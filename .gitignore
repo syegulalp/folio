@@ -8,7 +8,6 @@ dist*
 **/*.bak
 stats.*
 backup
-test
 pack.py
 *.bat
 .git.old
