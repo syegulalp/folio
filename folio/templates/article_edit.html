@@ -1,0 +1,392 @@
+% include includes/header.html
+
+<main role="main" class="container-wiki">
+
+    <div class="row">
+        <div id="left-col" class="col">
+
+            % include includes/messages.html
+
+            % article_title = article.title
+            % if article.new_title:
+            % article_title = article.new_title
+            % end
+            % else:
+            % if article.draft_of:
+            % article_title = article.draft_of.title
+            % end
+            % end
+
+            <form method="POST" data-dirty="false" id="save-form" class="form-compact">
+
+                <div id="editor-title" class="form-group">
+                    <input class="form-control form-control-lg" id="article_title" name="article_title"
+                        data-original="{{article_title}}" value="{{article_title}}">
+                </div>
+
+                <div id="editor-controls" class="form-group">
+
+                    % if article.id is not None:
+
+                    <a href="#" id="btn_toggle_preview" title="Toggle preview (Ctrl+P)"><span
+                            class="oi button-oi oi-eye"></span></a>
+                    <!-- <a href="#" title="Bold selection (Ctrl+B)"><span class="oi button-oi oi-bold"></span></a>
+                    <a href="#" title="Italicize selection (Ctrl+I)"><span class="oi button-oi oi-italic"></span></a>
+                    <a href="#" title="Insert article link (Ctrl+L)"><span
+                            class="oi button-oi oi-link-intact"></span></a>
+                    <a href="#" title="Insert external link (Ctrl+K)"><span
+                            class="oi button-oi oi-external-link"></span></a> -->
+                    <a href="#" id="btn_insert_media" title="Insert media (Ctrl+M)"><span
+                            class="oi button-oi oi-image"></span></a>
+                    <a href="#" id="btn_insert_tag" title="Edit article tags (Ctrl-T)"><span
+                            class="oi button-oi oi-tags"></span></a>
+
+                    % end
+                    % else:
+                    <p></p>
+                    % end
+
+                </div>
+
+                <div id="editor-text" class="form-group"><textarea class="form-control" id="article_content"
+                        name="article_content" rows="10">{{!article.content}}</textarea></div>
+                <div id="editor-buttons">
+                    <div class="row">
+                        <div class="col-6">
+                            % if article.id is not None:
+                            <button type="button" title="Save draft and continue editing (retain edit lock)" name="save"
+                                id="save-button" value="save" class="btn btn-sm btn-success">Save</button>
+                            % end
+                            % else:
+                            <button type="submit" title="Save and create article" name="save" id="save-button"
+                                onclick="clear_dirty();" value="save" class="btn btn-sm btn-success">Save and create
+                                article</button>
+                            % end
+
+                            % if article.id is not None:
+                            <button type="submit" id="save-and-exit-button"
+                                title="Save draft and release edit lock. (Shift-Ctrl-S)" name="save" value="exit"
+                                onclick="clear_dirty();" class="btn btn-sm btn-info">Save and exit</button>
+                            <button type="submit" id="save-and-publish-button"
+                                title="Save and close draft, and update article with draft. (Alt-Shift-S)"
+                                onclick="clear_dirty();" name="save" value="publish"
+                                class="btn btn-sm btn-primary">Publish</button>
+                            <button type="submit"
+                                title="Update article with draft, and create a revision from the current published version."
+                                onclick="clear_dirty();" name="save" value="revise"
+                                class="btn btn-sm btn-dark">Version</button>
+                            % end
+                        </div>
+                        <div class="col-6" style="text-align: right;">
+                            % if article.id is not None:
+                            <button type="submit" name="save" value="discard" title="Discard all changes in draft."
+                                class="btn btn-sm btn-secondary">Discard draft</button>
+
+                            <a href="{{article.delete_link}}"><button type="button" class="btn btn-sm btn-danger">Delete
+                                    article</button></a>
+
+                            <button type="submit" name="save" value="quit"
+                                title="Close editor and release edit lock. Discards unsaved changes to the draft."
+                                class="btn btn-sm btn-warning">Quit editing</button>
+                            % end
+                            % else:
+                            <a href="{{article.wiki.link}}"><button type="button" name="save" value="quit"
+                                    title="Leave article creation." class="btn btn-sm btn-warning">Quit creating
+                                    article</button></a>
+                            % end
+                        </div>
+                    </div>
+                </div>
+
+            </form>
+
+        </div>
+        <div style="display:none; overflow-y:scroll; height: 95vh; margin-bottom: 16px; margin-right: 15px;"
+            id="mid-col"></div>
+        <div id="sidebar" class="sidebar-col">
+            % include includes/sidebar.html
+        </div>
+    </div>
+
+</main>
+
+<div class="modal" id="edit-modal" tabindex="-1" role="dialog">
+</div>
+
+% include includes/footer.html
+<script>
+    article_target = "{{article.link}}";
+    save_target = article_target + "/save";
+    preview_target = article_target + "/preview";
+    api_target = "{{wiki.link}}/api";
+    has_error = {{ has_error }};
+</script>
+
+<script>
+    var keytimer;
+
+    function set_dirty() {
+        $('#save-form').data("dirty", "true");
+    }
+
+    function clear_dirty() {
+        $('#save-form').data("dirty", "false");
+    }
+
+    function resize_editor() {
+        if (has_error) {
+            $("#save-button").prop("type", "submit");
+        }
+        $('#article_content').height(
+            window.innerHeight
+            - $('#left-col')[0].offsetTop
+            - $('#editor-text')[0].offsetTop
+            - $('#editor-buttons')[0].clientHeight
+            - 32
+        )
+            ;
+    }
+    function toggle_preview() {
+        $('#mid-col').toggle();
+        if ($('#mid-col').css('display') == 'none') {
+            $('#left-col').attr('class', 'col');
+            $('#mid-col').attr('class', '');
+        } else {
+            $('#left-col').attr('class', 'col');
+            $('#mid-col').attr('class', 'col');
+            load_preview();
+        }
+        resize_editor();
+    }
+
+    function load_preview() {
+        if ($('#mid-col').css('display') == 'none') return false;
+        $.ajax({
+            url: preview_target,
+            dataType: "html"
+        }).done(function (data) {
+            update_preview(data);
+        })
+    }
+
+    function synch_preview_scroll() {
+        preview = $('#mid-col')[0];
+        editor = $("#article_content")[0];
+        pos = editor.scrollTop / (editor.scrollHeight - editor.clientHeight);
+        preview.scrollTop = (preview.scrollHeight - preview.clientHeight) * pos;
+    }
+
+    function update_preview(data) {
+        $('#mid-col').html(data);
+        synch_preview_scroll();
+    }
+
+    function ajax_save() {
+        var form = $('#save-form')[0];
+        var data = new FormData(form);
+
+        $.ajax({
+            type: "POST",
+            url: save_target,
+            data: data,
+            contentType: false,
+            processData: false,
+            success: function (data) {
+                clear_dirty();
+                $('#flash-message').html(data);
+                $('#flash-message').fadeIn();
+                setTimeout(function () { $('#flash-message').fadeOut() }, 3000);
+                load_preview();
+            },
+            complete: function () {
+            }
+        });
+    }
+
+    function wrapText(field, left, right) {
+        start = field.selectionStart;
+        end = field.selectionEnd;
+
+        selection = left + field.value.substring(start, end) + right;
+
+        document.execCommand('insertText', false, selection);
+
+        if (start == end) {
+            field.selectionStart = field.selectionEnd = end + left.length;
+        } else {
+            field.selectionStart = start + left.length;
+            field.selectionEnd = end + left.length;
+        }
+    }
+
+
+    $(document).ready(resize_editor);
+    $(window).on('resize', resize_editor);
+
+    $('#btn_toggle_preview').on("click", toggle_preview);
+
+    $("#article_content").on("scroll", synch_preview_scroll);
+
+    $("#save-button").on("click", function () {
+        if ($("#save-button").prop("type") === "button") {
+            ajax_save();
+        }
+    });
+
+    $("#article_title").on("change", function (e) {
+        set_dirty();
+    });
+
+    $("#article_title").on("keypress", function (e) {
+
+        btn = $("#save-button");
+        title = $("#article_title");
+
+        if (title.data("original") != title.val()) {
+            btn.prop("type", "submit");
+        }
+        else {
+            if (!has_error) {
+                btn.prop("type", "button");
+            }
+        }
+
+        if (e.originalEvent.keyCode === 13) {
+            e.preventDefault();
+            $("#save-button").click();
+
+        }
+
+    });
+
+    $("#article_content").on("change", function (e) {
+        set_dirty();
+    });
+
+    $("#article_content").on("keydown", function (e) {
+        if (e.code == 'Tab') {
+            e.preventDefault();
+            wrapText(this, '    ', '');
+        }
+        if (e.altKey) {
+            if (e.shiftKey) {
+                if (e.code == 'KeyS') {
+                    e.preventDefault();
+                    $("#save-and-publish-button").click();
+                }
+            }
+        }
+
+        if (e.ctrlKey) {
+            if (e.code == 'KeyP') {
+                e.preventDefault();
+                $('#btn_toggle_preview').click();
+            }
+            if (e.code == 'KeyS') {
+                if (e.shiftKey) {
+                    e.preventDefault();
+                    $("#save-and-exit-button").click();
+                } else {
+                    e.preventDefault();
+                    $("#save-button").click();
+                }
+            }
+            if (e.code == 'KeyI') {
+                e.preventDefault();
+                wrapText(this, '*', '*');
+            }
+            if (e.code == 'KeyB') {
+                e.preventDefault();
+                wrapText(this, '**', '**');
+            }
+        }
+    });
+
+    $(window).on("beforeunload", function () {
+        if ($('#save-form').data("dirty") === "true") {
+            return false;
+        }
+    })
+
+    $("#btn_insert_media").on("click", function () {
+        open_modal('insert-image');
+    });
+
+    $("#btn_insert_tag").on("click", function () {
+        open_modal('insert-tag');
+    });
+
+    function open_modal(destination) {
+        $.ajax({
+            url: article_target + '/' + destination,
+            dataType: "html"
+        }).done(function (data) {
+            $('#edit-modal').html(data);
+            $('#edit-modal').modal();
+            modal_post_load();
+        })
+    }
+
+    function insert_image(item) {
+        $('#edit-modal').modal('hide');
+        $("#article_content").focus();
+        document.execCommand("insertText", false, '![](' + $(item).data("url") + ')');
+    }
+
+    function tag_enter() {
+        if ($("#modal-search-query").val().length) {
+            $.post(
+                article_target + "/add-tag",
+                { tag: $("#modal-search-query").val() }
+            ).done(function (data) {
+                $("#modal-search-query").val('');
+                $('#modal-tag-listing').html(data);
+            })
+        }
+    }
+
+    function insert_tag(item) {
+        $.post(
+            article_target + "/add-tag",
+            { tag: $(item).html() }
+        ).done(function (data) {
+            $('#modal-tag-listing').html(data);
+        })
+    }
+
+    function remove_tag(item) {
+        $.post(
+            article_target + "/remove-tag",
+            { tag: $(item).html() }
+        ).done(function (data) {
+            $('#modal-tag-listing').html(data);
+        })
+    }
+
+    function set_enter_event(item) {
+        item.on("keydown", function (e) {
+            if (e.originalEvent.key === "Enter") {
+                e.preventDefault();
+                if (!e.originalEvent.shiftKey) {
+                    if (!$("#modal-search-results a").length) {
+                        modal_post_enter();
+                    } else {
+                        $("#modal-search-results a")[0].click();
+                    }
+                }
+                else {
+                    modal_post_enter();
+                }
+                $("#modal-search-query").val('');
+            }
+        });
+    }
+
+    // $("#article_content").on("keydown", function () {
+    //     clearTimeout(keytimer);
+    // });
+    // $("#article_content").on("keyup", function () {
+    //     keytimer = setTimeout(load_preview, 3000)
+    // });
+
+</script>

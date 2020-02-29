@@ -1,0 +1,210 @@
+pre {
+    white-space: pre-wrap;
+}
+
+p {
+    margin: .5em 0 .5em 0;
+}
+
+blockquote {
+    margin: 0 1em 0 1em;
+    background-color: rgba(0, 0, 0, 0.1);
+    padding: .5em;
+}
+
+.media {
+    margin-bottom: 16px;
+}
+.media img {
+    width: 5rem;
+}
+
+.img-search-result{
+    width: 100px;
+}
+
+.wiki-listing-row {
+    margin-bottom:16px;
+}
+
+#editor-buttons button {
+    margin-bottom: 2px;    
+}
+
+.sidebar-col {
+    width: 160px;
+    padding: 0 15px 15px 0;
+}
+
+.container-wiki {
+    margin: 16px;
+}
+#drop-target {
+    z-index: 100; position: fixed; width: 100vw; height:100vh;
+    top: 0; left: 0;margin: 0; border: 0; padding: 0;
+    background-color: rgba(0, 0, 0, 0.1);
+    display: none;
+}
+#drop-message {
+    z-index: 150; display:none; position: fixed; top: 8px; width: 50%; left: 25%; text-align: center; font-weight: bold;
+}
+
+.wiki-article-container h1 {
+    font-size: 1.75rem;
+}
+
+.wiki-article-container h2 {
+    font-size: 1.5rem;
+}
+
+.wiki-article-container h3 {
+    font-size: 1.25rem;
+}
+
+.wiki-article-container h4 {
+    font-size: 1.10rem;
+}
+
+.wiki-article-container h5 {
+    font-size: 1rem;
+}
+
+
+.wiki-title {
+    font-weight: bold;
+    font-size: 1.5em;
+    line-height: 1em;
+    margin-bottom: .25em;
+    overflow-wrap: break-word;
+}
+
+.wiki-description {
+    margin-bottom: 1em;
+    line-height: 1.2em;
+    padding-bottom: 1em;
+    border-bottom: 1px solid rgba(0,0,0,.1);
+}
+
+.wiki-cover-img {
+    margin-top: 16px;
+}
+
+.wiki-link {
+    font-weight: bold;
+    background-color: rgba(210, 180, 140, 0.15);
+    margin-left: .2em;
+    margin-right: .2em;
+}
+
+.wiki-tag-link {
+    font-weight: bold;
+    background-color: rgba(65, 212, 126, 0.15);
+    margin-left: .2em;
+    margin-right: .2em;
+}
+
+.wiki-missing-link {
+    font-style: italic;
+}
+
+.wiki-recent-date {
+    font-weight: bold;
+}
+
+.wiki-recent-article {
+    margin-left: 1em;
+    line-height: 1.2em;
+    margin-bottom: 0.5em;
+}
+
+.wiki-recent-article-editing {
+    font-weight: bold;
+    font-style: italic;
+}
+
+.wiki-recent-list {
+    font-size: 1.1em;
+}
+
+.wiki-sidebar-controls {
+    font-size: .75em;
+}
+
+.wiki-sidebar-controls a {
+    padding: 0 4px 0 4px;
+    
+}
+
+.wiki-sidebar-controls .nav-tabs {
+    margin-bottom: 8px;
+}
+
+
+.button-oi {
+    border: 1px solid #ced4da;
+    border-radius: .3rem;
+    padding: 8px;
+}
+
+.container-wiki .form-group {    
+    margin-top: 0
+}
+
+.form-compact .form-group {
+    margin-bottom: .5rem;
+}
+
+#flash-message {
+    display: none;
+    position: absolute;
+    z-index: 100;
+    left: 25%;
+    width: 50%;
+    top: 24px;
+}
+
+.alert-box {
+    text-align: center;
+    font-weight: bold;
+
+}
+
+.alert-box-buttons {
+    margin-top: 16px;
+}
+
+inline-error {
+    display: inline;
+    background-color:pink
+}
+
+/*
+
+Everything after this will eventually become a shadow article
+
+*/
+
+img-sidebar {
+    right: 16px;
+    float: right;
+    width: 33%;
+    margin-bottom: 16px;
+    margin-left: 16px;
+}
+
+img-sidebar img {
+    width: 100%;
+}
+
+img-banner img {
+    width: 19%;
+    margin-bottom: 8px;
+}
+
+img-banner .wiki-link {
+    margin: 0;
+}
+
+img-banner-wide img {
+    width: 100%;
+}

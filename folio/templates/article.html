@@ -1,0 +1,40 @@
+% include includes/header.html
+
+<main role="main" class="container-wiki">
+
+  <div class="row">
+    <div id="article-col" class="col">
+      % include includes/messages.html
+      % for article in articles:
+      % include includes/article_core.html
+      <hr style="clear: both;">
+      % end
+    </div>
+    <div id="sidebar" class="sidebar-col">
+      % sidebar_cache = wiki.sidebar_cache.get(wiki.id,None)
+      % if sidebar_cache:
+      {{!sidebar_cache}}
+      % end
+      % else:
+      % include includes/sidebar.html
+      % end
+    </div>
+  </div>
+
+</main>
+
+% include includes/footer.html
+
+<script>
+  $(window).on("keydown", function (e) {
+    console.log("a")
+    if (e.ctrlKey) {
+      console.log("b")
+      if (e.code == 'KeyE') {
+        console.log("OK")
+        e.preventDefault();
+        $('#article-edit-link')[0].click();
+      }
+    }
+  });
+</script>

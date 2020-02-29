@@ -1,0 +1,28 @@
+% include includes/header.html
+
+<main role="main" class="container-wiki">
+
+  <div class="row">
+    <div class="col">
+      <h2>Media for {{wiki.title}}</h2>
+      <hr/>
+      <ul class="list-unstyled">
+        % for media_item in media:
+        <li class="media">
+          <a href="{{media_item.edit_link}}"><img class="img-fluid align-self-start mr-3" src="{{media_item.link}}"></a>
+          <div class="media-body">
+            <a href="{{media_item.edit_link}}">{{media_item.file_path}}</a>
+          </div>
+        </li>
+        % end
+      </ul>
+      <hr/>
+    </div>
+    <div id="sidebar" class="sidebar-col">
+      % include includes/sidebar.html
+    </div>
+  </div>
+
+</main>
+
+% include includes/footer.html

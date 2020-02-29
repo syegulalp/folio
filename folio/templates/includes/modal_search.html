@@ -1,0 +1,35 @@
+<form method="POST" id="modal-search-form">
+    <div id="wiki-modal-search" class="form-group">
+        <label for="modal-search-query">Type to search:</label>
+        <input class="form-control form-control-lg" placeholder="Name or description" id="modal-search-query"
+            name="modal-search-query">
+    </div>
+    <div id="modal-search-results"></div>
+</form>
+<script>
+
+    var modal_url= '{{url}}';
+
+    $("#modal-search-query").on("keyup", function () {
+        searchQuery = this.value;
+        if (searchQuery.length>0) {
+            $.post(
+                modal_url, {search: searchQuery}
+            ).done(function (data) {
+                $("#modal-search-results").html(data);
+            });
+        }
+
+    });
+    
+    function modal_post_load() {
+        searchbox = $("#modal-search-query")
+        searchbox.focus();
+        set_enter_event(searchbox);
+    }
+
+    function modal_post_enter(){
+        {{ modal_post_enter }}
+    }
+
+</script>

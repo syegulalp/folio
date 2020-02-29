@@ -1,0 +1,16 @@
+wiki.db*
+venv
+data*
+.vscode
+**/.mypy_cache
+**/*.pyc
+dist*
+**/*.bak
+stats.*
+backup
+test
+pack.py
+*.bat
+.git.old
+pack.py
+folio.zip

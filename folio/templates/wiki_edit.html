@@ -1,0 +1,65 @@
+% include includes/header.html
+
+<main role="main" class="container-wiki">
+
+    % include includes/messages.html
+
+    % if not wiki.id:
+    <h1>Create your new wiki</h1>
+    % end
+    % else:
+    <h1>Wiki properties</h1>
+    % end
+
+    <form method="POST">
+
+        <div id="wiki-title" class="form-group">
+            <label for="wiki_title">Title of wiki:</label>
+            <input class="form-control form-control-lg" placeholder="My Amazing Wiki" id="wiki_title" name="wiki_title"
+                value="{{wiki.title}}">
+        </div>
+
+        <div id="wiki-description" class="form-group">
+            <label for="wiki_description">Description:</label>
+            <input class="form-control form-control-lg" id="wiki_description" name="wiki_description"
+                placeholder="A place for my stuff." value="{{wiki.description}}">
+        </div>
+
+        <div id="wiki-buttons">
+
+            % if wiki.id:
+            <span class="float-right">
+                <a href="{{original_wiki.link}}">
+                    <button type="button" class="btn btn-sm btn-warning">Quit editing</button>
+                </a>
+            </span>
+            % end
+            % else:
+            <span class="float-right">
+                <a href="/">
+                    <button type="button" class="btn btn-sm btn-warning">Quit creating new wiki</button>
+                </a>
+            </span>
+            % end
+
+            <button type="submit" name="save" value="save" class="btn btn-sm btn-success">Save</button>
+
+            % if wiki.id:
+            <button type="submit" name="save" value="quit" class="btn btn-sm btn-info">Save and exit</button>
+
+
+            <hr />
+
+            <a href="{{wiki.link}}/delete">
+                <button type="button" class="btn btn-sm btn-danger">Delete this wiki</button>
+            </a>
+            % end
+
+        </div>
+
+    </form>
+
+
+</main>
+
+% include includes/footer.html

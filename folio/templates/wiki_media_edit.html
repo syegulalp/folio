@@ -1,0 +1,24 @@
+% include includes/header.html
+
+<main role="main" class="container-wiki">
+
+  <div class="row">
+    <div class="col">
+      <h2>{{media.file_path}}</h2>
+      <hr />
+      <div class="row">
+        <div class="col-6">
+          <img class="img-fluid" src="{{media.link}}">
+        </div>
+        <div class="col-6">
+        </div>
+      </div>
+    </div>
+    <div id="sidebar" class="sidebar-col">
+      % include includes/sidebar.html
+    </div>
+  </div>
+
+</main>
+
+% include includes/footer.html
