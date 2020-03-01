@@ -17,6 +17,10 @@ The application runs from a single directory, using SQLite as a database, and so
 
 # Quickstart
 
+If you're on Windows 10, you can [download a pre-packaged binary from the releases list](https://github.com/syegulalp/folio/releases), unpack the archive into a directory with write permissions, and run `folio.bat`. Note that you may need to unblock the .ZIP file to unpack it properly.
+
+For other OSes:
+
 1. You'll need Python 3.7 or better.
 2. Download or clone the repository, and place it in a directory where you have write permissions.
 3. Install the requirements.
