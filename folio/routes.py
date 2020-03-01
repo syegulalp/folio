@@ -897,7 +897,7 @@ async def modal_insert_image_search(
     results = ['<ul class="list-unstyled">']
     for result in search_results:
         link = (
-            f'<a href="#" data-url="{result.file_path}" onclick="insert_image(this);">'
+            f'<a href="#" data-url="{result.file_path}" onclick="insertImage(this);">'
         )
         results.append(
             f'<li class="media">{link}<img class="img-fluid align-self-start mr-3" src="{result.link}"></a><div class="media-body">{link}{result.file_path}</a></li>'
@@ -911,7 +911,7 @@ def existing_tags(article):
     taglist = [""]
     for tag in article.tags_alpha:
         taglist.append(
-            f'<a href="#" onclick="remove_tag(this)"; title="Click to remove this tag from this article" class="badge badge-primary">{tag.title}</a> '
+            f'<a href="#" onclick="removeTag(this)"; title="Click to remove this tag from this article" class="badge badge-primary">{tag.title}</a> '
         )
     tags = "".join(taglist)
     return tags
@@ -922,7 +922,7 @@ def existing_tags(article):
 async def modal_tags(env: Request, wiki: Wiki, user: Author, article: Article):
     tags = existing_tags(article)
     body = modal_search_template.render(
-        url=f"{article.link}/insert-tag", modal_post_enter="tag_enter();"
+        url=f"{article.link}/insert-tag", modal_post_enter="tagEnter();"
     )
     return Response(
         modal_template.render(
@@ -941,7 +941,7 @@ async def modal_tags_search(env: Request, wiki: Wiki, user: Author, article: Art
     results = ["<ul>"]
     for result in search_results:
         results.append(
-            f'<li><a href="#" onclick="insert_tag(this);">{result.title}</li>'
+            f'<li><a href="#" onclick="insertTag(this);">{result.title}</li>'
         )
     results.append("</ul>")
     return Response("".join(results))
