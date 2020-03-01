@@ -577,6 +577,8 @@ async def article_delete_confirm(
     delete_key: str, 
     redirect_to = None
 ):
+    if article.id is None:
+        return redirect(wiki.link)
 
     if article.delete_key != delete_key:
         return redirect(article.link)
