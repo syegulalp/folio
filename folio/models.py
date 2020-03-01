@@ -128,7 +128,7 @@ class BaseModel(Model):
         return title
 
     @classmethod
-    def url_to_title(cls, url):        
+    def url_to_title(cls, url):
         title = url.replace(r"_", " ")
         title = urllib.parse.unquote(title)
         return title
@@ -217,7 +217,10 @@ class Wiki(BaseModel):
 
             for title, article in wiki_init.items():
                 new_article = Article(
-                    title=title, content=article["content"], author=author, wiki=new_wiki
+                    title=title,
+                    content=article["content"],
+                    author=author,
+                    wiki=new_wiki,
                 )
                 new_article.save()
                 for tag in article["tags"]:
@@ -315,7 +318,7 @@ class Wiki(BaseModel):
 
     @property
     def cover_img(self):
-        cover_img_file = self.setting('Cover image')
+        cover_img_file = self.setting("Cover image")
         img_path = os.path.join(self.data_path, cover_img_file)
         if os.path.exists(img_path):
             return f"{self.link}/media/{cover_img_file}"
@@ -352,7 +355,7 @@ class Wiki(BaseModel):
 
     @property
     def articles_nondraft_only(self):
-        return self.articles_main_only.where(Article.draft_of.is_null())        
+        return self.articles_main_only.where(Article.draft_of.is_null())
 
     @property
     def articles_draft_only(self):
@@ -396,16 +399,14 @@ class Article(BaseModel):
     blurb_inline_re = re.compile(r"\$\[(.*?)\]\$", re.MULTILINE | re.DOTALL)
 
     def clear_index(self):
-        ArticleIndex.delete().where(ArticleIndex.rowid==self.id).execute()
-    
+        ArticleIndex.delete().where(ArticleIndex.rowid == self.id).execute()
+
     def update_index(self):
         self.clear_index()
-        ArticleIndex(
-            rowid = self.id,
-            content = self.content).save()
+        ArticleIndex(rowid=self.id, content=self.content).save()
 
-    def template_creation_link(self,template):
-        return f'{self.link}/new_from_template/{self.title_to_url(template.title)}'
+    def template_creation_link(self, template):
+        return f"{self.link}/new_from_template/{self.title_to_url(template.title)}"
 
     def update_autogen_metadata(self):
         if getattr(self, "autogen_metadata", None) is None:
@@ -728,7 +729,9 @@ class Article(BaseModel):
                 if not is_table:
                     is_table = True
                     md_mini = markdown.Markdown()
-                    dummy = Article(title="", content="", author = self.author, wiki = self.wiki)
+                    dummy = Article(
+                        title="", content="", author=self.author, wiki=self.wiki
+                    )
                     if _.startswith("|!"):
                         header_row = True
                         _ = "|" + _[2:]
@@ -777,18 +780,19 @@ class Article(BaseModel):
         return content
 
     def _checkbox_re(self, matchobj):
-        if matchobj.group(1) not in ' _':
+        if matchobj.group(1) not in " _":
             return '<input type="checkbox" disabled checked />'
         return '<input type="checkbox" disabled/>'
 
     def _formatted(self, raw_content):
-        # md = markdown.Markdown(extensions=["markdown.extensions.meta"])
         md = markdown.Markdown()
+
+        self.autogen_metadata = []
+        raw_content = self.metadata_re.sub(self._metadata_re, raw_content)
 
         preformat_content = raw_content.split("```")
         preformatted = False
         output = []
-        self.autogen_metadata = []
 
         for section in preformat_content:
             if preformatted:
@@ -817,15 +821,15 @@ class Article(BaseModel):
                         )
 
                         # Included items come first
-                        content = self.literal_include_re.sub(self._literal_include_re, content)
+                        content = self.literal_include_re.sub(
+                            self._literal_include_re, content
+                        )
 
-                        content = self.metadata_re.sub(self._metadata_re, content)
                         content = self.blurb_re.sub(self._blurb_re, content)
                         content = self.blurb_inline_re.sub(
                             self._blurb_inline_re, content
                         )
                         content = self.function_re.sub(self._function_re, content)
-
 
                         # then local post-processing
                         content = self.strike_re.sub(self._strike_re, content)
@@ -833,7 +837,6 @@ class Article(BaseModel):
                         content = self.link_re.sub(self._link_re, content)
                         content = self._format_table(content)
                         content = self.checkbox_re.sub(self._checkbox_re, content)
-
 
                         inline_output.append(content)
                     inline_preformat = not inline_preformat
@@ -923,17 +926,21 @@ class Media(BaseModel):
     def edit_link(self):
         return f"{self.link}/edit"
 
+
 class ArticleIndex(FTSModel):
     rowid = RowIDField()
-    #title = SearchField()
+    # title = SearchField()
     content = SearchField()
 
     class Meta:
         database = db
-        options = {'content': Article.content}
+        options = {"content": Article.content}
+
 
 def create_db():
-    all_tables = [_ for _ in BaseModel.__subclasses__()]+[_ for _ in FTSModel.__subclasses__()]
+    all_tables = [_ for _ in BaseModel.__subclasses__()] + [
+        _ for _ in FTSModel.__subclasses__()
+    ]
     db.drop_tables(all_tables)
     db.create_tables(all_tables)
 
