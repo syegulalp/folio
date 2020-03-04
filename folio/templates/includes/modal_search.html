@@ -4,7 +4,7 @@
         <input class="form-control form-control-lg" placeholder="Name or description" id="modal-search-query"
             name="modal-search-query">
     </div>
-    <div id="modal-search-results"></div>
+    <div id="modal-search-results">{{!search_results}}</div>
 </form>
 <script>
 
@@ -12,13 +12,13 @@
 
     $("#modal-search-query").on("keyup", function () {
         searchQuery = this.value;
-        if (searchQuery.length>0) {
+        //if (searchQuery.length>0) {            
             $.post(
                 modal_url, {search: searchQuery}
             ).done(function (data) {
                 $("#modal-search-results").html(data);
             });
-        }
+        //}
 
     });
     

@@ -53,28 +53,32 @@ default_headers = {
 # Decorators
 ######################################################################
 
+
 def get_user():
     return Author.get(Author.name == "Admin")
+
 
 def get_wiki(wiki_title):
     wiki = Wiki.get(Wiki.title == Wiki.url_to_title(wiki_title))
     if Wiki.sidebar_cache.get(wiki.id, None) is None:
-        Wiki.sidebar_cache[wiki.id] = (
-            sidebar_template.render(wiki=wiki)
-        )
+        Wiki.sidebar_cache[wiki.id] = sidebar_template.render(wiki=wiki)
     return wiki
+
 
 def user_env(func):
     def wrapper(env: Request, *a, **ka):
         user = get_user()
         return func(env, user, *a, **ka)
+
     return wrapper
+
 
 def wiki_env(func):
     def wrapper(env: Request, wiki_title: str, *a, **ka):
         user = get_user()
         wiki = get_wiki(wiki_title)
         return func(env, wiki, user, *a, **ka)
+
     return wrapper
 
 
@@ -82,7 +86,7 @@ def article_env(func):
     def wrapper(env: Request, wiki_title: str, article_title: str, *a, **ka):
         user = get_user()
         wiki = get_wiki(wiki_title)
-        
+
         try:
             article = wiki.articles.where(
                 Article.title == Article.url_to_title(article_title)
@@ -206,7 +210,7 @@ async def wiki_settings_edit(env: Request, wiki: Wiki, user: Author):
             original_wiki = Wiki.get(Wiki.id == wiki.id)
 
     wiki.invalidate_cache()
-    
+
     return Response(
         wiki_edit_template.render(
             wiki=wiki,
@@ -234,31 +238,39 @@ async def articles(env: Request, wiki: Wiki, user: Author):
 @article_env
 async def article_display(env: Request, wiki: Wiki, user: Author, article: Article):
     if article.id is None:
-        
-        try:
-            template_tag = Tag.select(Tag.id).where(Tag.wiki == wiki, Tag.title=='@template')
 
-            tagged_as_template = TagAssociation.select(
-                TagAssociation.article
-            ).where(
+        try:
+            template_tag = Tag.select(Tag.id).where(
+                Tag.wiki == wiki, Tag.title == "@template"
+            )
+
+            tagged_as_template = TagAssociation.select(TagAssociation.article).where(
                 TagAssociation.tag << template_tag
             )
-            
+
             templates = wiki.articles_alpha.select().where(
                 Article.id << tagged_as_template
             )
 
-        except (Tag.DoesNotExist, TagAssociation.DoesNotExist, Article.DoesNotExist) as e:
-            templates = ''
-        else:            
+        except (
+            Tag.DoesNotExist,
+            TagAssociation.DoesNotExist,
+            Article.DoesNotExist,
+        ) as e:
+            templates = ""
+        else:
             if templates.count():
-                template_list =['<p>You can also create this article using a template:</p><hr/><ul>']
+                template_list = [
+                    "<p>You can also create this article using a template:</p><hr/><ul>"
+                ]
                 for template in templates:
-                    template_list.append(f'<li><a href="{article.template_creation_link(template)}">{template.title}</a></li>')
-                template_list.append('</ul>')
-                templates = ''.join(template_list)
+                    template_list.append(
+                        f'<li><a href="{article.template_creation_link(template)}">{template.title}</a></li>'
+                    )
+                template_list.append("</ul>")
+                templates = "".join(template_list)
             else:
-                templates=''
+                templates = ""
 
         article.content = f'This article does not exist. Click the <a class="autogenerate" href="{article.edit_link}">edit link</a> to create this article.{templates}'
 
@@ -269,10 +281,15 @@ async def article_display(env: Request, wiki: Wiki, user: Author, article: Artic
         headers=default_headers,
     )
 
+
 @route(f"{Wiki.PATH}{Article.PATH}/new_from_template/<template>", RouteType.asnc)
 @article_env
-async def article_new_from_template(env: Request, wiki: Wiki, user: Author, article: Article, template: str):
-    template_text = wiki.articles.where(Article.title == wiki.url_to_title(template)).get().content
+async def article_new_from_template(
+    env: Request, wiki: Wiki, user: Author, article: Article, template: str
+):
+    template_text = (
+        wiki.articles.where(Article.title == wiki.url_to_title(template)).get().content
+    )
 
     article.content = template_text
     article.save()
@@ -280,6 +297,7 @@ async def article_new_from_template(env: Request, wiki: Wiki, user: Author, arti
     wiki.invalidate_cache()
 
     return redirect(article.edit_link)
+
 
 @route(f"{Wiki.PATH}{Article.PATH}/history", RouteType.asnc)
 @article_env
@@ -331,7 +349,7 @@ async def article_edit(
 ):
 
     # Redirect to article creation if we try to edit a nonexistent article
-    
+
     if article.id is None:
         return redirect(f"{wiki.link}/new/?title={Wiki.title_to_url(article.title)}")
 
@@ -345,7 +363,7 @@ async def article_edit(
     warning = None
 
     # Create draft if it doesn't exist
-    
+
     if article.id is not None and not article.draft_of:
         if article.drafts.count():
             article = article.drafts.get()
@@ -419,7 +437,7 @@ async def article_edit(
                     action = "save"
 
         if error is None:
-            article.save()            
+            article.save()
             article.update_index()
             article.update_links()
             article.update_autogen_metadata()
@@ -442,9 +460,9 @@ async def article_edit(
                         created=new_article.created,
                         revision_of=new_article,
                     )
-                    revision.save()                    
-                    #revision.update_index()
-                    revision.update_links()                    
+                    revision.save()
+                    # revision.update_index()
+                    revision.update_links()
                     revision.update_autogen_metadata()
                     revision.copy_tags_from(new_article)
 
@@ -453,8 +471,8 @@ async def article_edit(
 
                 new_article.content = article.content
                 new_article.last_edited = article.last_edited
-                new_article.save()         
-                new_article.update_index()       
+                new_article.save()
+                new_article.update_index()
                 new_article.update_links()
                 new_article.update_autogen_metadata()
                 new_article.clear_tags()
@@ -500,11 +518,7 @@ async def article_edit(
 
 @route(f"{Wiki.PATH}{Article.PATH}/delete", RouteType.asnc)
 @article_env
-async def article_delete(
-    env: Request,
-    wiki: Wiki,
-    user: Author,
-    article: Article):
+async def article_delete(env: Request, wiki: Wiki, user: Author, article: Article):
 
     warning = f'Article "{Unsafe(article.title)}" is going to be deleted! Deleted articles are GONE FOREVER.'
 
@@ -523,13 +537,10 @@ async def article_delete(
         headers=default_headers,
     )
 
+
 @route(f"{Wiki.PATH}{Article.PATH}/discard-draft", RouteType.asnc)
 @article_env
-async def draft_discard(
-    env: Request,
-    wiki: Wiki,
-    user: Author,
-    article: Article):
+async def draft_discard(env: Request, wiki: Wiki, user: Author, article: Article):
 
     if article.id is None:
         return redirect(article.link)
@@ -541,7 +552,9 @@ async def draft_discard(
 
     if article.content != article.draft_of.content:
 
-        warning += "<br/>THIS DRAFT HAS MODIFICATIONS THAT WERE NOT SAVED TO THE ARTICLE."
+        warning += (
+            "<br/>THIS DRAFT HAS MODIFICATIONS THAT WERE NOT SAVED TO THE ARTICLE."
+        )
 
     return Response(
         article_template.render(
@@ -549,22 +562,23 @@ async def draft_discard(
             page_title=article.title,
             wiki=wiki,
             messages=[
-                Message(warning, yes=article.discard_draft_confirm_link, no=article.link,)
+                Message(
+                    warning, yes=article.discard_draft_confirm_link, no=article.link,
+                )
             ],
         ),
         headers=default_headers,
-    )    
+    )
+
 
 @route(f"{Wiki.PATH}{Article.PATH}/discard-draft/<delete_key>", RouteType.asnc)
 @article_env
 async def draft_discard_confirm(
-    env: Request,
-    wiki: Wiki,
-    user: Author,
-    article: Article,    
-    delete_key: str, 
+    env: Request, wiki: Wiki, user: Author, article: Article, delete_key: str,
 ):
-    return await article_delete_confirm.__wrapped__(env, wiki, user, article, delete_key, redirect_to=article.draft_of)
+    return await article_delete_confirm.__wrapped__(
+        env, wiki, user, article, delete_key, redirect_to=article.draft_of
+    )
 
 
 @route(f"{Wiki.PATH}{Article.PATH}/delete/<delete_key>", RouteType.asnc)
@@ -574,8 +588,8 @@ async def article_delete_confirm(
     wiki: Wiki,
     user: Author,
     article: Article,
-    delete_key: str, 
-    redirect_to = None
+    delete_key: str,
+    redirect_to=None,
 ):
     if article.id is None:
         return redirect(wiki.link)
@@ -649,7 +663,7 @@ async def article_new(env: Request, wiki: Wiki, user: Author):
                 new_article.title = f"Untitled ({counter})"
                 continue
             break
-   
+
     return Response(
         article_edit_template.render(
             article=new_article,
@@ -683,16 +697,15 @@ async def wiki_search(env: Request, wiki: Wiki, user: Author):
                 .order_by(SQL("title COLLATE NOCASE"))
             )
 
-
-            _article_result = (
-                ArticleIndex.select(ArticleIndex.rowid)
-                .where(
-                    ArticleIndex.match(search_query_wildcard+'*')
-                )
+            _article_result = ArticleIndex.select(ArticleIndex.rowid).where(
+                ArticleIndex.match(search_query_wildcard + "*")
             )
 
-            article_result = wiki.articles.select().where(Article.id << _article_result).order_by(SQL("title COLLATE NOCASE"))
-
+            article_result = (
+                wiki.articles.select()
+                .where(Article.id << _article_result)
+                .order_by(SQL("title COLLATE NOCASE"))
+            )
 
             tag_result = (
                 wiki.tags.select()
@@ -705,7 +718,6 @@ async def wiki_search(env: Request, wiki: Wiki, user: Author):
                 .where(Media.file_path.contains(search_query_wildcard))
                 .order_by(SQL("file_path COLLATE NOCASE"))
             )
-
 
             search_results.append(
                 [
@@ -840,8 +852,9 @@ async def wiki_media(env: Request, wiki: Wiki, user: Author):
 async def media_file(env: Request, wiki: Wiki, user: Author, file_name: str):
 
     return static_file(
-        Wiki.url_to_file(file_name), path=f"{config.DATA_PATH}/{wiki.id}",
-        last_modified=env.headers.get('HTTP_IF_MODIFIED_SINCE',None)
+        Wiki.url_to_file(file_name),
+        path=f"{config.DATA_PATH}/{wiki.id}",
+        last_modified=env.headers.get("HTTP_IF_MODIFIED_SINCE", None),
     )
 
 
@@ -864,37 +877,18 @@ async def media_file_edit(env: Request, wiki: Wiki, user: Author, file_name: str
         headers=default_headers,
     )
 
-
-@route(f"{Wiki.PATH}{Article.PATH}/insert-image", RouteType.asnc, action="GET")
-@article_env
-async def modal_insert_image(env: Request, wiki: Wiki, user: Author, article: Article):
-
-    return Response(
-        modal_template.render(
-            title="Insert image into article",
-            body=modal_search_template.render(
-                url=f"{article.link}/insert-image/", modal_post_enter=""
-            ),
-            footer="",
+def image_search(wiki, search):
+    if search is None or search=="":
+        search_results = wiki.media.select().order_by(SQL("file_path COLLATE NOCASE")).limit(20)
+    else:
+        search_results = (
+            wiki.media.select()
+            .where(
+                (Media.file_path.contains(search)) | (Media.description.contains(search))
+            )
+            .order_by(SQL("file_path COLLATE NOCASE"))
+            .limit(10)
         )
-    )
-
-
-@route(f"{Wiki.PATH}{Article.PATH}/insert-image", RouteType.asnc, action="POST")
-@article_env
-async def modal_insert_image_search(
-    env: Request, wiki: Wiki, user: Author, article: Article
-):
-
-    search = env.form.get("search", None)
-
-    search_results = (
-        wiki.media.select()
-        .where(
-            (Media.file_path.contains(search)) | (Media.description.contains(search))
-        )
-        .limit(10)
-    )
 
     results = ['<ul class="list-unstyled">']
     for result in search_results:
@@ -906,7 +900,33 @@ async def modal_insert_image_search(
         )
     results.append("</ul>")
 
-    return Response("".join(results))
+    return "".join(results)
+
+
+@route(f"{Wiki.PATH}{Article.PATH}/insert-image", RouteType.asnc, action="GET")
+@article_env
+async def modal_insert_image(env: Request, wiki: Wiki, user: Author, article: Article):
+
+    return Response(
+        modal_template.render(
+            title="Insert image into article",
+            body=modal_search_template.render(
+                url=f"{article.link}/insert-image/", modal_post_enter="",
+                search_results = image_search(wiki, None)
+            ),
+            footer="",            
+        )
+    )
+
+
+@route(f"{Wiki.PATH}{Article.PATH}/insert-image", RouteType.asnc, action="POST")
+@article_env
+async def modal_insert_image_search(
+    env: Request, wiki: Wiki, user: Author, article: Article
+):
+
+    search = env.form.get("search", None)
+    return Response(image_search(wiki, search))
 
 
 def existing_tags(article):
@@ -919,12 +939,28 @@ def existing_tags(article):
     return tags
 
 
+def search_results(wiki, search):
+    if search is None or search=='':
+        search_results = wiki.tags.select().order_by(SQL("title COLLATE NOCASE")).limit(100)
+    else:
+        search_results = wiki.tags.select().where(Tag.title.contains(search)).order_by(SQL("title COLLATE NOCASE")).limit(10)
+    results = ["<ul>"]
+    for result in search_results:
+        results.append(
+            f'<li><a href="#" onclick="insertTag(this);">{result.title}</li>'
+        )
+    results.append("</ul>")
+    return "".join(results)
+
+
 @route(f"{Wiki.PATH}{Article.PATH}/insert-tag", RouteType.asnc, action="GET")
 @article_env
 async def modal_tags(env: Request, wiki: Wiki, user: Author, article: Article):
     tags = existing_tags(article)
     body = modal_search_template.render(
-        url=f"{article.link}/insert-tag", modal_post_enter="tagEnter();"
+        url=f"{article.link}/insert-tag",
+        modal_post_enter="tagEnter();",
+        search_results=search_results(wiki, None)
     )
     return Response(
         modal_template.render(
@@ -939,14 +975,7 @@ async def modal_tags(env: Request, wiki: Wiki, user: Author, article: Article):
 @article_env
 async def modal_tags_search(env: Request, wiki: Wiki, user: Author, article: Article):
     search = env.form.get("search", None)
-    search_results = wiki.tags.select().where(Tag.title.contains(search)).limit(10)
-    results = ["<ul>"]
-    for result in search_results:
-        results.append(
-            f'<li><a href="#" onclick="insertTag(this);">{result.title}</li>'
-        )
-    results.append("</ul>")
-    return Response("".join(results))
+    return Response(search_results(wiki, search))
 
 
 @route(f"{Wiki.PATH}{Article.PATH}/add-tag", RouteType.asnc, action="POST")
