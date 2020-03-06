@@ -8,28 +8,25 @@
 </form>
 <script>
 
-    var modal_url= '{{url}}';
+    var modal_url = '{{url}}';
 
     $("#modal-search-query").on("keyup", function () {
         searchQuery = this.value;
-        //if (searchQuery.length>0) {            
-            $.post(
-                modal_url, {search: searchQuery}
-            ).done(function (data) {
-                $("#modal-search-results").html(data);
-            });
-        //}
-
+        $.post(
+            modal_url, { search: searchQuery }
+        ).done(function (data) {
+            $("#modal-search-results").html(data);
+        });
     });
-    
+
     function modalPostLoad() {
         searchbox = $("#modal-search-query")
         searchbox.focus();
         setEnterEvent(searchbox);
     }
 
-    function modalPostEnter(){
-        {{ modal_post_enter }}
+    function modalPostEnter() {
+        { { modal_post_enter } }
     }
 
 </script>

@@ -94,11 +94,11 @@ function wrapText(field, left, right) {
     }
 }
 
-function documentAddBold(){
+function documentAddBold() {
     wrapText($("#article_content")[0], '**', '**');
 }
 
-function documentAddItalic(){
+function documentAddItalic() {
     wrapText($("#article_content")[0], '*', '*');
 }
 
@@ -129,6 +129,14 @@ function tagEnter() {
             $('#modal-tag-listing').html(data);
         })
     }
+}
+
+function insertLink(item) {
+    linkText = $(item).html();
+    console.log(linkText);
+    $("#article_content").focus();
+    wrapText($("#article_content")[0], '[['+linkText+']]','')
+    $('#edit-modal').modal('hide');
 }
 
 function insertTag(item) {
@@ -166,20 +174,22 @@ function setEnterEvent(item) {
             $("#modal-search-query").val('');
         }
     });
-}    
+}
+
+
 
 $(document).ready(resizeEditor);
 $(window).on('resize', resizeEditor);
 
 $('#btn_toggle_preview').on("click", togglePreview);
 
-$('#btn_toggle_bold').on("click", function(){
+$('#btn_toggle_bold').on("click", function () {
     documentAddBold();
 });
 
-$('#btn_toggle_ital').on("click", function(){
+$('#btn_toggle_ital').on("click", function () {
     documentAddItalic();
-});    
+});
 
 $("#article_content").on("scroll", synchPreviewScroll);
 
@@ -234,6 +244,10 @@ $("#article_content").on("keydown", function (e) {
     }
 
     if (e.ctrlKey) {
+        if (e.code == 'KeyL') {
+            e.preventDefault();
+            $('#btn_insert_link').click();
+        }        
         if (e.code == 'KeyP') {
             e.preventDefault();
             $('#btn_toggle_preview').click();
@@ -248,7 +262,7 @@ $("#article_content").on("keydown", function (e) {
             }
         }
         if (e.code == 'KeyI') {
-            e.preventDefault();                
+            e.preventDefault();
             documentAddItalic();
         }
         if (e.code == 'KeyB') {
@@ -272,10 +286,13 @@ $("#btn_insert_tag").on("click", function () {
     openModal('insert-tag');
 });
 
-$("#btn_edit_metadata").on("click", function()
-{
+$("#btn_edit_metadata").on("click", function () {
     openModal('edit-metadata')
-})
+});
+
+$("#btn_insert_link").on("click", function () {
+    openModal('insert-link')
+});
 
 
 // $("#article_content").on("keydown", function () {

@@ -1061,6 +1061,56 @@ async def modal_edit_metadata_post(
     )
 
 
+def link_search(wiki, search):
+    if search is None or search == "":
+        search_results = (
+            wiki.articles.select().order_by(SQL("title COLLATE NOCASE")).limit(50)
+        )
+    else:
+        search_results = (
+            wiki.articles.select()
+            .where(Article.title.contains(search))
+            .order_by(SQL("title COLLATE NOCASE"))
+            .limit(10)
+        )
+
+    results = ['<ul class="list-unstyled">']
+    for result in search_results:
+        link = (
+            f'<li><a onclick="insertLink(this);" href="#">{result.title}</a></li>'
+        )
+        results.append(link)
+    
+    return "".join(results)
+
+
+@route(f"{Wiki.PATH}{Article.PATH}/insert-link", RouteType.asnc, action="GET")
+@article_env
+async def modal_insert_link_search(
+    env: Request, wiki: Wiki, user: Author, article: Article
+):
+
+    return Response(
+        modal_template.render(
+            title="Insert link into article",
+            body=modal_search_template.render(
+                url=f"{article.link}/insert-link/",
+                modal_post_enter="",
+                search_results=link_search(wiki, None),
+            ),
+            footer="",
+        )
+    )
+
+@route(f"{Wiki.PATH}{Article.PATH}/insert-link", RouteType.asnc, action="POST")
+@article_env
+async def modal_insert_link_search_post(
+    env: Request, wiki: Wiki, user: Author, article: Article
+):
+
+    search = env.form.get('search', None)
+    return Response(link_search(wiki, search))
+
 @route("/quit", RouteType.sync_nothread)
 def quit(*a):
     yield simple_response("You may now close this browser.")
