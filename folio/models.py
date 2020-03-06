@@ -149,6 +149,14 @@ class BaseModel(Model):
             Metadata.item == self._meta.table_name, Metadata.item_id == self.id
         )
 
+    @property
+    def metadata_autogen(self):
+        return self.metadata.where(Metadata.autogen == True)
+
+    @property
+    def metadata_not_autogen(self):
+        return self.metadata.where(Metadata.autogen == False)
+
     def get_metadata(self, key=None):
         metadata = self.metadata.select()
         if key:
@@ -162,7 +170,7 @@ class BaseModel(Model):
 
     def set_metadata(self, key, value):
         try:
-            metadata_item = self.metadata.where(Metadata.key == key)
+            metadata_item = self.metadata.where(Metadata.key == key).get()
         except Metadata.DoesNotExist:
             metadata_item = Metadata(
                 item=self._meta.table_name, item_id=self.id, key=key
@@ -570,6 +578,10 @@ class Article(BaseModel):
         h.update(bytes(self.title, "utf8"))
         return h.hexdigest()
 
+    def clear_metadata(self):
+        for _ in self.metadata:
+            _.delete_instance()
+    
     def clear_tags(self):
         for tag in self.tags:
             tag.delete_instance()

@@ -4,6 +4,7 @@
 
 ### New features
 
+* Metadata editor for articles.
 * Tag and image chooser in editor now show default choices instead of requiring you to type to show anything.
 * Bold/ital command buttons in editor.
 

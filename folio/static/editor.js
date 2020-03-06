@@ -272,6 +272,10 @@ $("#btn_insert_tag").on("click", function () {
     openModal('insert-tag');
 });
 
+$("#btn_edit_metadata").on("click", function()
+{
+    openModal('edit-metadata')
+})
 
 
 // $("#article_content").on("keydown", function () {

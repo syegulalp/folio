@@ -18,6 +18,7 @@ from models import (
     Tag,
     TagAssociation,
     Media,
+    Metadata,
     ARTICLE_TIME_FORMAT,
 )
 import asyncio
@@ -41,6 +42,7 @@ wiki_media_template = Template(file="wiki_media.html")
 wiki_media_edit_template = Template(file="wiki_media_edit.html")
 modal_template = Template(file="includes/modal.html")
 modal_search_template = Template(file="includes/modal_search.html")
+modal_metadata_template = Template(file="includes/modal_metadata.html")
 sidebar_template = Template(file="includes/sidebar.html")
 
 default_headers = {
@@ -472,6 +474,7 @@ async def article_edit(
                 new_article.content = article.content
                 new_article.last_edited = article.last_edited
                 new_article.save()
+
                 new_article.update_index()
                 new_article.update_links()
                 new_article.update_autogen_metadata()
@@ -479,7 +482,10 @@ async def article_edit(
                 new_article.copy_tags_from(article)
 
                 article.clear_tags()
+                article.clear_index()
+                article.clear_metadata()
                 article.delete_instance(recursive=True)
+
                 wiki.invalidate_cache()
                 return redirect(new_article.link)
 
@@ -600,11 +606,16 @@ async def article_delete_confirm(
     if article.drafts.count():
         draft = article.drafts.get()
         draft.clear_tags()
+        draft.clear_metadata()
+        draft.clear_index()
         draft.delete_instance(recursive=True)
     for revision in article.edits.select():
         revision.clear_tags()
+        revision.clear_metadata()
+        revision.clear_index()
         revision.delete_instance(recursive=True)
     article.clear_tags()
+    article.clear_metadata()
     article.clear_index()
     article.delete_instance(recursive=True)
 
@@ -877,14 +888,18 @@ async def media_file_edit(env: Request, wiki: Wiki, user: Author, file_name: str
         headers=default_headers,
     )
 
+
 def image_search(wiki, search):
-    if search is None or search=="":
-        search_results = wiki.media.select().order_by(SQL("file_path COLLATE NOCASE")).limit(20)
+    if search is None or search == "":
+        search_results = (
+            wiki.media.select().order_by(SQL("file_path COLLATE NOCASE")).limit(20)
+        )
     else:
         search_results = (
             wiki.media.select()
             .where(
-                (Media.file_path.contains(search)) | (Media.description.contains(search))
+                (Media.file_path.contains(search))
+                | (Media.description.contains(search))
             )
             .order_by(SQL("file_path COLLATE NOCASE"))
             .limit(10)
@@ -911,10 +926,11 @@ async def modal_insert_image(env: Request, wiki: Wiki, user: Author, article: Ar
         modal_template.render(
             title="Insert image into article",
             body=modal_search_template.render(
-                url=f"{article.link}/insert-image/", modal_post_enter="",
-                search_results = image_search(wiki, None)
+                url=f"{article.link}/insert-image/",
+                modal_post_enter="",
+                search_results=image_search(wiki, None),
             ),
-            footer="",            
+            footer="",
         )
     )
 
@@ -940,10 +956,17 @@ def existing_tags(article):
 
 
 def search_results(wiki, search):
-    if search is None or search=='':
-        search_results = wiki.tags.select().order_by(SQL("title COLLATE NOCASE")).limit(100)
+    if search is None or search == "":
+        search_results = (
+            wiki.tags.select().order_by(SQL("title COLLATE NOCASE")).limit(100)
+        )
     else:
-        search_results = wiki.tags.select().where(Tag.title.contains(search)).order_by(SQL("title COLLATE NOCASE")).limit(10)
+        search_results = (
+            wiki.tags.select()
+            .where(Tag.title.contains(search))
+            .order_by(SQL("title COLLATE NOCASE"))
+            .limit(10)
+        )
     results = ["<ul>"]
     for result in search_results:
         results.append(
@@ -960,7 +983,7 @@ async def modal_tags(env: Request, wiki: Wiki, user: Author, article: Article):
     body = modal_search_template.render(
         url=f"{article.link}/insert-tag",
         modal_post_enter="tagEnter();",
-        search_results=search_results(wiki, None)
+        search_results=search_results(wiki, None),
     )
     return Response(
         modal_template.render(
@@ -994,6 +1017,48 @@ async def modal_remove_tag(env: Request, wiki: Wiki, user: Author, article: Arti
     article.remove_tag(tag)
     wiki.invalidate_cache()
     return Response(existing_tags(article))
+
+
+@route(f"{Wiki.PATH}{Article.PATH}/edit-metadata", RouteType.asnc, action="GET")
+@article_env
+async def modal_edit_metadata(env: Request, wiki: Wiki, user: Author, article: Article):
+    return Response(
+        modal_template.render(
+            title="Edit article metadata",
+            body=modal_metadata_template.render(
+                url=f"{article.link}/edit-metadata",
+                article=article,
+                modal_post_enter="",
+            ),
+            footer="",
+        )
+    )
+
+
+@route(f"{Wiki.PATH}{Article.PATH}/edit-metadata", RouteType.asnc, action="POST")
+@article_env
+async def modal_edit_metadata_post(
+    env: Request, wiki: Wiki, user: Author, article: Article
+):
+
+    key = env.form.get("key", None)
+    if key:
+        value = env.form.get("value", None)
+        article.set_metadata(key, value)
+
+    delete = env.form.get("delete", None)
+    if delete:
+        try:
+            delete_instance = article.metadata.where(Metadata.id == delete).get()
+            delete_instance.delete_instance()
+        except Metadata.DoesNotExist:
+            pass
+
+    return Response(
+        modal_metadata_template.render(
+            url=f"{article.link}/edit-metadata", article=article, modal_post_enter=""
+        )
+    )
 
 
 @route("/quit", RouteType.sync_nothread)
