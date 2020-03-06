@@ -414,7 +414,7 @@ class Article(BaseModel):
         ArticleIndex(rowid=self.id, content=self.content).save()
 
     def template_creation_link(self, template):
-        return f"{self.link}/new_from_template/{self.title_to_url(template.title)}"
+        return f"{self.wiki.link}/new_from_template/{self.title_to_url(template.title)}"
 
     def update_autogen_metadata(self):
         if getattr(self, "autogen_metadata", None) is None:

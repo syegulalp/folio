@@ -284,16 +284,17 @@ async def article_display(env: Request, wiki: Wiki, user: Author, article: Artic
     )
 
 
-@route(f"{Wiki.PATH}{Article.PATH}/new_from_template/<template>", RouteType.asnc)
-@article_env
+@route(f"{Wiki.PATH}/new_from_template/<template>", RouteType.asnc)
+@wiki_env
 async def article_new_from_template(
-    env: Request, wiki: Wiki, user: Author, article: Article, template: str
+    env: Request, wiki: Wiki, user: Author, template: str
 ):
     template_text = (
         wiki.articles.where(Article.title == wiki.url_to_title(template)).get().content
     )
 
-    article.content = template_text
+    article = Article(title="Untitled", content=template_text, author=user, wiki=wiki)
+
     article.save()
 
     wiki.invalidate_cache()
@@ -1076,11 +1077,9 @@ def link_search(wiki, search):
 
     results = ['<ul class="list-unstyled">']
     for result in search_results:
-        link = (
-            f'<li><a onclick="insertLink(this);" href="#">{result.title}</a></li>'
-        )
+        link = f'<li><a onclick="insertLink(this);" href="#">{result.title}</a></li>'
         results.append(link)
-    
+
     return "".join(results)
 
 
@@ -1108,8 +1107,9 @@ async def modal_insert_link_search_post(
     env: Request, wiki: Wiki, user: Author, article: Article
 ):
 
-    search = env.form.get('search', None)
+    search = env.form.get("search", None)
     return Response(link_search(wiki, search))
+
 
 @route("/quit", RouteType.sync_nothread)
 def quit(*a):
