@@ -206,14 +206,13 @@ async def wiki_settings_edit(env: Request, wiki: Wiki, user: Author):
 
         if error is None:
             wiki.save()
+            wiki.invalidate_cache()
             if action == "quit":
                 return redirect(wiki.link)
             if action == "save":
                 return redirect(wiki.edit_link)
         else:
             original_wiki = Wiki.get(Wiki.id == wiki.id)
-
-    wiki.invalidate_cache()
 
     return Response(
         wiki_edit_template.render(
