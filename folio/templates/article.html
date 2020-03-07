@@ -11,13 +11,7 @@
       % end
     </div>
     <div id="sidebar" class="sidebar-col">
-      % sidebar_cache = wiki.sidebar_cache.get(wiki.id,None)
-      % if sidebar_cache:
-      {{!sidebar_cache}}
-      % end
-      % else:
       % include includes/sidebar.html
-      % end
     </div>
   </div>
 
@@ -25,16 +19,4 @@
 
 % include includes/footer.html
 
-<script>
-  $(window).on("keydown", function (e) {
-    console.log("a")
-    if (e.ctrlKey) {
-      console.log("b")
-      if (e.code == 'KeyE') {
-        console.log("OK")
-        e.preventDefault();
-        $('#article-edit-link')[0].click();
-      }
-    }
-  });
-</script>
+<script src="/static/article.js"></script>

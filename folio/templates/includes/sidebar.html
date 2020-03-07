@@ -1,3 +1,8 @@
+% if wiki.sidebar_cache:
+{{!wiki.sidebar_cache}}
+% end
+% else:
+
 <div class="wiki-title">
     <a href="{{wiki.link}}" title="Start page">{{wiki.title}}</a>
 </div>
@@ -73,3 +78,5 @@
     </div>
 
 </div>
+
+% end
