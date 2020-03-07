@@ -62,8 +62,8 @@ def get_user():
 
 def get_wiki(wiki_title):
     wiki = Wiki.get(Wiki.title == Wiki.url_to_title(wiki_title))
-    if Wiki.sidebar_cache.get(wiki.id, None) is None:
-        Wiki.sidebar_cache[wiki.id] = sidebar_template.render(wiki=wiki)
+    if wiki.sidebar_cache is None:
+        Wiki._sidebar_cache[wiki.id] = sidebar_template.render(wiki=wiki)
     return wiki
 
 
@@ -170,9 +170,11 @@ async def new_wiki_save(env: Request):
 @route(f"{Wiki.PATH}", RouteType.asnc)
 @wiki_env
 async def wiki_home(env: Request, wiki: Wiki, user: Author):
-    return Response(
-        article_template.render(wiki=wiki, articles=[wiki.main_article], user=user)
-    )
+    return await article_display.__wrapped__(env, wiki, user, wiki.main_article)
+    
+    # return Response(
+    #     article_template.render(wiki=wiki, articles=[wiki.main_article], user=user)
+    # )
 
 
 @route(f"{Wiki.PATH}/edit", RouteType.asnc, action=("GET", "POST"))
@@ -239,8 +241,15 @@ async def articles(env: Request, wiki: Wiki, user: Author):
 @route(f"{Wiki.PATH}{Article.PATH}", RouteType.asnc)
 @article_env
 async def article_display(env: Request, wiki: Wiki, user: Author, article: Article):
-    if article.id is None:
+    try:
+        return Response(
+        Wiki.article_cache[article.id],
+        headers=default_headers,
+    )
+    except KeyError:
+        pass
 
+    if article.id is None:
         try:
             template_tag = Tag.select(Tag.id).where(
                 Tag.wiki == wiki, Tag.title == "@template"
@@ -276,10 +285,14 @@ async def article_display(env: Request, wiki: Wiki, user: Author, article: Artic
 
         article.content = f'This article does not exist. Click the <a class="autogenerate" href="{article.edit_link}">edit link</a> to create this article.{templates}'
 
-    return Response(
-        article_template.render(
+    result = article_template.render(
             articles=[article], page_title=article.title, wiki=wiki
-        ),
+        )
+    
+    Wiki.article_cache[article.id] = result
+
+    return Response(
+        result,
         headers=default_headers,
     )
 

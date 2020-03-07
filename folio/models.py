@@ -184,16 +184,22 @@ class Wiki(BaseModel):
     title = TextField(index=True)
     description = TextField()
 
-    sidebar_cache: dict = {}
+    _sidebar_cache: dict = {}
+    article_cache: dict = {}
 
     PATH = "/wiki/<wiki_name>"
     METADATA = "wiki"
 
+    @property
+    def sidebar_cache(self):
+        return Wiki._sidebar_cache.get(self.id, None)
+
     def invalidate_cache(self):
         try:
-            del Wiki.sidebar_cache[self.id]
+            del Wiki._sidebar_cache[self.id]
         except KeyError:
-            pass
+            pass        
+        Wiki.article_cache = {}
 
     def setting(self, key):
         try:
@@ -379,6 +385,7 @@ class Author(BaseModel):
 
 
 class Article(BaseModel):
+    
     wiki = ForeignKeyField(Wiki, backref="articles")
     title = TextField(index=True)
     content = TextField(null=True)
