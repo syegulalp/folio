@@ -7,7 +7,10 @@ TEMPLATE_PATH = "templates"
 DEBUG = False
 MAX_REQUEST_SIZE = 1024 * 1024 * 4
 
-import re
+try:
+    import regex as re
+except ImportError:
+    import re
 import pickle
 
 pickle.DEFAULT_PROTOCOL = pickle.HIGHEST_PROTOCOL

@@ -1,7 +1,10 @@
 import datetime
 import urllib
 import markdown
-import re
+try:
+    import regex as re
+except ImportError:
+    import re
 import datetime
 import config
 import os
