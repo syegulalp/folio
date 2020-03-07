@@ -1,5 +1,7 @@
 **Folio** is a personal wiki, using Python 3.7+. It's somewhat akin to TiddkyWiki, in that it's intended for single-user use.
 
+![](screenshot.png)
+
 > This project is still in the early alpha stages and very unstable. Data is not guaranteed to be compatible across releases while in alpha. **Do not use it for production work of any kind,** at least not without making regular backups.
 
 Folio uses Markdown to render text, with some gratuitous additions for things exclusive to Folio (e.g., links within a wiki).
