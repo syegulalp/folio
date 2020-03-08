@@ -4,6 +4,7 @@
 
 ### New features
 
+* Ctrl-Shift-F takes you to the Search screen when not editing an article.
 * Added a simple caching system for article texts. This speeds up things somewhat with wikis that are mainly being browsed. (We already have a sidebar caching system, which provided some speedup, but this enhances that further.)
 * Link insert button in article editor. (Hotkey: Ctrl-L when editor is in focus.)
 * Metadata editor for articles.
