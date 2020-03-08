@@ -133,7 +133,6 @@ function tagEnter() {
 
 function insertLink(item) {
     linkText = $(item).html();
-    console.log(linkText);
     $("#article_content").focus();
     wrapText($("#article_content")[0], '[['+linkText+']]','')
     $('#edit-modal').modal('hide');
