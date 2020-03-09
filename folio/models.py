@@ -297,7 +297,7 @@ class Wiki(BaseModel):
         return f"/wiki/{self.title_to_url(self.title)}"
 
     def recent_articles(self):
-        return self.articles.order_by(Article.last_edited.desc()).limit(50)
+        return self.articles.where(Article.revision_of.is_null()).order_by(Article.last_edited.desc()).limit(50)
 
     @property
     def new_page_link(self):
