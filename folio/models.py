@@ -1,6 +1,7 @@
 import datetime
 import urllib
 import markdown
+
 try:
     import regex as re
 except ImportError:
@@ -193,6 +194,28 @@ class Wiki(BaseModel):
     PATH = "/wiki/<wiki_name>"
     METADATA = "wiki"
 
+    def delete_(self):
+        with db.transaction():
+
+            Metadata.delete().where(
+                Metadata.item == "wiki", Metadata.id == self.id,
+            )
+
+            for article in self.articles:
+                article.delete_()
+
+            for media in self.media:
+                media.delete_()
+
+            try:
+                os.remove(os.path.join(self.data_path, "cover.jpg"))
+            except:
+                pass
+
+            os.rmdir(self.data_path)
+
+            self.delete_instance()
+
     @property
     def sidebar_cache(self):
         return Wiki._sidebar_cache.get(self.id, None)
@@ -201,7 +224,7 @@ class Wiki(BaseModel):
         try:
             del Wiki._sidebar_cache[self.id]
         except KeyError:
-            pass        
+            pass
         Wiki.article_cache = {}
 
     def setting(self, key):
@@ -296,8 +319,26 @@ class Wiki(BaseModel):
     def link(self):
         return f"/wiki/{self.title_to_url(self.title)}"
 
+    @property
+    def delete_key(self):
+        h = blake2b(key=b"key1", digest_size=16)
+        h.update(bytes(self.title, "utf8"))
+        return h.hexdigest()
+
+    @property
+    def delete_link(self):
+        return f"{self.link}/delete"
+
+    @property
+    def delete_confirm_link(self):
+        return f"{self.delete_link}/{self.delete_key}"
+
     def recent_articles(self):
-        return self.articles.where(Article.revision_of.is_null()).order_by(Article.last_edited.desc()).limit(50)
+        return (
+            self.articles.where(Article.revision_of.is_null())
+            .order_by(Article.last_edited.desc())
+            .limit(50)
+        )
 
     @property
     def new_page_link(self):
@@ -388,7 +429,7 @@ class Author(BaseModel):
 
 
 class Article(BaseModel):
-    
+
     wiki = ForeignKeyField(Wiki, backref="articles")
     title = TextField(index=True)
     content = TextField(null=True)
@@ -588,10 +629,18 @@ class Article(BaseModel):
         h.update(bytes(self.title, "utf8"))
         return h.hexdigest()
 
+    def delete_(self):
+        with db.atomic():
+            self.clear_index()
+            self.clear_metadata()
+            self.clear_tags()
+            self.clear_links()
+            self.delete_instance(recursive=True)
+
     def clear_metadata(self):
         for _ in self.metadata:
             _.delete_instance()
-    
+
     def clear_tags(self):
         for tag in self.tags:
             tag.delete_instance()
@@ -603,9 +652,12 @@ class Article(BaseModel):
         for tag_assoc in other.tags:
             self.add_tag(tag_assoc.tag.title)
 
+    def clear_links(self):
+        ArticleLinks.delete().where(ArticleLinks.article == self).execute()
+
     def update_links(self):
         article_link_path = f"{self.wiki.link}/article/"
-        ArticleLinks.delete().where(ArticleLinks.article == self).execute()
+        self.clear_links()
 
         for _ in self.href_re.finditer(self.formatted):
             link_item = _.group(2)
@@ -945,8 +997,16 @@ class Media(BaseModel):
         return f"{self.wiki.link}/media/{self.file_to_url(self.file_path)}"
 
     @property
+    def file_path_(self):
+        return os.path.join(self.wiki.data_path, self.file_path)
+
+    @property
     def edit_link(self):
         return f"{self.link}/edit"
+
+    def delete_(self):
+        os.remove(self.file_path_)
+        self.delete_instance()
 
 
 class ArticleIndex(FTSModel):

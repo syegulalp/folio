@@ -171,7 +171,7 @@ async def new_wiki_save(env: Request):
 @wiki_env
 async def wiki_home(env: Request, wiki: Wiki, user: Author):
     return await article_display.__wrapped__(env, wiki, user, wiki.main_article)
-    
+
     # return Response(
     #     article_template.render(wiki=wiki, articles=[wiki.main_article], user=user)
     # )
@@ -241,10 +241,7 @@ async def articles(env: Request, wiki: Wiki, user: Author):
 @article_env
 async def article_display(env: Request, wiki: Wiki, user: Author, article: Article):
     try:
-        return Response(
-        Wiki.article_cache[article.id],
-        headers=default_headers,
-    )
+        return Response(Wiki.article_cache[article.id], headers=default_headers,)
     except KeyError:
         pass
 
@@ -285,15 +282,12 @@ async def article_display(env: Request, wiki: Wiki, user: Author, article: Artic
         article.content = f'This article does not exist. Click the <a class="autogenerate" href="{article.edit_link}">edit link</a> to create this article.{templates}'
 
     result = article_template.render(
-            articles=[article], page_title=article.title, wiki=wiki
-        )
-    
+        articles=[article], page_title=article.title, wiki=wiki
+    )
+
     Wiki.article_cache[article.id] = result
 
-    return Response(
-        result,
-        headers=default_headers,
-    )
+    return Response(result, headers=default_headers,)
 
 
 @route(f"{Wiki.PATH}/new_from_template/<template>", RouteType.asnc)
@@ -494,10 +488,7 @@ async def article_edit(
                 new_article.clear_tags()
                 new_article.copy_tags_from(article)
 
-                article.clear_tags()
-                article.clear_index()
-                article.clear_metadata()
-                article.delete_instance(recursive=True)
+                article.delete_()
 
                 wiki.invalidate_cache()
                 return redirect(new_article.link)
@@ -618,19 +609,10 @@ async def article_delete_confirm(
 
     if article.drafts.count():
         draft = article.drafts.get()
-        draft.clear_tags()
-        draft.clear_metadata()
-        draft.clear_index()
-        draft.delete_instance(recursive=True)
+        draft.delete_()
     for revision in article.edits.select():
-        revision.clear_tags()
-        revision.clear_metadata()
-        revision.clear_index()
-        revision.delete_instance(recursive=True)
-    article.clear_tags()
-    article.clear_metadata()
-    article.clear_index()
-    article.delete_instance(recursive=True)
+        revision.delete_()
+    article.delete_()
 
     # TODO: Move tag-clearing / orphan-check operations to override of delete_instance for article?
 
@@ -1113,6 +1095,7 @@ async def modal_insert_link_search(
         )
     )
 
+
 @route(f"{Wiki.PATH}{Article.PATH}/insert-link", RouteType.asnc, action="POST")
 @article_env
 async def modal_insert_link_search_post(
@@ -1133,3 +1116,40 @@ def quit(*a):
     import sys
 
     sys.exit()
+
+
+@route(f"{Wiki.PATH}/delete", RouteType.asnc)
+@wiki_env
+async def wiki_delete(env: Request, wiki: Wiki, user: Author):
+
+    warning = f'Wiki "{Unsafe(wiki.title)}" is going to be deleted! Deleted wikis are GONE FOREVER.'
+
+    return Response(
+        article_template.render(
+            articles=[wiki.main_article,],
+            wiki=wiki,
+            messages=[Message(warning, yes=wiki.delete_confirm_link, no=wiki.link,)],
+        ),
+        headers=default_headers,
+    )
+
+
+@route(f"{Wiki.PATH}/delete/<delete_key>", RouteType.asnc)
+@wiki_env
+async def wiki_delete_confirm(env: Request, wiki: Wiki, user: Author, delete_key: str):
+
+    wiki_title = wiki.title
+
+    wiki.delete_()
+
+    confirmation = f'Wiki "{Unsafe(wiki_title)}" has been deleted.'
+
+    return Response(
+        home_template.render(
+            wikis=Wiki.select().order_by(Wiki.title.asc()),
+            articles=Article.select().order_by(Article.last_edited.desc()).limit(25),
+            page_title="Wiki Server Homepage",
+            messages=[Message(confirmation)],
+        ),
+        headers=default_headers,
+    )
