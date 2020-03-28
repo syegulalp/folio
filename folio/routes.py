@@ -1144,6 +1144,8 @@ async def wiki_delete_confirm(env: Request, wiki: Wiki, user: Author, delete_key
 
     confirmation = f'Wiki "{Unsafe(wiki_title)}" has been deleted.'
 
+    # TODO: consolidate with main page routine
+
     return Response(
         home_template.render(
             wikis=Wiki.select().order_by(Wiki.title.asc()),
