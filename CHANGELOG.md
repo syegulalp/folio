@@ -10,11 +10,13 @@
 * Metadata editor for articles.
 * Tag and image chooser in editor now show default choices instead of requiring you to type to show anything.
 * Bold/ital command buttons in editor.
+* Wikis can now be deleted.
 
 ### Bugfixes
 
 * Metadata wasn't extracted properly from mixed formatted/unformatted content
 * Reloading delete-confirmation page sometimes destroyed data.
+* Metadata didn't migrate properly between drafts and published articles.
 
 ## [0.0.1-alpha](https://github.com/syegulalp/folio/releases/tag/0.0.1-alpha)
 
