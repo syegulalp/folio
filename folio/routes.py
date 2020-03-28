@@ -390,6 +390,7 @@ async def article_edit(
             draft.update_links()
             draft.update_autogen_metadata()
             draft.copy_tags_from(article)
+            draft.copy_metadata_from(article)
             article = draft
 
     original_article = article
@@ -470,10 +471,10 @@ async def article_edit(
                         revision_of=new_article,
                     )
                     revision.save()
-                    # revision.update_index()
                     revision.update_links()
                     revision.update_autogen_metadata()
-                    revision.copy_tags_from(new_article)
+                    revision.copy_metdata_from(new_article)
+                    revision.copy_tags_from(new_article)                    
 
                 if article.new_title:
                     new_article.title = article.new_title
@@ -484,9 +485,11 @@ async def article_edit(
 
                 new_article.update_index()
                 new_article.update_links()
+                new_article.clear_metadata()
                 new_article.update_autogen_metadata()
+                new_article.copy_metadata_from(article)
                 new_article.clear_tags()
-                new_article.copy_tags_from(article)
+                new_article.copy_tags_from(article)                
 
                 article.delete_()
 

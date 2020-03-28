@@ -457,6 +457,14 @@ class Article(BaseModel):
     metadata_re = re.compile(r"\$\[(.*?)\]\$\(([^)]*?)\)", re.MULTILINE | re.DOTALL)
     blurb_inline_re = re.compile(r"\$\[(.*?)\]\$", re.MULTILINE | re.DOTALL)
 
+    def clear_metadata(self):
+        for metadata in self.metadata_not_autogen:
+            metadata.delete_instance()
+   
+    def copy_metadata_from(self, other):
+        for metadata in other.metadata_not_autogen:
+            self.set_metadata(metadata.key, metadata.value)
+
     def clear_index(self):
         ArticleIndex.delete().where(ArticleIndex.rowid == self.id).execute()
 
