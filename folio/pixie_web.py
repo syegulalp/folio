@@ -747,7 +747,7 @@ class Server:
         if parameters:
             for _ in path_replace:
                 path = path.replace(_, "\\" + _)
-            path = re.sub(path_re_str, "(.*?)", path)
+            path = re.sub(path_re_str, "([^/]*?)", path)
             path += "$"
             route_regex = re.compile(path)
 
