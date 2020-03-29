@@ -91,7 +91,8 @@ def article_env(func):
 
         try:
             article = wiki.articles.where(
-                Article.title == Article.url_to_title(article_title)
+                Article.title == Article.url_to_title(article_title),
+                Article.revision_of.is_null()
             ).get()
         except Article.DoesNotExist:
             article = Article(

@@ -459,7 +459,7 @@ class Article(BaseModel):
 
     @property
     def id_link(self):
-        return f"{self.link}/revision/{self.id}"
+        return f"{self.revision_of.link}/revision/{self.id}"
     
     def copy_metadata_from(self, other):
         for metadata in other.metadata_not_autogen:
