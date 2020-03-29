@@ -461,10 +461,6 @@ class Article(BaseModel):
     def id_link(self):
         return f"{self.link}/revision/{self.id}"
     
-    def clear_metadata(self):
-        for metadata in self.metadata_not_autogen:
-            metadata.delete_instance()
-   
     def copy_metadata_from(self, other):
         for metadata in other.metadata_not_autogen:
             self.set_metadata(metadata.key, metadata.value)
