@@ -440,7 +440,7 @@ class Article(BaseModel):
     content_type = TextField(default="text/markdown", index=True)
     opened_by = ForeignKeyField(Author, backref="opened_articles", null=True)
     draft_of = ForeignKeyField("self", null=True, backref="drafts")
-    revision_of = ForeignKeyField("self", null=True, backref="edits")
+    revision_of = ForeignKeyField("self", null=True, backref="revisions")
     new_title = TextField(null=True)
 
     PATH = "/article/<title>"
@@ -578,8 +578,8 @@ class Article(BaseModel):
         )
 
     @property
-    def edits_chrono(self):
-        return self.edits.order_by(Article.last_edited.desc())
+    def revisions_chrono(self):
+        return self.revisions.order_by(Article.last_edited.desc())
 
     @property
     def short_date(self):

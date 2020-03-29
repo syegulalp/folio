@@ -313,7 +313,7 @@ async def article_new_from_template(
 async def article_revision(env: Request, wiki: Wiki, user: Author, article: Article, revision_id: str):
 
     try:
-        revision = article.edits.where(Article.id == int(revision_id)).get()
+        revision = article.revisions.where(Article.id == int(revision_id)).get()
     except Exception:
         return await wiki_home(env, wiki, user)
 
@@ -631,7 +631,7 @@ async def article_delete_confirm(
     if article.drafts.count():
         draft = article.drafts.get()
         draft.delete_()
-    for revision in article.edits.select():
+    for revision in article.revisions.select():
         revision.delete_()
     article.delete_()
 
