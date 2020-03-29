@@ -308,6 +308,23 @@ async def article_new_from_template(
     return redirect(article.edit_link)
 
 
+@route(f"{Wiki.PATH}{Article.PATH}/revision/<revision_id>", RouteType.asnc)
+@article_env
+async def article_revision(env: Request, wiki: Wiki, user: Author, article: Article, revision_id: str):
+
+    try:
+        revision = article.edits.where(Article.id == int(revision_id)).get()
+    except Exception:
+        return await wiki_home(env, wiki, user)
+
+    return Response(
+        article_template.render(
+            articles=[revision], page_title=revision.title, wiki=wiki
+        ),
+        headers=default_headers,
+    )
+
+
 @route(f"{Wiki.PATH}{Article.PATH}/history", RouteType.asnc)
 @article_env
 async def article_history(env: Request, wiki: Wiki, user: Author, article: Article):
@@ -464,7 +481,8 @@ async def article_edit(
                 if action == "revise":
                     revision = Article(
                         wiki=new_article.wiki,
-                        title=f"{new_article.title} [{new_article.last_edited.strftime(ARTICLE_TIME_FORMAT)}]",
+                        title=new_article.title,
+                        # title=f"{new_article.title} [{new_article.last_edited.strftime(ARTICLE_TIME_FORMAT)}]",
                         content=new_article.content,
                         author=new_article.author,
                         created=new_article.created,
@@ -474,7 +492,7 @@ async def article_edit(
                     revision.update_links()
                     revision.update_autogen_metadata()
                     revision.copy_metdata_from(new_article)
-                    revision.copy_tags_from(new_article)                    
+                    revision.copy_tags_from(new_article)
 
                 if article.new_title:
                     new_article.title = article.new_title
@@ -489,7 +507,7 @@ async def article_edit(
                 new_article.update_autogen_metadata()
                 new_article.copy_metadata_from(article)
                 new_article.clear_tags()
-                new_article.copy_tags_from(article)                
+                new_article.copy_tags_from(article)
 
                 article.delete_()
 

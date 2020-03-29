@@ -12,7 +12,7 @@
       % else:
       <ul class="list">
         % for revision in article.edits_chrono:
-        <li><a href="{{revision.link}}">{{revision.title}} | {{revision.formatted_date}}</a></li> 
+        <li><a href="{{revision.id_link}}">{{revision.formatted_date}}</a></li> 
         % end
       </ul>
       % end

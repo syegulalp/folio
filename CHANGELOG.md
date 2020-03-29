@@ -1,5 +1,15 @@
 # Changelog
 
+## ???
+
+### New features
+
+None yet.
+
+### Bugfixes
+
+* Article revisions are now accessed by way of an ID-based URL. This way revisions of an article with an earlier name can be accessed without any trickery in the name field. (Revisions to articles also no longer have a date stamp automatically added to the name.) 
+
 ## [0.0.2-alpha](https://github.com/syegulalp/folio/releases/tag/0.0.2-alpha)
 
 ### New features

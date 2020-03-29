@@ -457,6 +457,10 @@ class Article(BaseModel):
     metadata_re = re.compile(r"\$\[(.*?)\]\$\(([^)]*?)\)", re.MULTILINE | re.DOTALL)
     blurb_inline_re = re.compile(r"\$\[(.*?)\]\$", re.MULTILINE | re.DOTALL)
 
+    @property
+    def id_link(self):
+        return f"{self.link}/revision/{self.id}"
+    
     def clear_metadata(self):
         for metadata in self.metadata_not_autogen:
             metadata.delete_instance()
