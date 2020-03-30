@@ -831,7 +831,7 @@ async def tag_pages(env: Request, wiki: Wiki, user: Author, tag_name: str):
     tag_name = Wiki.url_to_title(tag_name)
     try:
         tag = Tag.get(Tag.title == tag_name)
-        tagged_articles = wiki.articles_tagged_with(tag_name).order_by(
+        tagged_articles = wiki.articles_tagged_with(tag_name).where(Article.revision_of.is_null()).order_by(
             SQL("title COLLATE NOCASE")
         )
     except Tag.DoesNotExist:
