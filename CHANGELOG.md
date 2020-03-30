@@ -1,14 +1,11 @@
 # Changelog
 
-## ???
-
-### New features
-
-None yet.
+## [0.0.2.1-alpha](https://github.com/syegulalp/folio/releases/tag/0.0.2.1-alpha)
 
 ### Bugfixes
 
-* Article revisions are now accessed by way of an ID-based URL. This way revisions of an article with an earlier name can be accessed without any trickery in the name field. (Revisions to articles also no longer have a date stamp automatically added to the name.) 
+* Article revisions are now accessed by way of an ID-based URL. This way revisions of an article with an earlier name can be accessed without any trickery in the name field. (Revisions to articles also no longer have a date stamp automatically added to the name.)
+* Tag listings now show only main articles, not revisions of articles as well.
 
 ## [0.0.2-alpha](https://github.com/syegulalp/folio/releases/tag/0.0.2-alpha)
 
