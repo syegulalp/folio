@@ -5,7 +5,7 @@ import markdown
 try:
     import regex as re
 except ImportError:
-    import re
+    import re # type: ignore
 import datetime
 import config
 import os
@@ -460,7 +460,7 @@ class Article(BaseModel):
     @property
     def id_link(self):
         return f"{self.revision_of.link}/revision/{self.id}"
-    
+
     def copy_metadata_from(self, other):
         for metadata in other.metadata_not_autogen:
             self.set_metadata(metadata.key, metadata.value)
