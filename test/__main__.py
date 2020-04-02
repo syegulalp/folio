@@ -1,5 +1,5 @@
 import unittest
-
+from pathlib import Path
 # TODO: need image tests
 
 
@@ -21,7 +21,7 @@ class TestRendering(unittest.TestCase):
         )
         self.article.save()
 
-        with open(os.path.join("test", "testdata", "source.md")) as f:
+        with open(Path("test", "testdata", "source.md")) as f:
             self.article.content = f.read()
         self.article.save()
 
@@ -36,7 +36,7 @@ class TestRendering(unittest.TestCase):
     def test_article_all_inclusive(self):
         self.maxDiff = None
         content = self.article.formatted
-        with open(os.path.join("test", "testdata", "output.html")) as f:
+        with open(Path("test", "testdata", "output.html")) as f:
             output = f.read()
         self.assertEqual(
             content, output,
@@ -130,7 +130,7 @@ if __name__ == "__main__":
 
     import sys, os
 
-    sys.path.insert(0, os.path.join("test", "testdata"))
+    sys.path.insert(0, str(Path("test", "testdata")))
     sys.path.insert(0, "folio")
     import models as m
 
@@ -145,5 +145,5 @@ if __name__ == "__main__":
 
     # teardown
     models.db.close()
-    os.remove(os.path.join("test", "testdata", "wiki.db"))
-    os.rmdir(os.path.join("test", "testdata", "1"))
+    os.remove(Path("test", "testdata", "wiki.db"))
+    os.rmdir(Path("test", "testdata", "1"))

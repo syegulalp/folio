@@ -5,7 +5,7 @@ import markdown
 try:
     import regex as re
 except ImportError:
-    import re # type: ignore
+    import re  # type: ignore
 import datetime
 import config
 import os
@@ -16,8 +16,10 @@ from peewee import SQL
 
 from settings import defaults
 
+from pathlib import Path
+
 db = SqliteExtDatabase(
-    os.path.join(config.DATA_PATH, "wiki.db"),
+    Path(config.DATA_PATH, "wiki.db"),
     pragmas=(("cache_size", -1024 * 64), ("journal_mode", "wal"), ("synchronous", 0)),
 )
 
@@ -208,7 +210,8 @@ class Wiki(BaseModel):
                 media.delete_()
 
             try:
-                os.remove(os.path.join(self.data_path, "cover.jpg"))
+                # os.remove(os.path.join(self.data_path, "cover.jpg"))
+                Path(self.data_path, "cover.jpg").unlink()
             except:
                 pass
 
@@ -250,7 +253,8 @@ class Wiki(BaseModel):
         new_wiki = cls(title=title, description=description)
         new_wiki.save()
 
-        os.mkdir(os.path.join(cls._config.DATA_PATH, str(new_wiki.id)))
+        # os.mkdir(os.path.join(cls._config.DATA_PATH, str(new_wiki.id)))
+        Path(cls._config.DATA_PATH, str(new_wiki.id)).mkdir()
 
         if first_wiki:
             from utils import wiki_init
@@ -372,13 +376,15 @@ class Wiki(BaseModel):
 
     @property
     def data_path(self):
-        return os.path.join(config.DATA_PATH, str(self.id))
+        # return os.path.join(config.DATA_PATH, str(self.id))
+        return str(Path(config.DATA_PATH, str(self.id)))
 
     @property
     def cover_img(self):
         cover_img_file = self.setting("Cover image")
-        img_path = os.path.join(self.data_path, cover_img_file)
-        if os.path.exists(img_path):
+        # img_path = os.path.join(self.data_path, cover_img_file)
+        # if os.path.exists(img_path):
+        if Path(self.data_path, cover_img_file).exists():
             return f"{self.link}/media/{cover_img_file}"
         return f"/static/default_cover.jpg"
 
@@ -1006,7 +1012,8 @@ class Media(BaseModel):
 
     @property
     def file_path_(self):
-        return os.path.join(self.wiki.data_path, self.file_path)
+        # return os.path.join(self.wiki.data_path, self.file_path)
+        return str(Path(self.wiki.data_path, self.file_path))
 
     @property
     def edit_link(self):

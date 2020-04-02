@@ -29,7 +29,9 @@ except ImportError:
 
 from sys import stderr
 from os import getcwd as os_getcwd, stat as os_stat
-from os.path import join as path_join
+
+# from os.path import join as path_join
+from pathlib import Path
 from functools import lru_cache
 from email import utils as email_utils
 
@@ -286,7 +288,9 @@ class Request:
         if self._form:
             return self._form
 
-        if self.headers.get("CONTENT_TYPE", "").startswith("application/x-www-form-urlencoded"):
+        if self.headers.get("CONTENT_TYPE", "").startswith(
+            "application/x-www-form-urlencoded"
+        ):
             self._form = self._urlencoded_form(self._body)
             return self._form
 
@@ -442,8 +446,8 @@ class Template:
     _braces = re.compile(r"(\{\{!*.+?\}\})")
     _lit_braces = re.compile(r"(\{\{!(.*?)\}\})")
 
-    #braces = re.compile(r"(\{\{\{\{(.*?)\}\}\}\})")
-    #lit_braces = re.compile(r"(\{\{\{\{!(.*?)\}\}\}\})")
+    # braces = re.compile(r"(\{\{\{\{(.*?)\}\}\}\})")
+    # lit_braces = re.compile(r"(\{\{\{\{!(.*?)\}\}\}\})")
 
     def _indent(self):
         return " " * 4 * self.indent_level
@@ -464,7 +468,7 @@ class Template:
                 continue
             else:
                 include_file = code_line.split("include ")[1]
-                with open(path_join(path, include_file), encoding="utf=8") as f:
+                with open(Path(path, include_file), encoding="utf=8") as f:
                     include_list.extend(self._include(f.read(), path))
 
         return include_list
@@ -492,9 +496,9 @@ class Template:
 
     def _compile(self):
         if self._file:
-            with open(path_join(self._path, self._file), "r", encoding="utf-8") as f:
+            with open(Path(self._path, self._file), "r", encoding="utf-8") as f:
                 template_str = f.read()
-            self._template_name = path_join(self._path, self._file)
+            self._template_name = Path(self._path, self._file)
         else:
             template_str = self._template_str
             self._template_name = "<string>"
@@ -580,7 +584,7 @@ def static_file(
     Load static file from `path`, using `root` as the directory to start at.
     """
     file_type, encoding = guess_type(filename)
-    full_path = path_join(path, filename)
+    full_path = Path(path, filename)
     try:
         with open(full_path, "rb") as file:
             stats = os_stat(full_path)

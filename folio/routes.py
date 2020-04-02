@@ -28,6 +28,7 @@ import os
 from __main__ import config
 from utils import Message, Error
 from peewee import fn, SQL
+from pathlib import Path
 
 home_template = Template(file="home.html")
 article_template = Template(file="article.html")
@@ -417,8 +418,8 @@ async def upload_to_wiki(env: Request, wiki: Wiki, user: Author):
         rename = 1
         dest_file_name = file_name
         while True:
-            file_path = os.path.join(wiki.data_path, dest_file_name)
-            if os.path.exists(file_path):
+            file_path = Path(wiki.data_path, dest_file_name)
+            if file_path.exists():
                 fn = file_name.rsplit(".", 1)
                 dest_file_name = f"{fn[0]}_{rename}.{fn[1]}"
                 rename += 1

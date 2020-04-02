@@ -23,10 +23,11 @@ class Error:
     def __str__(self):
         return f"""<div class="alert-box alert alert-{self.color}">{self.error}</div>"""
 
+
 wiki_init = {
-    'Quickstart': {
-        'tags':['@meta'],
-        'content':'''
+    "Quickstart": {
+        "tags": ["@meta"],
+        "content": """
 # What's a wiki?
 
 <small>(If you already know what a wiki is, go ahead and skip this.)</small>
@@ -81,10 +82,10 @@ You can also use **macros**, or special wiki commands, to extract parts of artic
 
 * [Learn more about includes.](Includes)
 * [Learn more about macros.](Macros)
-'''        
+""",
     },
-    'Wiki formatting':{
-        'content':'''This wiki uses the Markdown formatting system, with a few changes. If you're already familiar with Markdown, you should be able to use most of its functionality, but for your convenience here's a rundown of how to add all the formatting supported.
+    "Wiki formatting": {
+        "content": """This wiki uses the Markdown formatting system, with a few changes. If you're already familiar with Markdown, you should be able to use most of its functionality, but for your convenience here's a rundown of how to add all the formatting supported.
 
 # Inline formatting
 
@@ -250,24 +251,26 @@ Recipes:
 
 * `<<meta key="blurb">>` -- Display the blurb for the current document (if any).
 * `<<items tag="Places">>` -- Display all documents (items) tagged with `Places`, in alpha sort, with blurbs if available.
-''',
-'tags':['@meta']},
-'@meta': {
-    'tags':[],
-    'content':'''
+""",
+        "tags": ["@meta"],
+    },
+    "@meta": {
+        "tags": [],
+        "content": """
 $[`@meta`-tagged articles are part of the general infrastructure of a wiki.]$
 
 <<items tag="@meta">>
-'''
-},
-"Contents":{
-    'content':'''
+""",
+    },
+    "Contents": {
+        "content": """
 Welcome to Folio!
 
 This wiki has been automatically generated with your new Folio install. It contains some basic details about how to use Folio.
 
 * [[Quickstart]] instructions. (*Not complete yet but readable*)
-* Learn about [wiki formatting](Wiki formatting). ''',
-    'tags':['@meta']
+* Learn about [wiki formatting](Wiki formatting). """,
+        "tags": ["@meta"],
+    },
 }
-}
+

@@ -62,12 +62,12 @@ debug = getattr(config, "DEBUG", None) or args.debug
 launch_browser = getattr(config, "LAUNCH_BROWSER", None) or args.browser
 config.DATA_PATH = config_path
 
-port = getattr(config,'PORT',6171)
+port = getattr(config, "PORT", 6171)
 
 import pixie_web
 
 pixie_web.DEBUG = debug
-pixie_web.TEMPLATE_PATH ="folio/templates"
+pixie_web.TEMPLATE_PATH = "folio/templates"
 
 if __name__ == "__main__":
 
