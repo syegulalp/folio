@@ -1012,12 +1012,25 @@ class Media(BaseModel):
 
     @property
     def file_path_(self):
-        # return os.path.join(self.wiki.data_path, self.file_path)
         return str(Path(self.wiki.data_path, self.file_path))
 
     @property
     def edit_link(self):
         return f"{self.link}/edit"
+
+    @property
+    def delete_link(self):
+        return f"{self.link}/delete"
+
+    @property
+    def delete_confirm_link(self):
+        return f"{self.delete_link}/{self.delete_key}"
+
+    @property
+    def delete_key(self):
+        h = blake2b(key=b"key1", digest_size=16)
+        h.update(bytes(self.file_path, "utf8"))
+        return h.hexdigest()
 
     def delete_(self):
         os.remove(self.file_path_)

@@ -84,6 +84,18 @@ def wiki_env(func):
 
     return wrapper
 
+def media_env(func):
+    def wrapper(env: Request, wiki_title: str, media_filename: str, *a, **ka):
+        user = get_user()
+        wiki = get_wiki(wiki_title)
+        media = (
+            Media.select()
+            .where(Media.file_path == Wiki.url_to_file(media_filename), Media.wiki == wiki)
+            .get()
+        )
+        return func(env, wiki, user, media, *a, **ka)
+    return wrapper
+
 
 def article_env(func):
     def wrapper(env: Request, wiki_title: str, article_title: str, *a, **ka):
@@ -1121,33 +1133,51 @@ async def wiki_media(env: Request, wiki: Wiki, user: Author):
 
 
 @route(f"{Wiki.PATH}/media/<file_name>", RouteType.asnc)
-@wiki_env
-async def media_file(env: Request, wiki: Wiki, user: Author, file_name: str):
+@media_env
+async def media_file(env: Request, wiki: Wiki, user: Author, media: Media):
 
     return static_file(
-        Wiki.url_to_file(file_name),
+        Wiki.url_to_file(media.file_path),
         path=f"{config.DATA_PATH}/{wiki.id}",
         last_modified=env.headers.get("HTTP_IF_MODIFIED_SINCE", None),
     )
 
 
 @route(f"{Wiki.PATH}/media/<file_name>/edit", RouteType.asnc)
-@wiki_env
-async def media_file_edit(env: Request, wiki: Wiki, user: Author, file_name: str):
-
-    try:
-        media = (
-            Media.select()
-            .where(Media.file_path == Wiki.url_to_file(file_name), Media.wiki == wiki)
-            .get()
-        )
-    except Media.DoesNotExist:
-        return simple_response("", 404)
-        # TODO: proper error
+@media_env
+async def media_file_edit(env: Request, wiki: Wiki, user: Author, media: Media):
 
     return Response(
         wiki_media_edit_template.render(wiki=wiki, media=media),
         headers=default_headers,
+    )
+
+@route(f"{Wiki.PATH}/media/<file_name>/delete", RouteType.asnc)
+@media_env
+async def media_file_delete(env: Request, wiki: Wiki, user: Author, media: Media):
+
+    warning = f'Media "{Unsafe(media.file_path)}" is going to be deleted! Deleted media are GONE FOREVER.'
+
+    return Response(
+        wiki_media_edit_template.render(
+            wiki=wiki, media=media,
+            messages=[Message(warning, yes=media.delete_confirm_link, no=media.edit_link,)],
+            ),
+        headers=default_headers,
+    )
+
+@route(f"{Wiki.PATH}/media/<file_name>/delete/<delete_key>", RouteType.asnc)
+@media_env
+async def media_file_delete_confirm(env: Request, wiki: Wiki, user: Author, media: Media, delete_key: str):
+    
+    media.delete_()
+
+    return Response(
+        wiki_media_template.render(
+            wiki = wiki,
+            media=wiki.media_alpha,
+            messages=[Error(f'Article "{Unsafe(media.file_path)}" has been deleted.')],
+        )
     )
 
 

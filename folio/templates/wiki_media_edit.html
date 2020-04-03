@@ -2,6 +2,8 @@
 
 <main role="main" class="container-wiki">
 
+  % include includes/messages.html
+
   <div class="row">
     <div class="col">
       <h2>{{media.file_path}}</h2>
@@ -11,8 +13,13 @@
           <img class="img-fluid" src="{{media.link}}">
         </div>
         <div class="col-6">
+          % # Image attributes here
         </div>
       </div>
+      <hr />
+      <a href="{{media.delete_link}}">
+          <button type="button" class="btn btn-sm btn-danger">Delete this image</button>
+      </a>
     </div>
     <div id="sidebar" class="sidebar-col">
       % include includes/sidebar.html

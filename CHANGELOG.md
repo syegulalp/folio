@@ -1,5 +1,11 @@
 # Changelog
 
+## ??
+
+### New features
+
+* Media can now be deleted from the media gallery for a wiki.
+
 ## [0.0.2.1-alpha](https://github.com/syegulalp/folio/releases/tag/0.0.2.1-alpha)
 
 ### Bugfixes
