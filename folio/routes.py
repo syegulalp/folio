@@ -20,6 +20,7 @@ from models import (
     Media,
     Metadata,
     ARTICLE_TIME_FORMAT,
+    re,
 )
 import asyncio
 import urllib
@@ -51,6 +52,11 @@ default_headers = {
     "Pragma": "no-cache",
     "Cache-Control": "no-cache, no-store, must-revalidate",
 }
+
+
+class LocalException(Exception):
+    pass
+
 
 ######################################################################
 # Decorators
@@ -84,16 +90,20 @@ def wiki_env(func):
 
     return wrapper
 
+
 def media_env(func):
     def wrapper(env: Request, wiki_title: str, media_filename: str, *a, **ka):
         user = get_user()
         wiki = get_wiki(wiki_title)
         media = (
             Media.select()
-            .where(Media.file_path == Wiki.url_to_file(media_filename), Media.wiki == wiki)
+            .where(
+                Media.file_path == Wiki.url_to_file(media_filename), Media.wiki == wiki
+            )
             .get()
         )
         return func(env, wiki, user, media, *a, **ka)
+
     return wrapper
 
 
@@ -1152,6 +1162,76 @@ async def media_file_edit(env: Request, wiki: Wiki, user: Author, media: Media):
         headers=default_headers,
     )
 
+
+@route(f"{Wiki.PATH}/media/<file_name>/edit", RouteType.asnc, action="POST")
+@media_env
+async def media_file_edit_post(env: Request, wiki: Wiki, user: Author, media: Media):
+
+    note = None
+    filename_body, filename_ext = media.file_path.rsplit(".", 1)
+    new_filename_body = env.form.get("media-filename")
+
+    if new_filename_body != filename_body:
+
+        new_filename = new_filename_body + "." + filename_ext
+
+        try:
+
+            if Media.exists(new_filename, wiki):
+                note = Error(
+                    f'Filename "{Unsafe(new_filename)}" already exists. Use another filename.'
+                )
+
+                raise LocalException()
+
+            # TODO: use transaction/rollback for one-pass rename
+
+            for ref in media.article_refs.select():
+                if ref.article.opened_by:
+                    note = Error(
+                        f'Media "{Unsafe(new_filename)}" is referenced in article "{Unsafe(ref.article.title)}", which is open for editing. Save the article before renaming the image.'
+                    )
+                    raise LocalException()
+
+            old_filename = media.file_path
+
+            new_path = Path(media.wiki.data_path, new_filename)
+            Path(media.file_path_).rename(new_path)
+
+            media.file_path = new_filename
+            media.save()
+
+            replacement_src = re.compile(
+                r"!\[([^\]]*?)\]\((" + re.escape(old_filename) + r")\)"
+            )
+
+            for ref in media.article_refs.select():
+                ref.article.replace_text(
+                    replacement_src, r"![\1](" + new_filename + r")",
+                )
+
+            media.wiki.invalidate_cache()
+
+            note = Message(
+                f'Filename "{Unsafe(old_filename)}" successfully renamed to "<a href="{media.edit_link}">{Unsafe(new_filename)}</a>".'
+            )
+
+        except LocalException:
+            pass
+
+        else:
+            return Response(
+                wiki_media_template.render(
+                    wiki=wiki, media=wiki.media_alpha, messages=[note]
+                )
+            )
+
+    return Response(
+        wiki_media_edit_template.render(wiki=wiki, media=media, messages=[note]),
+        headers=default_headers,
+    )
+
+
 @route(f"{Wiki.PATH}/media/<file_name>/delete", RouteType.asnc)
 @media_env
 async def media_file_delete(env: Request, wiki: Wiki, user: Author, media: Media):
@@ -1160,21 +1240,27 @@ async def media_file_delete(env: Request, wiki: Wiki, user: Author, media: Media
 
     return Response(
         wiki_media_edit_template.render(
-            wiki=wiki, media=media,
-            messages=[Message(warning, yes=media.delete_confirm_link, no=media.edit_link,)],
-            ),
+            wiki=wiki,
+            media=media,
+            messages=[
+                Message(warning, yes=media.delete_confirm_link, no=media.edit_link,)
+            ],
+        ),
         headers=default_headers,
     )
 
+
 @route(f"{Wiki.PATH}/media/<file_name>/delete/<delete_key>", RouteType.asnc)
 @media_env
-async def media_file_delete_confirm(env: Request, wiki: Wiki, user: Author, media: Media, delete_key: str):
-    
+async def media_file_delete_confirm(
+    env: Request, wiki: Wiki, user: Author, media: Media, delete_key: str
+):
+
     media.delete_()
 
     return Response(
         wiki_media_template.render(
-            wiki = wiki,
+            wiki=wiki,
             media=wiki.media_alpha,
             messages=[Error(f'Article "{Unsafe(media.file_path)}" has been deleted.')],
         )

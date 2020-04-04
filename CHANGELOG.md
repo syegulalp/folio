@@ -2,9 +2,12 @@
 
 ## ??
 
+**This version has a breaking schema from the previous versions.**
+
 ### New features
 
 * Media can now be deleted from the media gallery for a wiki.
+* Media can be renamed, with each article that uses the media automatically renaming its references as well.
 
 ## [0.0.2.1-alpha](https://github.com/syegulalp/folio/releases/tag/0.0.2.1-alpha)
 

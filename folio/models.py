@@ -123,6 +123,9 @@ class DocTagParser(HTMLParser):
 class BaseModel(Model):
     _config = config
 
+    class ItemInUseError(Exception):
+        pass
+
     class Meta:
         database = db
 
@@ -463,6 +466,13 @@ class Article(BaseModel):
     metadata_re = re.compile(r"\$\[(.*?)\]\$\(([^)]*?)\)", re.MULTILINE | re.DOTALL)
     blurb_inline_re = re.compile(r"\$\[(.*?)\]\$", re.MULTILINE | re.DOTALL)
 
+    def replace_text(self, re_to_find, new_text):
+        if self.opened_by:
+            raise self.ItemInUseError()
+
+        self.content = re_to_find.sub(new_text, self.content)
+        self.save()
+
     @property
     def id_link(self):
         return f"{self.revision_of.link}/revision/{self.id}"
@@ -668,6 +678,7 @@ class Article(BaseModel):
 
     def clear_links(self):
         ArticleLinks.delete().where(ArticleLinks.article == self).execute()
+        MediaLinks.delete().where(MediaLinks.article == self).execute()
 
     def update_links(self):
         article_link_path = f"{self.wiki.link}/article/"
@@ -689,6 +700,22 @@ class Article(BaseModel):
                 else:
                     new_link.link = link_extracted
                 new_link.save()
+
+        for _ in self.media_re.finditer(self.content):
+            try:
+                media = Media.get(
+                    Media.wiki == self.wiki,
+                    Media.file_path == _.group(2)
+                )
+            except Media.DoesNotExist:
+                continue
+            
+            new_link = MediaLinks(
+                media = media,
+                article = self
+            )
+            
+            new_link.save()
 
     def get_metadata_old(self):
         """
@@ -1006,6 +1033,17 @@ class Media(BaseModel):
     file_path = TextField()
     description = TextField(null=True)
 
+    @classmethod
+    def exists(cls, file_path, wiki):
+        try:
+            cls.select().where(
+                cls.file_path == file_path,
+                cls.wiki == wiki
+            ).get()
+        except cls.DoesNotExist:
+            return False
+        return True
+
     @property
     def link(self):
         return f"{self.wiki.link}/media/{self.file_to_url(self.file_path)}"
@@ -1036,6 +1074,9 @@ class Media(BaseModel):
         os.remove(self.file_path_)
         self.delete_instance()
 
+class MediaLinks(BaseModel):
+    media = ForeignKeyField(Media, backref="article_refs")
+    article = ForeignKeyField(Article, backref="media_refs")
 
 class ArticleIndex(FTSModel):
     rowid = RowIDField()
@@ -1063,46 +1104,6 @@ def create_db():
     ArticleIndex.optimize()
 
 
-def update():
-    pass
-
-    # for article in Article.select():
-    #     m = article.get_metadata_old()
-    #     if m.items():
-    #         article.clear_tags()
-    #         #print(article.title)
-    #         for k, v in m.items():
-    #             if k != "tag":
-    #                 new_metadata = Metadata(
-    #                     item="article",
-    #                     item_id=article.id,
-    #                     key=k,
-    #                     value=v[0],
-    #                     autogen=True,
-    #                 )
-    #                 new_metadata.save()
-    #             else:
-    #                 article.add_tag(v)
-
-    #         if "\r\n" in article.content:
-    #             splitter = "\r\n\r\n"
-    #         else:
-    #             splitter = "\n\n"
-    #         text = article.content.split(splitter, 1)
-    #         if len(text) > 1:
-    #             text = text[1]
-    #         else:
-    #             text = ""
-    #         article.content = text
-    #         article.save()
-
-
-# update()
-
+# db.create_tables([MediaLinks])
 # for article in Article.select():
-#     article.update_autogen_metadata()
-
-
-# db.create_tables([ArticleIndex])
-# ArticleIndex.rebuild()
-# ArticleIndex.optimize()
+#     article.update_links()

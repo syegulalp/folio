@@ -3,6 +3,7 @@
 <main role="main" class="container-wiki">
 
   % include includes/messages.html
+  % filename_body, filename_ext = media.file_path.rsplit('.',1)
 
   <div class="row">
     <div class="col">
@@ -13,12 +14,29 @@
           <img class="img-fluid" src="{{media.link}}">
         </div>
         <div class="col-6">
-          % # Image attributes here
+          <form method="POST">
+
+            <label for="media-filename">Filename (edit to change):</label>
+
+            <div id="media-filename" class="input-group mb-3">
+              <input class="form-control form-control-lg" placeholder="{{filename_body}}" id="media-filename"
+                name="media-filename" value="{{filename_body}}">
+
+              <div class="input-group-append">
+                <span class="input-group-text" id="basic-addon2">.{{filename_ext}}</span>
+              </div>
+
+            </div>
+
+            <button type="submit" name="save" value="save" class="btn btn-sm btn-success">Save</button>
+
+          </form>
+
         </div>
       </div>
       <hr />
       <a href="{{media.delete_link}}">
-          <button type="button" class="btn btn-sm btn-danger">Delete this image</button>
+        <button type="button" class="btn btn-sm btn-danger">Delete this image</button>
       </a>
     </div>
     <div id="sidebar" class="sidebar-col">
