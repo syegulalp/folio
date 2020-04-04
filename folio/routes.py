@@ -1133,11 +1133,11 @@ async def wiki_media(env: Request, wiki: Wiki, user: Author):
 
 
 @route(f"{Wiki.PATH}/media/<file_name>", RouteType.asnc)
-@media_env
-async def media_file(env: Request, wiki: Wiki, user: Author, media: Media):
+@wiki_env
+async def media_file(env: Request, wiki: Wiki, user: Author, file_name: str):
 
     return static_file(
-        Wiki.url_to_file(media.file_path),
+        Wiki.url_to_file(file_name),
         path=f"{config.DATA_PATH}/{wiki.id}",
         last_modified=env.headers.get("HTTP_IF_MODIFIED_SINCE", None),
     )
