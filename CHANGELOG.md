@@ -9,6 +9,10 @@
 * Media can now be deleted from the media gallery for a wiki.
 * Media can be renamed, with each article that uses the media automatically renaming its references as well.
 
+### Bugfixes
+
+* When a tag page has no article associated with it, the "create page" link sometimes created a new page in the wrong wiki.
+
 ## [0.0.2.1-alpha](https://github.com/syegulalp/folio/releases/tag/0.0.2.1-alpha)
 
 ### Bugfixes

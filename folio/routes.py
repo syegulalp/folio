@@ -463,7 +463,7 @@ async def upload_to_wiki(env: Request, wiki: Wiki, user: Author):
 async def tag_pages(env: Request, wiki: Wiki, user: Author, tag_name: str):
     tag_name = Wiki.url_to_title(tag_name)
     try:
-        tag = Tag.get(Tag.title == tag_name)
+        tag = wiki.tags.where(Tag.title == tag_name).get()
         tagged_articles = (
             wiki.articles_tagged_with(tag_name)
             .where(Article.revision_of.is_null())
