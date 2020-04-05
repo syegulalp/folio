@@ -1045,6 +1045,12 @@ class Media(BaseModel):
         return True
 
     @property
+    def in_articles(self):
+        return self.article_refs.select(
+            MediaLinks.article
+        )
+
+    @property
     def link(self):
         return f"{self.wiki.link}/media/{self.file_to_url(self.file_path)}"
 

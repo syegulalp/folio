@@ -1186,7 +1186,7 @@ async def media_file_edit_post(env: Request, wiki: Wiki, user: Author, media: Me
 
             # TODO: use transaction/rollback for one-pass rename
 
-            for ref in media.article_refs.select():
+            for ref in media.in_articles:
                 if ref.article.opened_by:
                     note = Error(
                         f'Media "{Unsafe(new_filename)}" is referenced in article "{Unsafe(ref.article.title)}", which is open for editing. Save the article before renaming the image.'
@@ -1205,7 +1205,7 @@ async def media_file_edit_post(env: Request, wiki: Wiki, user: Author, media: Me
                 r"!\[([^\]]*?)\]\((" + re.escape(old_filename) + r")\)"
             )
 
-            for ref in media.article_refs.select():
+            for ref in media.in_articles:
                 ref.article.replace_text(
                     replacement_src, r"![\1](" + new_filename + r")",
                 )
@@ -1237,6 +1237,9 @@ async def media_file_edit_post(env: Request, wiki: Wiki, user: Author, media: Me
 async def media_file_delete(env: Request, wiki: Wiki, user: Author, media: Media):
 
     warning = f'Media "{Unsafe(media.file_path)}" is going to be deleted! Deleted media are GONE FOREVER.'
+
+    if media.in_articles.count():
+        warning += f"<hr>Also note: This media is in use in {media.in_articles.count()} articles. Deleting it will NOT remove references to the image from those articles, but will leave broken links."
 
     return Response(
         wiki_media_edit_template.render(
