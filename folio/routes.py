@@ -30,6 +30,7 @@ from __main__ import config
 from utils import Message, Error
 from peewee import fn, SQL
 from pathlib import Path
+from typing import Union
 
 home_template = Template(file="home.html")
 article_template = Template(file="article.html")
@@ -1167,7 +1168,8 @@ async def media_file_edit(env: Request, wiki: Wiki, user: Author, media: Media):
 @media_env
 async def media_file_edit_post(env: Request, wiki: Wiki, user: Author, media: Media):
 
-    note = None
+    note: Union[Error, Message, None] = None
+
     filename_body, filename_ext = media.file_path.rsplit(".", 1)
     new_filename_body = env.form.get("media-filename")
 
