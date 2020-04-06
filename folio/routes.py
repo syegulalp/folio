@@ -96,13 +96,9 @@ def media_env(func):
     def wrapper(env: Request, wiki_title: str, media_filename: str, *a, **ka):
         user = get_user()
         wiki = get_wiki(wiki_title)
-        media = (
-            Media.select()
-            .where(
-                Media.file_path == Wiki.url_to_file(media_filename), Media.wiki == wiki
-            )
-            .get()
-        )
+        media = wiki.media.where(
+            Media.file_path == Wiki.url_to_file(media_filename)
+        ).get()
         return func(env, wiki, user, media, *a, **ka)
 
     return wrapper
@@ -112,6 +108,8 @@ def article_env(func):
     def wrapper(env: Request, wiki_title: str, article_title: str, *a, **ka):
         user = get_user()
         wiki = get_wiki(wiki_title)
+
+        # NOTE: there may be circumstances where we want to return a blank article, but there may be others when we want to fail, so we may want to push that off to the wrapped function
 
         try:
             article = wiki.articles.where(
