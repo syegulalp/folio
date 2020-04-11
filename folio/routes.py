@@ -1170,8 +1170,12 @@ async def media_file_edit_post(env: Request, wiki: Wiki, user: Author, media: Me
 
     filename_body, filename_ext = media.file_path.rsplit(".", 1)
     new_filename_body = env.form.get("media-filename")
-
-    if new_filename_body != filename_body:
+    
+    if env.form.get('select', None):
+        wiki.set_metadata('cover_img', media.id)
+        wiki.invalidate_cache()
+    
+    elif env.form.get('save',None) and new_filename_body != filename_body:
 
         new_filename = new_filename_body + "." + filename_ext
 

@@ -8,6 +8,7 @@
 
 * Media can now be deleted from the media gallery for a wiki.
 * Media can be renamed, with each article that uses the media automatically renaming its references as well.
+* You can select a given image from the media gallery as the cover image for a wiki. Go to the image's edit page and select "Use this image as the wiki's cover image."
 
 ### Bugfixes
 

@@ -188,6 +188,14 @@ class BaseModel(Model):
         metadata_item.value = value
         metadata_item.save()
 
+    def delete_metadata(self, key):
+        try:
+            value = self.metadata.select().where(Metadata.key == key).get()
+        except Metadata.DoesNotExist:
+            return
+        else:
+            value.delete_instance()
+
 
 class Wiki(BaseModel):
     title = TextField(index=True)
@@ -233,17 +241,17 @@ class Wiki(BaseModel):
             pass
         Wiki.article_cache = {}
 
-    def setting(self, key):
-        try:
-            return self.metadata.where(Metadata.key == key).get().value
-        except Metadata.DoesNotExist:
-            if key not in defaults:
-                return None
-            return defaults[key]
+    # def setting(self, key):
+    #     try:
+    #         return self.metadata.where(Metadata.key == key).get().value
+    #     except Metadata.DoesNotExist:
+    #         if key not in defaults:
+    #             return None
+    #         return defaults[key]
 
-    @property
-    def settings(self):
-        return self.metadata.where(Metadata.key << list(defaults.keys()))
+    # @property
+    # def settings(self):
+    #     return self.metadata.where(Metadata.key << list(defaults.keys()))
 
     @classmethod
     def new_wiki(cls, title, description, author, first_wiki=False):
@@ -382,14 +390,21 @@ class Wiki(BaseModel):
         # return os.path.join(config.DATA_PATH, str(self.id))
         return str(Path(config.DATA_PATH, str(self.id)))
 
+    # @property
+    # def cover_img(self):
+    #     cover_img_file = self.setting("Cover image")
+    #     # img_path = os.path.join(self.data_path, cover_img_file)
+    #     # if os.path.exists(img_path):
+    #     if Path(self.data_path, cover_img_file).exists():
+    #         return f"{self.link}/media/{cover_img_file}"
+    #     return f"/static/default_cover.jpg"
+    
     @property
     def cover_img(self):
-        cover_img_file = self.setting("Cover image")
-        # img_path = os.path.join(self.data_path, cover_img_file)
-        # if os.path.exists(img_path):
-        if Path(self.data_path, cover_img_file).exists():
-            return f"{self.link}/media/{cover_img_file}"
-        return f"/static/default_cover.jpg"
+        cover_img_id = self.get_metadata('cover_img')
+        if not cover_img_id:
+            return f"/static/default_cover.jpg"
+        return Media.get(Media.id == cover_img_id).link
 
     @property
     def last_edited(self):
