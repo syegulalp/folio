@@ -241,18 +241,6 @@ class Wiki(BaseModel):
             pass
         Wiki.article_cache = {}
 
-    # def setting(self, key):
-    #     try:
-    #         return self.metadata.where(Metadata.key == key).get().value
-    #     except Metadata.DoesNotExist:
-    #         if key not in defaults:
-    #             return None
-    #         return defaults[key]
-
-    # @property
-    # def settings(self):
-    #     return self.metadata.where(Metadata.key << list(defaults.keys()))
-
     @classmethod
     def new_wiki(cls, title, description, author, first_wiki=False):
         """
@@ -264,7 +252,6 @@ class Wiki(BaseModel):
         new_wiki = cls(title=title, description=description)
         new_wiki.save()
 
-        # os.mkdir(os.path.join(cls._config.DATA_PATH, str(new_wiki.id)))
         Path(cls._config.DATA_PATH, str(new_wiki.id)).mkdir()
 
         if first_wiki:
@@ -387,21 +374,11 @@ class Wiki(BaseModel):
 
     @property
     def data_path(self):
-        # return os.path.join(config.DATA_PATH, str(self.id))
         return str(Path(config.DATA_PATH, str(self.id)))
 
-    # @property
-    # def cover_img(self):
-    #     cover_img_file = self.setting("Cover image")
-    #     # img_path = os.path.join(self.data_path, cover_img_file)
-    #     # if os.path.exists(img_path):
-    #     if Path(self.data_path, cover_img_file).exists():
-    #         return f"{self.link}/media/{cover_img_file}"
-    #     return f"/static/default_cover.jpg"
-    
     @property
     def cover_img(self):
-        cover_img_id = self.get_metadata('cover_img')
+        cover_img_id = self.get_metadata("cover_img")
         if not cover_img_id:
             return f"/static/default_cover.jpg"
         return Media.get(Media.id == cover_img_id).link
@@ -719,17 +696,13 @@ class Article(BaseModel):
         for _ in self.media_re.finditer(self.content):
             try:
                 media = Media.get(
-                    Media.wiki == self.wiki,
-                    Media.file_path == _.group(2)
+                    Media.wiki == self.wiki, Media.file_path == _.group(2)
                 )
             except Media.DoesNotExist:
                 continue
-            
-            new_link = MediaLinks(
-                media = media,
-                article = self
-            )
-            
+
+            new_link = MediaLinks(media=media, article=self)
+
             new_link.save()
 
     def get_metadata_old(self):
@@ -1051,19 +1024,14 @@ class Media(BaseModel):
     @classmethod
     def exists(cls, file_path, wiki):
         try:
-            cls.select().where(
-                cls.file_path == file_path,
-                cls.wiki == wiki
-            ).get()
+            cls.select().where(cls.file_path == file_path, cls.wiki == wiki).get()
         except cls.DoesNotExist:
             return False
         return True
 
     @property
     def in_articles(self):
-        return self.article_refs.select(
-            MediaLinks.article
-        )
+        return self.article_refs.select(MediaLinks.article)
 
     @property
     def link(self):
@@ -1095,9 +1063,11 @@ class Media(BaseModel):
         os.remove(self.file_path_)
         self.delete_instance()
 
+
 class MediaLinks(BaseModel):
     media = ForeignKeyField(Media, backref="article_refs")
     article = ForeignKeyField(Article, backref="media_refs")
+
 
 class ArticleIndex(FTSModel):
     rowid = RowIDField()
