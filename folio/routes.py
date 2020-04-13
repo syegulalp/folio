@@ -75,7 +75,9 @@ def get_wiki(wiki_title):
     try:
         wiki = Wiki.get(Wiki.title == Wiki.url_to_title(wiki_title))
     except Wiki.DoesNotExist:
-        raise WebException(home_page_render([Error(f'Wiki "{Unsafe(wiki_title)}" not found')]))
+        raise WebException(
+            home_page_render([Error(f'Wiki "{Unsafe(wiki_title)}" not found')])
+        )
 
     if wiki.sidebar_cache is None:
         Wiki._sidebar_cache[wiki.id] = sidebar_template.render(wiki=wiki)
@@ -213,11 +215,12 @@ def home_page_render(messages=[]):
         home_template.render(
             wikis=Wiki.select().order_by(Wiki.title.asc()),
             articles=Article.select().order_by(Article.last_edited.desc()).limit(25),
-            page_title="Wiki Server Homepage",
+            page_title="Folio (Homepage)",
             messages=messages,
         ),
         headers=default_headers,
     )
+
 
 @route(f"{Wiki.PATH}", RouteType.asnc)
 @wiki_env
@@ -266,7 +269,7 @@ async def wiki_settings_edit(env: Request, wiki: Wiki, user: Author):
         wiki_edit_template.render(
             wiki=wiki,
             user=user,
-            page_title=f"{wiki.title}: Edit settings",
+            page_title=f"Edit settings ({wiki.title})",
             messages=[error] if error else None,
             original_wiki=original_wiki,
         ),
@@ -341,7 +344,7 @@ async def article_new(env: Request, wiki: Wiki, user: Author):
     return Response(
         article_edit_template.render(
             article=new_article,
-            page_title=f"Creating: {new_article.title}",
+            page_title=f"Creating: {new_article.title} ({wiki.title})",
             wiki=wiki,
             messages=messages,
             has_error="true" if messages else "false",
@@ -428,6 +431,7 @@ async def wiki_search(env: Request, wiki: Wiki, user: Author):
     return Response(
         wiki_search_template.render(
             search_query=search_query,
+            page_title=f"Search ({wiki.title})",
             tags=wiki.tags,
             wiki=wiki,
             search_results=search_results,
@@ -498,6 +502,7 @@ async def tag_pages(env: Request, wiki: Wiki, user: Author, tag_name: str):
             articles=tagged_articles,
             article_with_tag_name=article_with_tag_name,
             wiki=wiki,
+            page_title=f"Tag: {tag_name} ({wiki.title})"
         ),
         headers=default_headers,
     )
@@ -559,7 +564,7 @@ async def article_display(env: Request, wiki: Wiki, user: Author, article: Artic
         article.content = f'This article does not exist. Click the <a class="autogenerate" href="{article.edit_link}">edit link</a> to create this article.{templates}'
 
     result = article_template.render(
-        articles=[article], page_title=article.title, wiki=wiki
+        articles=[article], page_title=f"{article.title} ({wiki.title})", wiki=wiki
     )
 
     Wiki.article_cache[article.id] = result
@@ -598,7 +603,9 @@ async def article_revision(
 
     return Response(
         article_template.render(
-            articles=[revision], page_title=revision.title, wiki=wiki
+            articles=[revision],
+            page_title=f"{revision.title} ({wiki.title})",
+            wiki=wiki,
         ),
         headers=default_headers,
     )
@@ -609,7 +616,9 @@ async def article_revision(
 async def article_history(env: Request, wiki: Wiki, user: Author, article: Article):
     return Response(
         article_history_template.render(
-            article=article, page_title=article.title, wiki=wiki
+            article=article,
+            page_title=f"History: {article.title} ({wiki.title})",
+            wiki=wiki,
         )
     )
 
@@ -816,7 +825,7 @@ async def article_edit(
     return Response(
         article_edit_template.render(
             article=article,
-            page_title=f"Editing: {article.title}",
+            page_title=f"Editing: {article.title} ({wiki.title})",
             wiki=wiki,
             original_article=original_article,
             messages=[error, warning],
@@ -838,7 +847,7 @@ async def article_delete(env: Request, wiki: Wiki, user: Author, article: Articl
     return Response(
         article_template.render(
             articles=[article],
-            page_title=article.title,
+            page_title=f"Delete: {article.title} ({wiki.title})",
             wiki=wiki,
             messages=[
                 Message(warning, yes=article.delete_confirm_link, no=article.link,)
@@ -869,7 +878,7 @@ async def draft_discard(env: Request, wiki: Wiki, user: Author, article: Article
     return Response(
         article_template.render(
             articles=[article],
-            page_title=article.title,
+            page_title=f"Discard draft: {article.title} ({wiki.title})",
             wiki=wiki,
             messages=[
                 Message(
@@ -1151,7 +1160,9 @@ async def static_content(env: Request, filename: str):
 async def wiki_media(env: Request, wiki: Wiki, user: Author):
 
     return Response(
-        wiki_media_template.render(wiki=wiki, media=wiki.media_alpha,),
+        wiki_media_template.render(
+            wiki=wiki, media=wiki.media_alpha, page_title=f"Media ({wiki.title})"
+        ),
         headers=default_headers,
     )
 
@@ -1172,7 +1183,9 @@ async def media_file(env: Request, wiki: Wiki, user: Author, file_name: str):
 async def media_file_edit(env: Request, wiki: Wiki, user: Author, media: Media):
 
     return Response(
-        wiki_media_edit_template.render(wiki=wiki, media=media),
+        wiki_media_edit_template.render(
+            wiki=wiki, media=media, page_title=f"File {media.file_path} ({wiki.title})"
+        ),
         headers=default_headers,
     )
 
