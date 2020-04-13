@@ -9,6 +9,8 @@ from pixie_web import (
     simple_response,
     Unsafe,
     redirect,
+    server,
+    WebException,
 )
 from models import (
     Article,
@@ -26,6 +28,7 @@ import asyncio
 import urllib
 import datetime
 import os
+
 from __main__ import config
 from utils import Message, Error
 from peewee import fn, SQL
@@ -69,7 +72,21 @@ def get_user():
 
 
 def get_wiki(wiki_title):
-    wiki = Wiki.get(Wiki.title == Wiki.url_to_title(wiki_title))
+    try:
+        wiki = Wiki.get(Wiki.title == Wiki.url_to_title(wiki_title))
+    except Wiki.DoesNotExist:
+        wikis = Wiki.select().order_by(Wiki.title.asc())
+        articles = Article.select().order_by(Article.last_edited.desc()).limit(25)
+        response = Response(
+            home_template.render(
+                wikis=wikis,
+                page_title="Wiki Server Homepage",
+                articles=articles,
+                messages=[Error(f'Wiki "{Unsafe(wiki_title)}" not found')],
+            )
+        )
+        raise WebException(response)
+
     if wiki.sidebar_cache is None:
         Wiki._sidebar_cache[wiki.id] = sidebar_template.render(wiki=wiki)
     return wiki
@@ -96,9 +113,20 @@ def media_env(func):
     def wrapper(env: Request, wiki_title: str, media_filename: str, *a, **ka):
         user = get_user()
         wiki = get_wiki(wiki_title)
-        media = wiki.media.where(
-            Media.file_path == Wiki.url_to_file(media_filename)
-        ).get()
+        try:
+            media = wiki.media.where(
+                Media.file_path == Wiki.url_to_file(media_filename)
+            ).get()
+        except Media.DoesNotExist:
+            response = Response(
+                wiki_media_template.render(
+                    wiki=wiki,
+                    media=wiki.media_alpha,
+                    messages=[Error(f'Media "{Unsafe(media_filename)}" not found')],
+                ),
+                headers=default_headers,
+            )
+            raise WebException(response)
         return func(env, wiki, user, media, *a, **ka)
 
     return wrapper
@@ -131,9 +159,24 @@ def article_env(func):
 ######################################################################
 
 
+def error_404(env: Request):
+    wikis = Wiki.select().order_by(Wiki.title.asc())
+    articles = Article.select().order_by(Article.last_edited.desc()).limit(25)
+    return Response(
+        home_template.render(
+            wikis=wikis,
+            page_title="Wiki Server Homepage",
+            articles=articles,
+            messages=[Error(f'Page or wiki "{Unsafe(env.path)}" not found')],
+        )
+    )
+
+
+server.error_404 = error_404  # type: ignore
+
+
 @route("/", RouteType.asnc)
 async def main_route(env: Request):
-    default_article = Article.get(Article.title == "Contents")
     wikis = Wiki.select().order_by(Wiki.title.asc())
     articles = Article.select().order_by(Article.last_edited.desc()).limit(25)
     return Response(
@@ -1170,12 +1213,12 @@ async def media_file_edit_post(env: Request, wiki: Wiki, user: Author, media: Me
 
     filename_body, filename_ext = media.file_path.rsplit(".", 1)
     new_filename_body = env.form.get("media-filename")
-    
-    if env.form.get('select', None):
-        wiki.set_metadata('cover_img', media.id)
+
+    if env.form.get("select", None):
+        wiki.set_metadata("cover_img", media.id)
         wiki.invalidate_cache()
-    
-    elif env.form.get('save',None) and new_filename_body != filename_body:
+
+    elif env.form.get("save", None) and new_filename_body != filename_body:
 
         new_filename = new_filename_body + "." + filename_ext
 

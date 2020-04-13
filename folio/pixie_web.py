@@ -52,6 +52,9 @@ import os
 class ParentProcessConnectionAborted(ConnectionAbortedError):
     pass
 
+class WebException(Exception):
+    def __init__(self, response):
+        self.response = response
 
 class ProcessType(Enum):
     """
@@ -1191,6 +1194,8 @@ class Server:
                     writer.close()
                     return
 
+            except WebException as e:
+                result = e.response.as_bytes()
             except FileNotFoundError:
                 result = self.error_404(Request(raw_data))
             except AsyncTimeout:
