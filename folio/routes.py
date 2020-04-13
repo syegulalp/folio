@@ -75,17 +75,7 @@ def get_wiki(wiki_title):
     try:
         wiki = Wiki.get(Wiki.title == Wiki.url_to_title(wiki_title))
     except Wiki.DoesNotExist:
-        wikis = Wiki.select().order_by(Wiki.title.asc())
-        articles = Article.select().order_by(Article.last_edited.desc()).limit(25)
-        response = Response(
-            home_template.render(
-                wikis=wikis,
-                page_title="Wiki Server Homepage",
-                articles=articles,
-                messages=[Error(f'Wiki "{Unsafe(wiki_title)}" not found')],
-            )
-        )
-        raise WebException(response)
+        raise WebException(home_page_render([Error(f'Wiki "{Unsafe(wiki_title)}" not found')]))
 
     if wiki.sidebar_cache is None:
         Wiki._sidebar_cache[wiki.id] = sidebar_template.render(wiki=wiki)
@@ -160,16 +150,7 @@ def article_env(func):
 
 
 def error_404(env: Request):
-    wikis = Wiki.select().order_by(Wiki.title.asc())
-    articles = Article.select().order_by(Article.last_edited.desc()).limit(25)
-    return Response(
-        home_template.render(
-            wikis=wikis,
-            page_title="Wiki Server Homepage",
-            articles=articles,
-            messages=[Error(f'Page or wiki "{Unsafe(env.path)}" not found')],
-        )
-    )
+    return home_page_render([Error(f'Page or wiki "{Unsafe(env.path)}" not found')])
 
 
 server.error_404 = error_404  # type: ignore
@@ -177,13 +158,7 @@ server.error_404 = error_404  # type: ignore
 
 @route("/", RouteType.asnc)
 async def main_route(env: Request):
-    wikis = Wiki.select().order_by(Wiki.title.asc())
-    articles = Article.select().order_by(Article.last_edited.desc()).limit(25)
-    return Response(
-        home_template.render(
-            wikis=wikis, page_title="Wiki Server Homepage", articles=articles
-        )
-    )
+    return home_page_render()
 
 
 route("/wiki", RouteType.asnc)(main_route)
@@ -232,6 +207,17 @@ async def new_wiki_save(env: Request):
 # Wiki paths
 ######################################################################
 
+
+def home_page_render(messages=[]):
+    return Response(
+        home_template.render(
+            wikis=Wiki.select().order_by(Wiki.title.asc()),
+            articles=Article.select().order_by(Article.last_edited.desc()).limit(25),
+            page_title="Wiki Server Homepage",
+            messages=messages,
+        ),
+        headers=default_headers,
+    )
 
 @route(f"{Wiki.PATH}", RouteType.asnc)
 @wiki_env
@@ -307,24 +293,10 @@ async def wiki_delete(env: Request, wiki: Wiki, user: Author):
 @route(f"{Wiki.PATH}/delete/<delete_key>", RouteType.asnc)
 @wiki_env
 async def wiki_delete_confirm(env: Request, wiki: Wiki, user: Author, delete_key: str):
-
     wiki_title = wiki.title
-
     wiki.delete_()
-
     confirmation = f'Wiki "{Unsafe(wiki_title)}" has been deleted.'
-
-    # TODO: consolidate with main page routine
-
-    return Response(
-        home_template.render(
-            wikis=Wiki.select().order_by(Wiki.title.asc()),
-            articles=Article.select().order_by(Article.last_edited.desc()).limit(25),
-            page_title="Wiki Server Homepage",
-            messages=[Message(confirmation)],
-        ),
-        headers=default_headers,
-    )
+    return home_page_render([Message(confirmation)])
 
 
 @route(f"{Wiki.PATH}/new", RouteType.asnc, action=("GET", "POST"))
