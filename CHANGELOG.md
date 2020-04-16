@@ -11,6 +11,7 @@
 * You can select a given image from the media gallery as the cover image for a wiki. Go to the image's edit page and select "Use this image as the wiki's cover image."
 * Error pages for wikis, media, etc. not found are much cleaner now.
 * Titles for many pages are more explicit.
+* Deleting an image used as the cover image for a wiki will generate a warning.
 
 ### Bugfixes
 

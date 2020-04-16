@@ -1242,7 +1242,7 @@ async def media_file_edit_post(env: Request, wiki: Wiki, user: Author, media: Me
                     replacement_src, r"![\1](" + new_filename + r")",
                 )
 
-            media.wiki.invalidate_cache()
+            wiki.invalidate_cache()
 
             note = Message(
                 f'Filename "{Unsafe(old_filename)}" successfully renamed to "<a href="{media.edit_link}">{Unsafe(new_filename)}</a>".'
@@ -1270,6 +1270,9 @@ async def media_file_delete(env: Request, wiki: Wiki, user: Author, media: Media
 
     warning = f'Media "{Unsafe(media.file_path)}" is going to be deleted! Deleted media are GONE FOREVER.'
 
+    if int(wiki.get_metadata("cover_img")) == media.id:
+        warning += f"<hr>Also note: This media is in use as the cover image for this wiki. Deleting it will cause the cover image to revert to the default."
+
     if media.in_articles.count():
         warning += f"<hr>Also note: This media is in use in {media.in_articles.count()} articles. Deleting it will NOT remove references to the image from those articles, but will leave broken links."
 
@@ -1291,7 +1294,12 @@ async def media_file_delete_confirm(
     env: Request, wiki: Wiki, user: Author, media: Media, delete_key: str
 ):
 
+    if int(wiki.get_metadata("cover_img")) == media.id:
+        wiki.delete_metadata("cover_img")
+
     media.delete_()
+
+    wiki.invalidate_cache()
 
     return Response(
         wiki_media_template.render(
