@@ -81,8 +81,10 @@ blockquote {
 .wiki-description {
     margin-bottom: 1em;
     line-height: 1.2em;
-    padding-bottom: 1em;
-    border-bottom: 1px solid rgba(0,0,0,.1);
+}
+
+.wiki-icons {
+    margin-bottom: 1em;
 }
 
 .wiki-cover-img {
