@@ -23,6 +23,16 @@ class Error:
     def __str__(self):
         return f"""<div class="alert-box alert alert-{self.color}">{self.error}</div>"""
 
+def export():
+    # example export, just fooling around for now
+    # for import we need to resolve primary keys in an in-memory temp table I think
+    from models import Article
+    import json
+    from playhouse import shortcuts
+    print (
+        [shortcuts.model_to_dict(_, recurse=False) for _ in Article.select()]
+    )
+
 
 wiki_init = {
     "Quickstart": {
