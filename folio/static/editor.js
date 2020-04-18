@@ -175,9 +175,12 @@ function setEnterEvent(item) {
     });
 }
 
+function document_ready(){
+    resizeEditor();
+    $("#article_content").focus();
+}
 
-
-$(document).ready(resizeEditor);
+$(document).ready(document_ready);
 $(window).on('resize', resizeEditor);
 
 $('#btn_toggle_preview').on("click", togglePreview);

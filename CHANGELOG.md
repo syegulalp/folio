@@ -12,6 +12,7 @@
 * Error pages for wikis, media, etc. not found are much cleaner now.
 * Titles for many pages are more explicit.
 * Deleting an image used as the cover image for a wiki will generate a warning.
+* Editor automatically assumes focus when entering article edit mode.
 
 ### Bugfixes
 
