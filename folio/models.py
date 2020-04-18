@@ -455,7 +455,7 @@ class Article(BaseModel):
     blurb_re = re.compile(r"\<\<\<([^>]*?)\>\>\>")
     media_re = re.compile("!\[([^\]]*?)\]\(([^)]*?)\)")
     strike_re = re.compile(r"\~\~(.*?)\~\~")
-    metadata_re = re.compile(r"\$\[(.*?)\]\$\(([^)]*?)\)", re.MULTILINE | re.DOTALL)
+    metadata_re = re.compile(r"(\$\[(.*?)\]\$)+(\(([^)]*?)\))?", re.MULTILINE | re.DOTALL)
     blurb_inline_re = re.compile(r"\$\[(.*?)\]\$", re.MULTILINE | re.DOTALL)
 
     def replace_text(self, re_to_find, new_text):
@@ -813,8 +813,9 @@ class Article(BaseModel):
         return f"<strike>{matchobj.group(1)}</strike>"
 
     def _metadata_re(self, matchobj):
-        self.autogen_metadata.append((matchobj.group(2), matchobj.group(1)))
-        return matchobj.group(1)
+        if matchobj.group(4):
+            self.autogen_metadata.append((matchobj.group(4), matchobj.group(2)))
+        return matchobj.group(2)
 
     def _blurb_inline_re(self, matchobj):
         self.autogen_metadata.append(("blurb", matchobj.group(1)))
