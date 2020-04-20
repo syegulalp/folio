@@ -28,6 +28,9 @@ import asyncio
 import urllib
 import datetime
 import os
+import time
+
+from email import utils as email_utils
 
 from __main__ import config
 from utils import Message, Error
@@ -502,7 +505,7 @@ async def tag_pages(env: Request, wiki: Wiki, user: Author, tag_name: str):
             articles=tagged_articles,
             article_with_tag_name=article_with_tag_name,
             wiki=wiki,
-            page_title=f"Tag: {tag_name} ({wiki.title})"
+            page_title=f"Tag: {tag_name} ({wiki.title})",
         ),
         headers=default_headers,
     )
@@ -1307,6 +1310,20 @@ async def media_file_delete_confirm(
             media=wiki.media_alpha,
             messages=[Error(f'Article "{Unsafe(media.file_path)}" has been deleted.')],
         )
+    )
+
+# For now, a dummy response until we can come up with an actual favicon.
+
+@route(f"/favicon.ico", RouteType.asnc)
+async def favicon(env: Request):
+    date = email_utils.formatdate(time.time(), usegmt=True)
+    return simple_response(
+        b"",
+        headers={
+            "Cache-Control": f"private, max-age=38400",
+            "Last-Modified": date,
+            "Date": date,
+        },
     )
 
 
