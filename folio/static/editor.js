@@ -78,7 +78,13 @@ function ajaxSave() {
     });
 }
 
+function hasSelection(field) {
+    return field.selectionEnd-field.selectionStart;
+}
+
+
 function wrapText(field, left, right) {
+    
     start = field.selectionStart;
     end = field.selectionEnd;
 
@@ -134,7 +140,14 @@ function tagEnter() {
 function insertLink(item) {
     linkText = $(item).html();
     $("#article_content").focus();
-    wrapText($("#article_content")[0], '[['+linkText+']]','')
+    field = $("#article_content")[0];
+    if (hasSelection(field)) {
+        wrapText(field, '[', ']('+linkText+')')
+    }
+    else
+    {
+        wrapText(field, '[['+linkText+']]','')
+    }
     $('#edit-modal').modal('hide');
 }
 

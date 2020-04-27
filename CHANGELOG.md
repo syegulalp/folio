@@ -13,6 +13,7 @@
 * Titles for many pages are more explicit.
 * Deleting an image used as the cover image for a wiki will generate a warning.
 * Editor automatically assumes focus when entering article edit mode.
+* Adding a link when text is selected automatically uses the selected text as the text for the link.
 
 ### Bugfixes
 
