@@ -161,15 +161,15 @@ def error_404(env: Request):
 server.error_404 = error_404  # type: ignore
 
 
-@route("/", RouteType.asnc)
+@route("/", RouteType.asnc_local)
 async def main_route(env: Request):
     return home_page_render()
 
 
-route("/wiki", RouteType.asnc)(main_route)
+route("/wiki", RouteType.asnc_local)(main_route)
 
 
-@route("/new", RouteType.asnc)
+@route("/new", RouteType.asnc_local)
 async def new_wiki(env: Request):
     user = Author.get(Author.name == "Admin")
     wiki = Wiki(title="", description="",)
@@ -178,7 +178,7 @@ async def new_wiki(env: Request):
     )
 
 
-@route("/new", RouteType.asnc, action="POST")
+@route("/new", RouteType.asnc_local, action="POST")
 async def new_wiki_save(env: Request):
     author = Author.get(Author.name == "Admin")
 
@@ -225,13 +225,13 @@ def home_page_render(messages=[]):
     )
 
 
-@route(f"{Wiki.PATH}", RouteType.asnc)
+@route(f"{Wiki.PATH}", RouteType.asnc_local)
 @wiki_env
 async def wiki_home(env: Request, wiki: Wiki, user: Author):
     return await article_display.__wrapped__(env, wiki, user, wiki.main_article)
 
 
-@route(f"{Wiki.PATH}/edit", RouteType.asnc, action=("GET", "POST"))
+@route(f"{Wiki.PATH}/edit", RouteType.asnc_local, action=("GET", "POST"))
 @wiki_env
 async def wiki_settings_edit(env: Request, wiki: Wiki, user: Author):
     action = None
@@ -280,7 +280,7 @@ async def wiki_settings_edit(env: Request, wiki: Wiki, user: Author):
     )
 
 
-@route(f"{Wiki.PATH}/delete", RouteType.asnc)
+@route(f"{Wiki.PATH}/delete", RouteType.asnc_local)
 @wiki_env
 async def wiki_delete(env: Request, wiki: Wiki, user: Author):
 
@@ -296,7 +296,7 @@ async def wiki_delete(env: Request, wiki: Wiki, user: Author):
     )
 
 
-@route(f"{Wiki.PATH}/delete/<delete_key>", RouteType.asnc)
+@route(f"{Wiki.PATH}/delete/<delete_key>", RouteType.asnc_local)
 @wiki_env
 async def wiki_delete_confirm(env: Request, wiki: Wiki, user: Author, delete_key: str):
     wiki_title = wiki.title
@@ -305,7 +305,7 @@ async def wiki_delete_confirm(env: Request, wiki: Wiki, user: Author, delete_key
     return home_page_render([Message(confirmation)])
 
 
-@route(f"{Wiki.PATH}/new", RouteType.asnc, action=("GET", "POST"))
+@route(f"{Wiki.PATH}/new", RouteType.asnc_local, action=("GET", "POST"))
 @wiki_env
 async def article_new(env: Request, wiki: Wiki, user: Author):
 
@@ -356,7 +356,7 @@ async def article_new(env: Request, wiki: Wiki, user: Author):
     )
 
 
-@route(f"{Wiki.PATH}/search", RouteType.asnc, action=("GET", "POST"))
+@route(f"{Wiki.PATH}/search", RouteType.asnc_local, action=("GET", "POST"))
 @wiki_env
 async def wiki_search(env: Request, wiki: Wiki, user: Author):
 
@@ -443,7 +443,7 @@ async def wiki_search(env: Request, wiki: Wiki, user: Author):
     )
 
 
-@route(f"{Wiki.PATH}/tags", RouteType.asnc)
+@route(f"{Wiki.PATH}/tags", RouteType.asnc_local)
 @wiki_env
 async def tags_all(env: Request, wiki: Wiki, user: Author):
 
@@ -453,7 +453,7 @@ async def tags_all(env: Request, wiki: Wiki, user: Author):
     )
 
 
-@route(f"{Wiki.PATH}/upload", RouteType.asnc, action="POST")
+@route(f"{Wiki.PATH}/upload", RouteType.asnc_local, action="POST")
 @wiki_env
 async def upload_to_wiki(env: Request, wiki: Wiki, user: Author):
 
@@ -478,7 +478,7 @@ async def upload_to_wiki(env: Request, wiki: Wiki, user: Author):
     return simple_response("")
 
 
-@route(f"{Wiki.PATH}/tag/<tag_name>", RouteType.asnc)
+@route(f"{Wiki.PATH}/tag/<tag_name>", RouteType.asnc_local)
 @wiki_env
 async def tag_pages(env: Request, wiki: Wiki, user: Author, tag_name: str):
     tag_name = Wiki.url_to_title(tag_name)
@@ -516,13 +516,13 @@ async def tag_pages(env: Request, wiki: Wiki, user: Author, tag_name: str):
 ######################################################################
 
 
-@route(f"{Wiki.PATH}/article", RouteType.asnc)
+@route(f"{Wiki.PATH}/article", RouteType.asnc_local)
 @wiki_env
 async def articles(env: Request, wiki: Wiki, user: Author):
     return await wiki_home(env, wiki, user)
 
 
-@route(f"{Wiki.PATH}{Article.PATH}", RouteType.asnc)
+@route(f"{Wiki.PATH}{Article.PATH}", RouteType.asnc_local)
 @article_env
 async def article_display(env: Request, wiki: Wiki, user: Author, article: Article):
     try:
@@ -575,7 +575,7 @@ async def article_display(env: Request, wiki: Wiki, user: Author, article: Artic
     return Response(result, headers=default_headers,)
 
 
-@route(f"{Wiki.PATH}/new_from_template/<template>", RouteType.asnc)
+@route(f"{Wiki.PATH}/new_from_template/<template>", RouteType.asnc_local)
 @wiki_env
 async def article_new_from_template(
     env: Request, wiki: Wiki, user: Author, template: str
@@ -593,7 +593,7 @@ async def article_new_from_template(
     return redirect(article.edit_link)
 
 
-@route(f"{Wiki.PATH}{Article.PATH}/revision/<revision_id>", RouteType.asnc)
+@route(f"{Wiki.PATH}{Article.PATH}/revision/<revision_id>", RouteType.asnc_local)
 @article_env
 async def article_revision(
     env: Request, wiki: Wiki, user: Author, article: Article, revision_id: str
@@ -614,7 +614,7 @@ async def article_revision(
     )
 
 
-@route(f"{Wiki.PATH}{Article.PATH}/history", RouteType.asnc)
+@route(f"{Wiki.PATH}{Article.PATH}/history", RouteType.asnc_local)
 @article_env
 async def article_history(env: Request, wiki: Wiki, user: Author, article: Article):
     return Response(
@@ -626,7 +626,7 @@ async def article_history(env: Request, wiki: Wiki, user: Author, article: Artic
     )
 
 
-@route(f"{Wiki.PATH}{Article.PATH}/preview", RouteType.asnc, action=("GET", "POST"))
+@route(f"{Wiki.PATH}{Article.PATH}/preview", RouteType.asnc_local, action=("GET", "POST"))
 @article_env
 async def article_preview(env: Request, wiki: Wiki, user: Author, article: Article):
 
@@ -654,12 +654,12 @@ async def article_preview(env: Request, wiki: Wiki, user: Author, article: Artic
     )
 
 
-@route(f"{Wiki.PATH}{Article.PATH}/save", RouteType.asnc, action="POST")
+@route(f"{Wiki.PATH}{Article.PATH}/save", RouteType.asnc_local, action="POST")
 async def article_save_ajax(env: Request, wiki_title: str, article_title: str):
     return await article_edit(env, wiki_title, article_title, ajax=True)
 
 
-@route(f"{Wiki.PATH}{Article.PATH}/edit", RouteType.asnc, action=("GET", "POST"))
+@route(f"{Wiki.PATH}{Article.PATH}/edit", RouteType.asnc_local, action=("GET", "POST"))
 @article_env
 async def article_edit(
     env: Request, wiki: Wiki, user: Author, article: Article, ajax=False
@@ -838,7 +838,7 @@ async def article_edit(
     )
 
 
-@route(f"{Wiki.PATH}{Article.PATH}/delete", RouteType.asnc)
+@route(f"{Wiki.PATH}{Article.PATH}/delete", RouteType.asnc_local)
 @article_env
 async def article_delete(env: Request, wiki: Wiki, user: Author, article: Article):
 
@@ -860,7 +860,7 @@ async def article_delete(env: Request, wiki: Wiki, user: Author, article: Articl
     )
 
 
-@route(f"{Wiki.PATH}{Article.PATH}/discard-draft", RouteType.asnc)
+@route(f"{Wiki.PATH}{Article.PATH}/discard-draft", RouteType.asnc_local)
 @article_env
 async def draft_discard(env: Request, wiki: Wiki, user: Author, article: Article):
 
@@ -893,7 +893,7 @@ async def draft_discard(env: Request, wiki: Wiki, user: Author, article: Article
     )
 
 
-@route(f"{Wiki.PATH}{Article.PATH}/discard-draft/<delete_key>", RouteType.asnc)
+@route(f"{Wiki.PATH}{Article.PATH}/discard-draft/<delete_key>", RouteType.asnc_local)
 @article_env
 async def draft_discard_confirm(
     env: Request, wiki: Wiki, user: Author, article: Article, delete_key: str,
@@ -903,7 +903,7 @@ async def draft_discard_confirm(
     )
 
 
-@route(f"{Wiki.PATH}{Article.PATH}/delete/<delete_key>", RouteType.asnc)
+@route(f"{Wiki.PATH}{Article.PATH}/delete/<delete_key>", RouteType.asnc_local)
 @article_env
 async def article_delete_confirm(
     env: Request,
@@ -943,7 +943,7 @@ async def article_delete_confirm(
     )
 
 
-@route(f"{Wiki.PATH}{Article.PATH}/insert-image", RouteType.asnc, action="GET")
+@route(f"{Wiki.PATH}{Article.PATH}/insert-image", RouteType.asnc_local, action="GET")
 @article_env
 async def modal_insert_image(env: Request, wiki: Wiki, user: Author, article: Article):
 
@@ -960,7 +960,7 @@ async def modal_insert_image(env: Request, wiki: Wiki, user: Author, article: Ar
     )
 
 
-@route(f"{Wiki.PATH}{Article.PATH}/insert-image", RouteType.asnc, action="POST")
+@route(f"{Wiki.PATH}{Article.PATH}/insert-image", RouteType.asnc_local, action="POST")
 @article_env
 async def modal_insert_image_search(
     env: Request, wiki: Wiki, user: Author, article: Article
@@ -1001,7 +1001,7 @@ def search_results(wiki, search):
     return "".join(results)
 
 
-@route(f"{Wiki.PATH}{Article.PATH}/insert-tag", RouteType.asnc, action="GET")
+@route(f"{Wiki.PATH}{Article.PATH}/insert-tag", RouteType.asnc_local, action="GET")
 @article_env
 async def modal_tags(env: Request, wiki: Wiki, user: Author, article: Article):
     tags = existing_tags(article)
@@ -1019,14 +1019,14 @@ async def modal_tags(env: Request, wiki: Wiki, user: Author, article: Article):
     )
 
 
-@route(f"{Wiki.PATH}{Article.PATH}/insert-tag", RouteType.asnc, action="POST")
+@route(f"{Wiki.PATH}{Article.PATH}/insert-tag", RouteType.asnc_local, action="POST")
 @article_env
 async def modal_tags_search(env: Request, wiki: Wiki, user: Author, article: Article):
     search = env.form.get("search", None)
     return Response(search_results(wiki, search))
 
 
-@route(f"{Wiki.PATH}{Article.PATH}/add-tag", RouteType.asnc, action="POST")
+@route(f"{Wiki.PATH}{Article.PATH}/add-tag", RouteType.asnc_local, action="POST")
 @article_env
 async def modal_add_tag(env: Request, wiki: Wiki, user: Author, article: Article):
     tag = env.form.get("tag", None)
@@ -1035,7 +1035,7 @@ async def modal_add_tag(env: Request, wiki: Wiki, user: Author, article: Article
     return Response(existing_tags(article))
 
 
-@route(f"{Wiki.PATH}{Article.PATH}/remove-tag", RouteType.asnc, action="POST")
+@route(f"{Wiki.PATH}{Article.PATH}/remove-tag", RouteType.asnc_local, action="POST")
 @article_env
 async def modal_remove_tag(env: Request, wiki: Wiki, user: Author, article: Article):
     tag = env.form.get("tag", None)
@@ -1044,7 +1044,7 @@ async def modal_remove_tag(env: Request, wiki: Wiki, user: Author, article: Arti
     return Response(existing_tags(article))
 
 
-@route(f"{Wiki.PATH}{Article.PATH}/edit-metadata", RouteType.asnc, action="GET")
+@route(f"{Wiki.PATH}{Article.PATH}/edit-metadata", RouteType.asnc_local, action="GET")
 @article_env
 async def modal_edit_metadata(env: Request, wiki: Wiki, user: Author, article: Article):
     return Response(
@@ -1060,7 +1060,7 @@ async def modal_edit_metadata(env: Request, wiki: Wiki, user: Author, article: A
     )
 
 
-@route(f"{Wiki.PATH}{Article.PATH}/edit-metadata", RouteType.asnc, action="POST")
+@route(f"{Wiki.PATH}{Article.PATH}/edit-metadata", RouteType.asnc_local, action="POST")
 @article_env
 async def modal_edit_metadata_post(
     env: Request, wiki: Wiki, user: Author, article: Article
@@ -1107,7 +1107,7 @@ def link_search(wiki, search):
     return "".join(results)
 
 
-@route(f"{Wiki.PATH}{Article.PATH}/insert-link", RouteType.asnc, action="GET")
+@route(f"{Wiki.PATH}{Article.PATH}/insert-link", RouteType.asnc_local, action="GET")
 @article_env
 async def modal_insert_link_search(
     env: Request, wiki: Wiki, user: Author, article: Article
@@ -1126,7 +1126,7 @@ async def modal_insert_link_search(
     )
 
 
-@route(f"{Wiki.PATH}{Article.PATH}/insert-link", RouteType.asnc, action="POST")
+@route(f"{Wiki.PATH}{Article.PATH}/insert-link", RouteType.asnc_local, action="POST")
 @article_env
 async def modal_insert_link_search_post(
     env: Request, wiki: Wiki, user: Author, article: Article
@@ -1153,12 +1153,12 @@ def quit(*a):
 ######################################################################
 
 
-@route("/static/<filename>", RouteType.asnc)
+@route("/static/<filename>", RouteType.asnc_local)
 async def static_content(env: Request, filename: str):
     return static_file(filename, path="folio/static")
 
 
-@route(f"{Wiki.PATH}/media", RouteType.asnc)
+@route(f"{Wiki.PATH}/media", RouteType.asnc_local)
 @wiki_env
 async def wiki_media(env: Request, wiki: Wiki, user: Author):
 
@@ -1170,7 +1170,7 @@ async def wiki_media(env: Request, wiki: Wiki, user: Author):
     )
 
 
-@route(f"{Wiki.PATH}/media/<file_name>", RouteType.asnc)
+@route(f"{Wiki.PATH}/media/<file_name>", RouteType.asnc_local)
 @wiki_env
 async def media_file(env: Request, wiki: Wiki, user: Author, file_name: str):
 
@@ -1181,7 +1181,7 @@ async def media_file(env: Request, wiki: Wiki, user: Author, file_name: str):
     )
 
 
-@route(f"{Wiki.PATH}/media/<file_name>/edit", RouteType.asnc)
+@route(f"{Wiki.PATH}/media/<file_name>/edit", RouteType.asnc_local)
 @media_env
 async def media_file_edit(env: Request, wiki: Wiki, user: Author, media: Media):
 
@@ -1193,7 +1193,7 @@ async def media_file_edit(env: Request, wiki: Wiki, user: Author, media: Media):
     )
 
 
-@route(f"{Wiki.PATH}/media/<file_name>/edit", RouteType.asnc, action="POST")
+@route(f"{Wiki.PATH}/media/<file_name>/edit", RouteType.asnc_local, action="POST")
 @media_env
 async def media_file_edit_post(env: Request, wiki: Wiki, user: Author, media: Media):
 
@@ -1267,7 +1267,7 @@ async def media_file_edit_post(env: Request, wiki: Wiki, user: Author, media: Me
     )
 
 
-@route(f"{Wiki.PATH}/media/<file_name>/delete", RouteType.asnc)
+@route(f"{Wiki.PATH}/media/<file_name>/delete", RouteType.asnc_local)
 @media_env
 async def media_file_delete(env: Request, wiki: Wiki, user: Author, media: Media):
 
@@ -1291,7 +1291,7 @@ async def media_file_delete(env: Request, wiki: Wiki, user: Author, media: Media
     )
 
 
-@route(f"{Wiki.PATH}/media/<file_name>/delete/<delete_key>", RouteType.asnc)
+@route(f"{Wiki.PATH}/media/<file_name>/delete/<delete_key>", RouteType.asnc_local)
 @media_env
 async def media_file_delete_confirm(
     env: Request, wiki: Wiki, user: Author, media: Media, delete_key: str
@@ -1312,9 +1312,11 @@ async def media_file_delete_confirm(
         )
     )
 
+
 # For now, a dummy response until we can come up with an actual favicon.
 
-@route(f"/favicon.ico", RouteType.asnc)
+
+@route(f"/favicon.ico", RouteType.asnc_local)
 async def favicon(env: Request):
     date = email_utils.formatdate(time.time(), usegmt=True)
     return simple_response(
