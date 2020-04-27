@@ -255,7 +255,7 @@ class Wiki(BaseModel):
         Path(cls._config.DATA_PATH, str(new_wiki.id)).mkdir()
 
         if first_wiki:
-            from utils import wiki_init
+            from init_data import wiki_init
 
             for title, article in wiki_init.items():
                 new_article = Article(

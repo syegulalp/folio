@@ -2,7 +2,7 @@
 
 import sys, os
 
-sys.path.insert(0, "src")
+sys.path.insert(0, "folio")
 
 config_path = "data"
 
@@ -73,7 +73,6 @@ if __name__ == "__main__":
 
     if INIT:
         import models
-
         models.create_db()
 
     import routes
@@ -84,3 +83,4 @@ if __name__ == "__main__":
         webbrowser.open(f"http://localhost:{port}")
 
     routes.run(host="0.0.0.0", port=port, workers=None)
+
