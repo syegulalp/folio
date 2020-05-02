@@ -182,10 +182,10 @@ class BaseModel(Model):
             metadata_item = self.metadata.where(Metadata.key == key).get()
         except Metadata.DoesNotExist:
             metadata_item = Metadata(
-                item=self._meta.table_name, item_id=self.id, key=key
+                item=self._meta.table_name, item_id=self.id, key=key, value=value
             )
-            metadata_item.save()
-        metadata_item.value = value
+        else:
+            metadata_item.value = value
         metadata_item.save()
 
     def delete_metadata(self, key):
@@ -954,7 +954,7 @@ class Article(BaseModel):
                     content.replace("\\{", "{").replace("\\}", "}").replace("``", "`")
                 )
                 content = content.replace(
-                    "<img ", '<img loading="lazy" class="img-fluid" '
+                    "<img ", '<img class="img-fluid" '
                 )
 
                 output.append(content)
