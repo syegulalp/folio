@@ -1,6 +1,6 @@
 # Changelog
 
-## ??
+## [0.0.3-alpha](https://github.com/syegulalp/folio/releases/tag/0.0.3-alpha)
 
 **This version has a breaking schema from the previous versions.**
 
