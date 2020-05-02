@@ -133,7 +133,9 @@ You can also click the "Link" icon <span class="oi button-oi oi-link-intact"></s
 
 # Images
 
-tk
+You can upload images into a wiki and insert them inline. To upload an image to a wiki, simply drag and drop the image anywhere into the browser. The image will be uploaded and made available in the wiki's image manager, available from the <span title="See wiki media" class="oi oi-image"></span> icon in the sidebar.
+
+To insert an image in an article, click the "Image" <span class="oi button-oi oi-image"></span> icon in the editor's toolbar. You can also insert an image reference manually by using the format `![](<Name of image file>)`.
 
 * [Learn more about managing images in Folio.](Image management)
 
