@@ -23,9 +23,15 @@ If you click <button type="button" class="btn btn-sm btn-warning">Quit creating 
 
 To edit an existing article, click the <span class="oi oi-pencil"></span> icon at the top right of the article. This opens the article for editing.
 
+
+
+* [Learn how to insert formatting into articles with the Markdown format.](Wiki formatting)
+
 When you open an existing article for editing, or save a newly created one for editing, you'll be editing a *draft copy* of the article -- a clone of the original.
 
 The draft copy is where all changes to an article are saved until you're satisfied with them.  Any changes you make to the article text aren't saved to the draft until you hit the <button type="button" class="btn btn-sm btn-success">Save</button> button.
+
+You can also press **Ctrl-S** when the editor has focus to save the document.
 
 When you hit <button type="button" class="btn btn-sm btn-primary">Publish</button> , the changes in your draft are copied into the original article, and the draft is removed. To start editing a new draft, just click the <span class="oi oi-pencil"></span> icon for the article once again.
 
@@ -35,45 +41,61 @@ If you want to publish a draft to an article but keep a "snapshot" of its state 
 
 # The toolbar
 
+Above the editor pane is a list of icons, called the **toolbar**, that provides shortcuts to common actions.
+
 ## Preview
+
+The **Preview** button <span class="oi button-oi oi-eye"></span> opens and closes a pane to the right of the editor that shows what your article looks like when it's published. To update the preview, hit <button type="button" class="btn btn-sm btn-success">Save</button> (or **Ctrl-S**).
+
+You can also toggle the preview by pressing **Ctrl-P** when the editor is in focus.
 
 ## Bold
 
+The **Bold** button <span class="oi button-oi oi-bold"></span> adds Markdown bolding, or two asterisks, to either side of the currently selected text.
+
+You can also add bolding to a selection by pressing **Ctrl-B** when the editor is in focus.
+
 ## Italic
+
+The **Italic** button <span class="oi button-oi oi-italic"></span> adds Markdown italicizing, or one asterisk, to either side of the currently selected text.
+
+You can also add italicizing to a selection by pressing **Ctrl-I** when the editor is in focus.
 
 ## Add link
 
+The **Add link** button <span class="oi button-oi oi-link-intact"></span> lets you take the currently selected text and wrap it in a link to an article. You can type to search the name of the article you want to link to, then either click the article name or press **Enter** to use the topmost listed link.
+
+If no text is selected, a direct link to the article under its name will be inserted at the cursor.
+
+You can also add a link by pressing **Ctrl-L** when the editor is in focus.
+
 * [Learn more about linking, including showing images and linking to external sites.](Linking)
 
-## Add image
+## Add media
+
+To upload media to the wiki -- generally, an image file -- simply drag and drop the media file anywhere in the browser. The uploaded media will show in the wiki's media manager, available from the <span title="See wiki media" class="oi oi-image"></span> icon in the right-hand column.
+
+You can then insert the image in the editor by clicking the **Insert media** button <span class="oi button-oi oi-image"></span> in the editor toolbar. Type the name of a file to search for it, and either click the name of the image or press Enter to select the topmost item displayed.
 
 * [Learn more about managing images in Folio.](Image management)
 
 ## Add/edit metadata
 
+*Metadata* are key/value pairs associated with objects in Folio. To edit the metadata for an article, click the **Edit article metadata** button <span class="oi button-oi oi-info"></span> in the editor's toolbar.
+
+When you add a metadata element, the key *must* be a single word -- no spaces, but underscores are OK. The value can be any text.
+
+Note that any metadata changes are saved first to an article draft, and only to the actual article after it's published.
+
 * [Learn more about metadata.](Metadata)
 
 ## Add tags
 
-* [Learn more about tagging.](Tags)
+To add or change *tags* for an article, click the **Edit tags** <span class="oi button-oi oi-tags"></span> button in the editor toolbar.
 
-# The command buttons
+Note that any tag changes are saved first to an article draft, and only to the actual article after it's published.
 
-## Save
-
-## Save and exit
-
-## Publish
-
-## Version
-
-## Discard draft
-
-## Delete article
-
-## Quit editing
-
-* [Learn how to insert formatting into articles with the Markdown format.](Wiki formatting)"""},
+* [Learn more about tagging.](Tags)"""},
 "Quick Start": {
    "tags": [],
    "content": """# What's a wiki?
