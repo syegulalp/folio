@@ -67,3 +67,11 @@ Table test:
 {{Include article}}
 
 {{{Include article}}}
+
+`<literal>`
+
+`literal``literal`
+
+```literal
+<literal>
+```
