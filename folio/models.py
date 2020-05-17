@@ -455,7 +455,10 @@ class Article(BaseModel):
     blurb_re = re.compile(r"\<\<\<(.*?)\>\>\>")
     media_re = re.compile("!\[([^\]]*?)\]\(([^)]*?)\)")
     strike_re = re.compile(r"\~\~(.*?)\~\~")
-    metadata_re = re.compile(r"(\$\[(.*?)\]\$)+(\(([^)]*?)\))?", re.MULTILINE | re.DOTALL)
+    metadata_re = re.compile(
+        r"(\$\[(.*?)\]\$)+(\(([^)]*?)\))?", re.MULTILINE | re.DOTALL
+    )
+    literal_clean_re = re.compile(r"[^`]``[^`]")
 
     def replace_text(self, re_to_find, new_text):
         if self.opened_by:
@@ -883,13 +886,17 @@ class Article(BaseModel):
             return '<input type="checkbox" disabled checked />'
         return '<input type="checkbox" disabled/>'
 
+    def _literal_clean_re(self, matchobj):
+        return matchobj.group(0)[0]+matchobj.group(0)[-1]
+
     def _formatted(self, raw_content):
         md = markdown.Markdown()
 
-        self.autogen_metadata = []       
+        self.autogen_metadata = []
 
-        # before everything else: process multi-line auto-metadata
         raw_content = self.metadata_re.sub(self._metadata_re, raw_content)
+
+        raw_content = self.literal_clean_re.sub(self._literal_clean_re, raw_content)
 
         preformat_content = raw_content.split("```")
         preformatted = False
@@ -915,7 +922,7 @@ class Article(BaseModel):
                 for content in inline_content:
                     if inline_preformat:
                         content = content.replace("{", r"\{").replace("}", r"\}")
-                        inline_output.append(f"```{content}```")
+                        inline_output.append(f"`{content}`")
                     else:
                         content = content.replace("\\{", "\\\\{").replace(
                             "\\}", "\\\\}"
@@ -944,11 +951,10 @@ class Article(BaseModel):
                 content = self.href_re.sub(self._href_re, content)
                 content = self.include_re.sub(self._include_re, content)
                 content = (
-                    content.replace("\\{", "{").replace("\\}", "}").replace("``", "`")
+                    content.replace("\\{", "{")
+                    .replace("\\}", "}")
                 )
-                content = content.replace(
-                    "<img ", '<img class="img-fluid" '
-                )
+                content = content.replace("<img ", '<img class="img-fluid" ')
 
                 output.append(content)
 
