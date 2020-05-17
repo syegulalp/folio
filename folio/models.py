@@ -712,15 +712,11 @@ class Article(BaseModel):
         Extracts only the RAW metadata from an article.
         """
         md = markdown.Markdown(extensions=["markdown.extensions.meta"])
-        # content = self.content.split("\n\n")[0]
         md.convert(self.content)
         return md.Meta
 
     @property
     def formatted(self):
-        # content, metadata = self._formatted(self.content)
-        # self.metadata = metadata
-        # return content
         return self._formatted(self.content)
 
     def _function_re(self, matchobj):
