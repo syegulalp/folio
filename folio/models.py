@@ -458,6 +458,9 @@ class Article(BaseModel):
     metadata_re = re.compile(
         r"(\$\[(.*?)\]\$)+(\(([^)]*?)\))?", re.MULTILINE | re.DOTALL
     )
+    metadata_cleared_re = re.compile(
+        r"(\$\$\[(.*?)\]\$\$)+(\(([^)]*?)\))?", re.MULTILINE | re.DOTALL
+    )
     literal_clean_re = re.compile(r"[^`]``[^`]")
 
     def replace_text(self, re_to_find, new_text):
@@ -815,6 +818,11 @@ class Article(BaseModel):
         self.autogen_metadata.append((append, matchobj.group(2)))
         return matchobj.group(2)
 
+    def _metadata_cleared_re(self, matchobj):
+        append = matchobj.group(4) if matchobj.group(4) else "blurb"
+        self.autogen_metadata.append((append, matchobj.group(2)))
+        return ''
+        
     def _format_table(self, content):
         table_fmt = []
         is_table = False
@@ -890,6 +898,7 @@ class Article(BaseModel):
 
         self.autogen_metadata = []
 
+        raw_content = self.metadata_cleared_re.sub(self._metadata_cleared_re, raw_content)
         raw_content = self.metadata_re.sub(self._metadata_re, raw_content)
 
         raw_content = self.literal_clean_re.sub(self._literal_clean_re, raw_content)
