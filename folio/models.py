@@ -447,16 +447,15 @@ class Article(BaseModel):
     PATH = "/article/<title>"
 
     checkbox_re = re.compile(r"\[([xX_ ])\]")
-    link_re = re.compile(r"\[\[([^]]*?)\]\]")
-    literal_include_re = re.compile(r"\{\{\{([^}]*?)\}\}\}")
-    include_re = re.compile(r"\{\{([^}]*?)\}\}")
+    link_re = re.compile(r"\[\[(.*?)\]\]")
+    literal_include_re = re.compile(r"\{\{\{(.*?)\}\}\}")
+    include_re = re.compile(r"\{\{(.*?)\}\}")
     function_re = re.compile(r"\<\<[^>]*?\>\>")
     href_re = re.compile(r'(<a .*?)href="([^"]*?)"([^>]*?>)')
-    blurb_re = re.compile(r"\<\<\<([^>]*?)\>\>\>")
+    blurb_re = re.compile(r"\<\<\<(.*?)\>\>\>")
     media_re = re.compile("!\[([^\]]*?)\]\(([^)]*?)\)")
     strike_re = re.compile(r"\~\~(.*?)\~\~")
     metadata_re = re.compile(r"(\$\[(.*?)\]\$)+(\(([^)]*?)\))?", re.MULTILINE | re.DOTALL)
-    blurb_inline_re = re.compile(r"\$\[(.*?)\]\$", re.MULTILINE | re.DOTALL)
 
     def replace_text(self, re_to_find, new_text):
         if self.opened_by:
@@ -813,13 +812,9 @@ class Article(BaseModel):
         return f"<strike>{matchobj.group(1)}</strike>"
 
     def _metadata_re(self, matchobj):
-        if matchobj.group(4):
-            self.autogen_metadata.append((matchobj.group(4), matchobj.group(2)))
+        append = matchobj.group(4) if matchobj.group(4) else "blurb"
+        self.autogen_metadata.append((append, matchobj.group(2)))
         return matchobj.group(2)
-
-    def _blurb_inline_re(self, matchobj):
-        self.autogen_metadata.append(("blurb", matchobj.group(1)))
-        return matchobj.group(1)
 
     def _format_table(self, content):
         table_fmt = []
@@ -891,7 +886,9 @@ class Article(BaseModel):
     def _formatted(self, raw_content):
         md = markdown.Markdown()
 
-        self.autogen_metadata = []
+        self.autogen_metadata = []       
+
+        # before everything else: process multi-line auto-metadata
         raw_content = self.metadata_re.sub(self._metadata_re, raw_content)
 
         preformat_content = raw_content.split("```")
@@ -917,8 +914,8 @@ class Article(BaseModel):
                 inline_preformat = False
                 for content in inline_content:
                     if inline_preformat:
-                        content = content.replace("{", "\\{").replace("}", "\\}")
-                        inline_output.append(f"`{content}`")
+                        content = content.replace("{", r"\{").replace("}", r"\}")
+                        inline_output.append(f"```{content}```")
                     else:
                         content = content.replace("\\{", "\\\\{").replace(
                             "\\}", "\\\\}"
@@ -928,11 +925,7 @@ class Article(BaseModel):
                         content = self.literal_include_re.sub(
                             self._literal_include_re, content
                         )
-
                         content = self.blurb_re.sub(self._blurb_re, content)
-                        content = self.blurb_inline_re.sub(
-                            self._blurb_inline_re, content
-                        )
                         content = self.function_re.sub(self._function_re, content)
 
                         # then local post-processing
@@ -962,12 +955,7 @@ class Article(BaseModel):
             preformatted = not preformatted
 
         result = "".join(output)
-        # return result, md.Meta
         return result
-
-
-# class ArticleRevision(Article):
-#     revision_of = ForeignKeyField(Article, backref="revisions")
 
 
 class Metadata(BaseModel):

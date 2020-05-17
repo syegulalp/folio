@@ -1,5 +1,15 @@
 # Changelog
 
+## ??
+
+### New features
+
+tk
+
+### Bugfixes
+
+* Many inconsistencies with how literals were handled have been fixed.
+
 ## [0.0.3-alpha](https://github.com/syegulalp/folio/releases/tag/0.0.3-alpha)
 
 **This version has a breaking schema from the previous versions.**
