@@ -1,15 +1,28 @@
 wiki_init = {
 "Contents": {
    "tags": ['@meta'],
-   "content": """Welcome to Folio!
+   "content": """$$[Welcome to Folio!]$$
+
+# Welcome to Folio!
 
 This wiki has been automatically generated with your new Folio install. It contains some basic details about how to use Folio.
 
-* [Quickstart](Quick Start) instructions. (*Not complete yet but readable*)
-* Learn about [wiki formatting](Wiki formatting). """},
+If you just want to jump in, the [quickstart](Quick Start) article has basic instructions.
+
+* <<<What's a wiki?>>>
+* <<<Editor>>>
+* <<<Wiki formatting>>>
+* <<<Tags>>>
+* <<<Linking>>>
+* <<<Image management>>>
+* <<<Includes>>>
+* <<<Metadata>>>
+* <<<Macros>>>"""},
 "Editor": {
    "tags": ['@meta'],
-   "content": """The editor for Folio lets you edit, save drafts of changes, and publish changes to articles in a Folio wiki.
+   "content": """$$[The tool used to create and edit wiki articles.]$$
+
+The editor for Folio lets you edit, save drafts of changes, and publish changes to articles in a Folio wiki.
 
 # Starting a new article
 
@@ -96,6 +109,154 @@ To add or change *tags* for an article, click the **Edit tags** <span class="oi 
 Note that any tag changes are saved first to an article draft, and only to the actual article after it's published.
 
 * [Learn more about tagging.](Tags)"""},
+"Image management": {
+   "tags": ['@meta'],
+   "content": """$$[How to upload images into a wiki and display them in articles.]$$
+
+You can upload images into a wiki and insert them into articles.
+
+To upload an image to a wiki, simply drag and drop the image anywhere into the browser. The image will be uploaded and made available in the wiki's image manager, available from the <span title="See wiki media" class="oi oi-image"></span> icon in the sidebar.
+
+To insert an image in an article, click the "Image" <span class="oi button-oi oi-image"></span> icon in the editor's toolbar. You can also insert an image reference manually by using the format `![](filename.jpg)`.
+
+# The media manager
+
+Click the media icon <span title="See wiki media" class="oi oi-image"></span> in the sidebar for a wiki to see all the media uploaded to that wiki. From there you can click on an image to see its details and make changes, such as renaming the file.
+
+If you change the filename of an image, all references to that file are automatically updated throughout the wiki.
+
+If you click the button <button type="button" class="btn btn-sm btn-info">Use this image as the wiki's cover image</button> , the image in question will be used as the image that shows in the wiki's sidebar and in its entry on the Folio homepage."""},
+"Includes": {
+   "tags": ['@meta'],
+   "content": """$$[How to place the contents of one article within another.]$$
+
+To include the rendered contents of one document inside another, place the name of the document in double curly braces.
+
+`{{Pastries}}` would include the contents of the document named `Pastries`.
+
+If you want to include the *literal text* of another document, not its rendered/formatted text, use *triple* curly braces.
+
+To show curly braces as-is, escape them with slashes: `\{\{` and `\}\}` yields \{\{ and \}\}."""},
+"Linking": {
+   "tags": ['@meta'],
+   "content": """$$[How to generate links between articles and to external content.]$$
+
+# Simple links
+
+To link to a document in the wiki, surround its name with double square brackets.
+
+
+`[[Wiki formatting]]` - [[Wiki formatting]]
+
+To type double or single square brackets as-is, escape them with backslashes.
+
+`\[\[` and `\]\]` yields \[\[ and \]\].
+
+
+# Named links
+
+To make a link but show a different text, use Markdown-style links:
+
+
+`[Link](Link target)` - [Link](Link target)
+
+# Linking to a tag
+
+To link to a *tag*, use `/tag/tag_name` as your target.
+
+`[[/tag/@meta]]` - [[/tag/@meta]]
+
+# Linking to an external URL
+
+To link to an external URL, just use the full URL you want to link to.
+
+
+`[Le googz](https://google.com)`  - [Le googz](https://google.com)
+
+
+`[[https://google.com]]` - [[https://google.com]]
+
+# Link to document with blurb autogeneration
+
+To link to a document and automatically provide its blurb (if it has one), use triple angle brackets.
+
+
+`<<<Wiki formatting>>>`
+
+This is basically shorthand for:  
+
+`[[Wiki formatting]] <<meta doc="Wiki formatting" key="@blurb" pre="--">>`
+
+# Linking to an image
+
+To link to an image in the wiki's [image manager](Image management), use Markdown's image format, with the name of the image:
+
+
+`![](picture.jpg)`"""},
+"Macros": {
+   "tags": ['@meta'],
+   "content": """$$[ Special in-article commands for extended formatting.]$$
+
+**Macros** allow parts of articles to be included in other articles. Macros look like XML tags, but use double angle brackets.
+
+# `documents|articles|items`
+
+Use `documents` (`articles` and `items` are synonyms) to generate a list of all articles in the wiki that match certain parameters.
+
+
+`<<documents|articles|items tag="tagname">>`
+
+* `tag`: Match any articles that have the following tag. Use multiple `tag` items to match against multiple tags.  `<<items tag="Fiction">>` would insert a list of all articles with the tag `Fiction`.
+
+# `meta`
+
+Extracts a given piece of metadata from a specific article with a specific metadata key. If no document is specified, the current document is used.
+
+
+`<<meta doc|article|item="name" key|key_opt="key_name" pre="pre_text" post="post_text">>`
+
+* `doc` / `article` / `item`: Find the article that matches this name. If no such article is found, an error is thrown.
+* `key`: Extract the metadata that matches this key. If no such key is found, an error will be thrown.
+* `key_opt`: Same as `key` except that if the key isn't found, no error is thrown.
+* `pre` / `post`: Automatically insert a specified text either before (`pre`) or after (`post`) the metadata. The `<<<`/`>>>` [linking function](Linking) uses `pre` internally to place a dash between the article title and its extracted blurb.
+
+# Common macro recipes
+
+* `<<items tag="Places">>` -- Display all documents (items) tagged with `Places`, in alpha sort, with blurbs if available."""},
+"Metadata": {
+   "tags": ['@meta'],
+   "content": """$$[Sidecar data for articles.]$$
+
+Every object in a Folio wiki can have *metadata* associated with it. Metadata consists of key-value pairs that you can add to, edit, or remove from wiki objects.
+
+To edit the metadata for an article, click the **Edit article metadata** button <span class="oi button-oi oi-info"></span> in the editor's toolbar.
+
+When you add a metadata element, the key *must* be a single word -- no spaces, but underscores are OK. The value can be any text.
+
+Note that any metadata changes are saved first to an article draft, and only to the actual article after it's published.
+
+# Auto-generated metadata
+
+Some articles will have metadata automatically generated based on the contents. For instance, if you use the `$``[` and `]``$` tags to delineate a block of text, that text will automatically be added to the article's metadata with the key `@blurb`. (The `@` in front of a metadata key indicates it's intended to be handled as special system-level metadata.)
+
+
+`$``[This will show up as metadata in an article with the key "@blurb", with the text remaining in the article.]``$`
+
+If you want to use a custom key, you can do so:
+
+
+`$``[This will show up as metadata in an article with the tag "custom_key", with the text remaining in the article.]``$(custom_key)`
+
+
+If you don't want to keep the value text in the document, but only add the metadata, use `$$``[` and `]``$$`.
+
+
+`$$``[This text will be added with the key "@blurb", but will not appear in the published document.]``$$`
+
+
+`$$``[This text will be added with the key "custom_key", but will not appear in the published document.]``$$(custom_key)`
+
+**Note**: Due to a limitation in the rendering system, you must express `$``[` and `]``$` tags in literals using separate literal blocks. Otherwise, a spurious metadata entry will be created for the page. See the source of this page for an example. This is because auto-generated metadata tags can encompass literal text."""},
 "Quick Start": {
    "tags": [],
    "content": """# What's a wiki?
@@ -106,9 +267,19 @@ A *wiki* is a system for storing and interlinking web documents, using a text fo
 
 Folio is a wiki you can use for anything from simple to-do lists to organizing all the details that go into a large creative project. Unlike Wikipedia, though, it's meant to be used by a single person at a time. But it has many of the same features, as you'll see in this document.
 
+* [Learn more about wikis and their concepts.](What's a wiki?)
+
+# Creating a new, blank wiki
+
+To get started with a new wiki with nothing in it, click on the globe <span title="Wiki server homepage" class="oi oi-globe"></span> icon on the sidebar at right. (You'll want to Ctrl-click the icon to open the new article in a new tab, so you don't close these instructions.) That takes you to the homepage for your Folio installation.
+
+From there, click <button type="button" class="btn btn-sm btn-success">Create a new wiki</button> to create a new wiki. You'll need to pick a name for it and an optional description. 
+
+Press <button type="button" class="btn btn-sm btn-success">Save</button> to create your new wiki. You'll be automatically taken to its homepage.
+
 # Creating a basic wiki article
 
-To create a new article, click on the <span class="oi oi-file"></span> icon in the sidebar at right. (You'll want to Ctrl-click the icon to open the new article in a new tab, so you don't close these instructions.)
+To create a new article, click on the new article <span class="oi oi-file"></span> icon in the sidebar at right. (You'll want to Ctrl-click the icon to open the new article in a new tab, so you don't close these instructions.)
 
 Type a title in the top bar, then click the <button type="button" class="btn btn-sm btn-success">Save and create article</button> button. This creates the article with a blank body. You can always change the article name later.
 
@@ -133,11 +304,13 @@ You can also click the "Link" icon <span class="oi button-oi oi-link-intact"></s
 
 # Images
 
-You can upload images into a wiki and insert them inline. To upload an image to a wiki, simply drag and drop the image anywhere into the browser. The image will be uploaded and made available in the wiki's image manager, available from the <span title="See wiki media" class="oi oi-image"></span> icon in the sidebar.
+You can upload images into a wiki and insert them into articles.
 
-To insert an image in an article, click the "Image" <span class="oi button-oi oi-image"></span> icon in the editor's toolbar. You can also insert an image reference manually by using the format `![](<Name of image file>)`.
+To upload an image to a wiki, simply drag and drop the image anywhere into the browser. The image will be uploaded and made available in the wiki's image manager, available from the <span title="See wiki media" class="oi oi-image"></span> icon in the sidebar.
 
-* [Learn more about managing images in Folio.](Image management)
+To insert an image in an article, click the "Image" <span class="oi button-oi oi-image"></span> icon in the editor's toolbar. You can also insert an image reference manually by using the format `![](filename.jpg)`.
+
+* [Learn more about images and image management.](Image management)
 
 # Tags
 
@@ -151,8 +324,13 @@ If a tag already exists that has a name with a close match for something you're 
 
 All tags for all articles can be accessed by way of the **Tags** tab in the sidebar at right.
 
-* [Learn more about metadata.](Metadata)
 * [Learn more about tagging.](Tags)
+
+# Metadata
+
+Metadata lets you store key-value information with articles. To edit the metadata for an article, click the **Edit article metadata** button <span class="oi button-oi oi-info"></span> in the editor's toolbar.
+
+* [Learn more about metadata.](Metadata)
 
 # Includes and macros
 
@@ -164,9 +342,45 @@ You can also use **macros**, or special wiki commands, to extract parts of artic
 
 * [Learn more about includes.](Includes)
 * [Learn more about macros.](Macros)"""},
+"Tags": {
+   "tags": ['@meta'],
+   "content": """$$[Ways to categorize and group articles.]$$
+
+**Tags** allow you to group articles together in categories.
+
+Tag names can be any *plain* text. Markdown and HTML aren't rendered in tags.
+
+When you add a tag to an article (see [using the editor](Editor) for more details on how to do that), it appears at the top of the published article. Clicking on the tag name shows you all other articles with the same tag.
+
+You can also see a list of tags in the **Tags** tab in the sidebar.
+
+To link to a *tag*, use `/tag/tag_name` as your target.
+
+
+`[[/tag/@meta]]` - [[/tag/@meta]]
+
+# Special `@` tags
+
+Tag names beginning with an `@` are used for tags that have system functions.
+
+* `@meta`: Used to tag articles that are part of a wiki's basic structure. When a blank wiki is created from an existing wiki as a template, all articles tagged `@meta` are created automatically in the new wiki.
+* `@template`: Used to tag articles that can be used as a template for other articles in the same wiki. For instance, a blank character sheet could be tagged `@template`."""},
+"What's a wiki?": {
+   "tags": ['@meta'],
+   "content": """$$[A quick introduction to wikis, and why to use them for creative projects.]$$
+
+A *wiki* is a system for storing and interlinking web documents, using a text format that makes writing and editing documents easy and fast.  [Wikipedia](https://www.wikipedia.org) popularized the concept of the wiki, and many other projects -- not just wiki sites, but the underlying wiki *software* -- have taken inspiration from the same idea.
+
+Folio is a wiki you can use for anything from simple to-do lists to organizing all the details that go into a large creative project. Unlike Wikipedia, though, it's meant to be used by a single person at a time. But it has many of the same features, as you'll see in this document.
+
+# Wikis vs. "flat-file" editing
+
+If you take notes on paper, or in a word processing program -- Notepad, Word, etc. -- one of the problems you may run into is how to organize everything. Putting everything in a single, large document is unwieldy, since it's hard to refer elegantly to one piece of information from multiple places. Breaking everything across multiple documents just creates a new kind of unwieldy. The problem is even worse when you're dealing with "freeform" data, or data that has no inherent organization. 
+
+A wiki provides a better paradigm for holding and organizing freeform data. You can write things down first, and then gradually impose structure on your data as you go along. Documents can be [linked](Linking) between each other freely, as with web pages (since they *are* web pages!), and can be [tagged](Tagging and metadata) to give them organization and structure. What's more, once you find a structure you're comfortable with, you can turn that structure into a template you can use for future projects that have the same basic outlines."""},
 "Wiki formatting": {
-   "tags": [],
-   "content": """$[How to format wiki pages.]$(blurb)
+   "tags": ['@meta'],
+   "content": """$$[How articles are written and marked up.]$$
 
 This wiki uses the Markdown formatting system, with a few changes. If you're already familiar with Markdown, you should be able to use most of its functionality, but for your convenience here's a rundown of how to add all the formatting supported.
 
@@ -180,52 +394,13 @@ Note that *formatting only applies to article contents.* Article titles cannot b
 
 ***Italic and bold***: `***Italic and bold***`
 
+~~Strikethrough~~: `~~Strikethrough~~`
+
+Superscript^^superscript^^
+
 # Links
 
-## Simple links
-
-To link to a document in the wiki, surround its name with double square brackets.
-
-[[Wiki formatting]] - `[[Wiki formatting]]`
-
-To type double square brackets as-is, escape them with backslashes.
-
-`\[\[` and `\]\]` yields \[\[ and \]\].
-
-## Named links
-
-To make a link but show a different text, use Markdown-style links:
-
-[Link](Link target) - `[Link](Link target)`
-
-## Linking to a tag
-
-To link to a *tag*, use `/tag/tag_name` as your target.
-
-[[/tag/meta]]  - `[[/tag/meta]]`
-
-## Link to document with blurb autogeneration
-
-To link to a document and automatically provide its blurb (if it has one), use triple angle brackets.
-
-
-`<<<Wiki formatting>>>`
-
-<<<Wiki formatting>>>
-
-
-This is basically shorthand for:  
-
-`[[Wiki formatting]] -- <<meta doc="Wiki formatting" key="blurb">>`
-
-# Images
-
-To include an image inline, use Markdown image format:
-
-```
-![](Image.jpg)
-![](https://host.com/Image.jpg)
-```
+{{Linking}}
 
 # Literal formatting
 
@@ -315,88 +490,5 @@ Indent items four spaces to create subheadings.
     * Indented item.
 * Another main item.
 
-
-
-Image with link
-
-To link to an image's asset page
-
-## Image styles and formatting
-
-# Includes
-
-To include the rendered contents of one document inside another, place the name of the document in double curly braces.
-
-`{{Pastries}}` would include the contents of the document named `Pastries`.
-
-If you want to include the *literal text* of another document, not its rendered/formatted text, use *triple* curly braces.
-
-To show curly braces as-is, escape them with slashes: `\{\{` and `\}\}` yields \{\{ and \}\}.
-
-# Metadata and tags
-
-**Metadata** can be assigned to an article in the form of key-value pairs. The key is a single word (or a `camel_case` or `hyphen-case` term), followed by a colon, followed on the rest of the line by the value.
-
-To add metadata to an article, add the metadata lines at the top of the article, separated from the body of the article by a blank line.
-
-```
-tag: Fiction
-author: Kurt Vonnegut
-
-*Slaughterhouse-five* stemmed from Vonnegut's own experiences in WWII. ...
-```
-
-The wiki recognizes some metadata natively:
-
-## `tag`
-
-The `tag` meta is used to assign a tag to the article. Use multiple `tag` metas for multiple tags.
-
-```
-tag: Fiction
-tag: Time Travel
-tag: 20th Century
-```
-
-## `blurb`
-
-The `blurb` meta lets you specify a snippet of text that's used to describe the article apart from its title, like a subhed. Blurbs can contain inline formatting and linking.
-
-```
-tag: Character
-blurb: A man who has become "unstuck in time."
-
-We are told in the first lines of the book about Billy Pilgrim's strange plight ...
-```
-
-# Macros
-
-**Macros** allow parts of articles to be included in other articles. Macros look like XML tags, but with double angle brackets.
-
-
-## `documents|articles|items`
-
-Use `documents` (`articles` and `items` are synonyms) to generate a list of all articles in the wiki that match certain parameters.
-
-
-`<<documents|articles|items tag="tagname">>`
-
-* `tag`: Match any articles that have the following tag. Use multiple `tag` items to match against multiple tags.  `<<items tag="Fiction">>` would insert a list of all articles with the tag `Fiction`.
-
-## `meta`
-
-Extracts a given piece of metadata from a specific article with a specific metadata key. If no document is specified, the current document is used.
-
-
-`<<meta doc|article|item="name" key|key_opt="key_name" pre="pre_text" post="post_text">>`
-
-* `doc` / `article` / `item`
-* `key`
-* `key_opt`
-* `pre` / `post`
-
-Common macro recipes:
-
-* `` -- Display the blurb for the current document (if any).
-* `<<items tag="Places">>` -- Display all documents (items) tagged with `Places`, in alpha sort, with blurbs if available."""},
+"""},
 }

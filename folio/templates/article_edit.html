@@ -21,7 +21,7 @@
 
                 <div id="editor-title" class="form-group">
                     <input class="form-control form-control-lg" id="article_title" name="article_title"
-                        data-original="{{article_title}}" value="{{article_title}}">
+                        data-original="{{article_title if article.id is not None else ''}}" value="{{article_title}}">
                 </div>
 
                 <div id="editor-controls" class="form-group">
@@ -39,8 +39,8 @@
                             class="oi button-oi oi-external-link"></span></a> -->
                     <a href="#" id="btn_insert_media" title="Insert media (Ctrl+M)"><span
                             class="oi button-oi oi-image"></span></a>
-                    <a href="#" id="btn_edit_metadata" title="Edit article metadata"><span class="oi button-oi oi-info"></span></a>
-                    <a href="#" id="btn_insert_tag" title="Edit article tags (Ctrl-T)"><span
+                    <a href="#" id="btn_edit_metadata" title="Edit article metadata (Ctrl-Shift-M)"><span class="oi button-oi oi-info"></span></a>
+                    <a href="#" id="btn_insert_tag" title="Edit article tags (Ctrl-G)"><span
                             class="oi button-oi oi-tags"></span></a>
 
                     % end
@@ -56,7 +56,7 @@
                     <div class="row">
                         <div class="col-6">
                             % if article.id is not None:
-                            <button type="button" title="Save draft and continue editing (retain edit lock)" name="save"
+                            <button type="button" title="Save draft and continue editing (retain edit lock) (Ctrl-S)" name="save"
                                 id="save-button" value="save" class="btn btn-sm btn-success">Save</button>
                             % end
                             % else:

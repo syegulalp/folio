@@ -73,12 +73,13 @@ class DocTagParser(HTMLParser):
 
             for __ in self.query:
                 __.formatted
-                blurb = __.get_metadata("blurb")
+                blurb = __.get_metadata("@blurb")
                 blurb = f" -- {blurb}" if blurb else ""
                 self.results.append(f"* [[{__.title}]]{blurb}")
 
         elif tag == "meta":
             for k, v in attrs:
+                v = Wiki.html_keysafe_to_title(v)
                 if k in ("doc", "article", "item"):
                     try:
                         self.query = self.article.wiki.articles.where(
@@ -130,16 +131,34 @@ class BaseModel(Model):
         database = db
 
     @classmethod
+    def title_to_html_keysafe(cls, title):
+        return title.replace('"', "&quot;")
+
+    @classmethod
+    def html_keysafe_to_title(cls, title):
+        return title.replace("&quot;", '"')
+
+    @classmethod
     def title_to_url(cls, title):
+        anchor = None
+        if "#" in title:
+            title, anchor = title.split("#", 1)
         title = title.replace(" ", "_")
         title = urllib.parse.quote(title)
         title = title.replace("/", r"%2f")
+        if anchor:
+            title = title + "#" + anchor
         return title
 
     @classmethod
     def url_to_title(cls, url):
+        anchor = None
+        if "#" in url:
+            url, anchor = url.split("#", 1)
         title = url.replace(r"_", " ")
         title = urllib.parse.unquote(title)
+        if anchor:
+            title = title + "#" + anchor
         return title
 
     @classmethod
@@ -446,21 +465,26 @@ class Article(BaseModel):
 
     PATH = "/article/<title>"
 
+    # HTML not handled by Markdown directly
     checkbox_re = re.compile(r"\[([xX_ ])\]")
+    strike_re = re.compile(r"\~\~(.*?)\~\~")
+
+    # Folio custom functions
     link_re = re.compile(r"\[\[(.*?)\]\]")
     literal_include_re = re.compile(r"\{\{\{(.*?)\}\}\}")
     include_re = re.compile(r"\{\{(.*?)\}\}")
     function_re = re.compile(r"\<\<[^>]*?\>\>")
-    href_re = re.compile(r'(<a .*?)href="([^"]*?)"([^>]*?>)')
     blurb_re = re.compile(r"\<\<\<(.*?)\>\>\>")
     media_re = re.compile("!\[([^\]]*?)\]\(([^)]*?)\)")
-    strike_re = re.compile(r"\~\~(.*?)\~\~")
     metadata_re = re.compile(
         r"(\$\[(.*?)\]\$)+(\(([^)]*?)\))?", re.MULTILINE | re.DOTALL
     )
     metadata_cleared_re = re.compile(
         r"(\$\$\[(.*?)\]\$\$)+(\(([^)]*?)\))?", re.MULTILINE | re.DOTALL
     )
+
+    # Everything else
+    href_re = re.compile(r'(<a .*?)href="([^"]*?)"([^>]*?>)')
     literal_clean_re = re.compile(r"[^`]``[^`]")
 
     def replace_text(self, re_to_find, new_text):
@@ -742,7 +766,13 @@ class Article(BaseModel):
         link = matchobj.group(2)
         target = ""
 
-        if link.startswith(f"{self.wiki.link}/article/"):
+        # Article-internal anchors are a special case
+        if link.startswith("#"):
+            link_title = link
+            link_test = link
+            link_class = "wiki-link"
+            link_to_render = link
+        elif link.startswith(f"{self.wiki.link}/article/"):
             link_to_find = link.split(f"{self.wiki.link}/article/")[1]
             link_to_render = link
             link_to_find = self.url_to_title(link_to_find)
@@ -798,6 +828,9 @@ class Article(BaseModel):
 
     def _link_re(self, matchobj):
         link = matchobj.group(1)
+        anchor = None
+        if "#" in link:
+            link, anchor = link.split("#", 1)
         if link.startswith(("http://", "https://")):
             newlink = link
         elif link.startswith("/tag/"):
@@ -805,24 +838,25 @@ class Article(BaseModel):
             newlink = f"/tag/{self.title_to_url(link)}"
         else:
             newlink = f"{self.wiki.link}/article/{self.title_to_url(link)}"
+        if anchor:
+            newlink = newlink + "#" + anchor
         return f"[{link}]({newlink})"
 
     def _blurb_re(self, matchobj):
-        return f'[[{matchobj.group(1)}]]<<meta doc="{matchobj.group(1)}" key_opt="blurb" pre=" -- ">>'
+        Wiki.title_to_url
+        return f'[[{matchobj.group(1)}]]<<meta doc="{Wiki.title_to_html_keysafe(matchobj.group(1))}" key_opt="@blurb" pre=" -- ">>'
 
     def _strike_re(self, matchobj):
         return f"<strike>{matchobj.group(1)}</strike>"
 
-    def _metadata_re(self, matchobj):
-        append = matchobj.group(4) if matchobj.group(4) else "blurb"
+    def _metadata_re(self, matchobj, cleared=False):
+        append = matchobj.group(4) if matchobj.group(4) else "@blurb"
         self.autogen_metadata.append((append, matchobj.group(2)))
-        return matchobj.group(2)
+        return "" if cleared else matchobj.group(2)
 
     def _metadata_cleared_re(self, matchobj):
-        append = matchobj.group(4) if matchobj.group(4) else "blurb"
-        self.autogen_metadata.append((append, matchobj.group(2)))
-        return ''
-        
+        return self._metadata_re(matchobj, True)
+
     def _format_table(self, content):
         table_fmt = []
         is_table = False
@@ -891,14 +925,16 @@ class Article(BaseModel):
         return '<input type="checkbox" disabled/>'
 
     def _literal_clean_re(self, matchobj):
-        return matchobj.group(0)[0]+matchobj.group(0)[-1]
+        return matchobj.group(0)[0] + matchobj.group(0)[-1]
 
     def _formatted(self, raw_content):
         md = markdown.Markdown()
 
         self.autogen_metadata = []
 
-        raw_content = self.metadata_cleared_re.sub(self._metadata_cleared_re, raw_content)
+        raw_content = self.metadata_cleared_re.sub(
+            self._metadata_cleared_re, raw_content
+        )
         raw_content = self.metadata_re.sub(self._metadata_re, raw_content)
 
         raw_content = self.literal_clean_re.sub(self._literal_clean_re, raw_content)
@@ -955,10 +991,9 @@ class Article(BaseModel):
                 # Post-rendering processing
                 content = self.href_re.sub(self._href_re, content)
                 content = self.include_re.sub(self._include_re, content)
-                content = (
-                    content.replace("\\{", "{")
-                    .replace("\\}", "}")
-                )
+                content = content.replace("\\{", "{").replace("\\}", "}")
+
+                # TODO: use proper XML analysis for this
                 content = content.replace("<img ", '<img class="img-fluid" ')
 
                 output.append(content)
@@ -1071,12 +1106,15 @@ class MediaLinks(BaseModel):
 
 class ArticleIndex(FTSModel):
     rowid = RowIDField()
-    # title = SearchField()
     content = SearchField()
 
     class Meta:
         database = db
         options = {"content": Article.content}
+
+
+System = Wiki()
+System.id = 0
 
 
 def create_db():
@@ -1089,12 +1127,11 @@ def create_db():
     new_admin = Author.default()
     new_admin.save()
 
+    from settings import DB_SCHEMA
+
+    metadata = System.set_metadata("schema", DB_SCHEMA)
+
     Wiki.new_wiki("Welcome to Folio", "", new_admin, first_wiki=True)
 
     ArticleIndex.rebuild()
     ArticleIndex.optimize()
-
-
-# db.create_tables([MediaLinks])
-# for article in Article.select():
-#     article.update_links()

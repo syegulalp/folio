@@ -1082,13 +1082,14 @@ class Server:
                 handler, route_type = self.static_routes[path][verb]
             except KeyError:
                 route_match = None
-                for route in self.dynamic_routes:
+                for route in self.dynamic_routes:                    
                     if verb != route[1]:
                         continue
                     route_match = route[0].fullmatch(path)
                     if route_match:
                         handler, route_type = route[2:4]
                         parameters = route_match.groups()
+                        break
 
             if not handler:
                 write(self.error_404(Request(raw_data)).as_bytes())

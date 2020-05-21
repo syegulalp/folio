@@ -9,6 +9,10 @@
       <h2>Media for {{wiki.title}}</h2>
       <hr/>
       <ul class="list-unstyled">
+        % if media.count()==0:
+        [<i>No media in this wiki. Drag images anywhere onto this page to upload media.</i>]
+        % end
+        % else:
         % for media_item in media:
         <li class="media">
           <a href="{{media_item.edit_link}}"><img class="img-fluid align-self-start mr-3" src="{{media_item.link}}"></a>
@@ -16,6 +20,7 @@
             <a href="{{media_item.edit_link}}">{{media_item.file_path}}</a>
           </div>
         </li>
+        % end
         % end
       </ul>
       <hr/>

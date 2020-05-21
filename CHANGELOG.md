@@ -1,13 +1,20 @@
 # Changelog
 
-## ??
+## HEAD
+
+**This version has a breaking schema from the previous versions.**
 
 ### New features
 
-tk
+* The documentation is now feature-complete.
+* You can now use the `$$[ ]$$` tags to specify auto-generated metadata that is not shown in the underlying article text.
+* The link insert function in the editor now lets you specify what text to use when you insert the link. By default the text is the topmost item in the link search box.
+* Links now respect anchors. For instance, `[[A link#An anchor]]` will link to the anchor `An anchor` on the article named `A link`.
 
 ### Bugfixes
 
+* A bug involving newly created pages not saving correctly when the title wasn't modified was fixed.
+* Search results for articles mistakenly showed revisions as well as current articles. (An option to search revisions as well as current versions of articles will come later.)
 * Many inconsistencies with how literals were handled have been fixed.
 
 ## [0.0.3-alpha](https://github.com/syegulalp/folio/releases/tag/0.0.3-alpha)

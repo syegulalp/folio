@@ -139,14 +139,21 @@ function tagEnter() {
 
 function insertLink(item) {
     linkText = $(item).html();
+    linkAltText = $("#modal-alt-input").val();
+
     $("#article_content").focus();
     field = $("#article_content")[0];
     if (hasSelection(field)) {
         wrapText(field, '[', ']('+linkText+')')
     }
-    else
+    else    
     {
-        wrapText(field, '[['+linkText+']]','')
+        if (linkAltText.length == 0) {
+            wrapText(field, '[['+linkText+']]','')
+        }
+        else {
+            wrapText(field, '['+linkAltText+']','('+linkText+')')
+        }        
     }
     $('#edit-modal').modal('hide');
 }
@@ -258,16 +265,32 @@ $("#article_content").on("keydown", function (e) {
         }
     }
 
+    // replace with switch/case
+
     if (e.ctrlKey) {
         if (e.code == 'KeyL') {
             e.preventDefault();
             $('#btn_insert_link').click();
         }        
-        if (e.code == 'KeyP') {
+        else if (e.code == 'KeyM') {
+            if (e.shiftKey) {
+                e.preventDefault();            
+                $('#btn_edit_metadata').click();
+            }
+            else {
+                e.preventDefault();            
+                $('#btn_insert_media').click();
+            }
+        }      
+        else if (e.code == 'KeyG') {
+            e.preventDefault();
+            $('#btn_insert_tag').click();
+        }     
+        else if (e.code == 'KeyP') {
             e.preventDefault();
             $('#btn_toggle_preview').click();
         }
-        if (e.code == 'KeyS') {
+        else if (e.code == 'KeyS') {
             if (e.shiftKey) {
                 e.preventDefault();
                 $("#save-and-exit-button").click();
@@ -276,11 +299,11 @@ $("#article_content").on("keydown", function (e) {
                 $("#save-button").click();
             }
         }
-        if (e.code == 'KeyI') {
+        else if (e.code == 'KeyI') {
             e.preventDefault();
             documentAddItalic();
         }
-        if (e.code == 'KeyB') {
+        else if (e.code == 'KeyB') {
             e.preventDefault();
             documentAddBold();
         }

@@ -205,7 +205,7 @@ async def new_wiki_save(env: Request):
         )
 
     wiki = Wiki.new_wiki(wiki_title, wiki_description, author, first_wiki=False)
-    return redirect(wiki.link)
+    return redirect(wiki.link)    
 
 
 ######################################################################
@@ -369,21 +369,22 @@ async def wiki_search(env: Request, wiki: Wiki, user: Author):
         if search_query != "":
             search_query_wildcard = search_query
 
-            title_result = (
-                Article.select()
+            article_title_result = (
+                wiki.articles.select()
                 .where(
-                    Article.wiki == wiki, Article.title.contains(search_query_wildcard)
+                    Article.revision_of.is_null(),
+                    Article.title.contains(search_query_wildcard),
                 )
                 .order_by(SQL("title COLLATE NOCASE"))
             )
 
-            _article_result = ArticleIndex.select(ArticleIndex.rowid).where(
+            _article_contents_result = ArticleIndex.select(ArticleIndex.rowid).where(
                 ArticleIndex.match(search_query_wildcard + "*")
             )
 
-            article_result = (
+            article_contents_result = (
                 wiki.articles.select()
-                .where(Article.id << _article_result)
+                .where(Article.revision_of.is_null(), Article.id << _article_contents_result)
                 .order_by(SQL("title COLLATE NOCASE"))
             )
 
@@ -403,7 +404,7 @@ async def wiki_search(env: Request, wiki: Wiki, user: Author):
                 [
                     "Article titles",
                     r'<li><a href="{result.link}">{result.title}</a></li>',
-                    title_result,
+                    article_title_result,
                 ]
             )
 
@@ -411,7 +412,7 @@ async def wiki_search(env: Request, wiki: Wiki, user: Author):
                 [
                     "Article contents",
                     r'<li><a href="{result.link}">{result.title}</a></li>',
-                    article_result,
+                    article_contents_result,
                 ]
             )
 
@@ -626,7 +627,9 @@ async def article_history(env: Request, wiki: Wiki, user: Author, article: Artic
     )
 
 
-@route(f"{Wiki.PATH}{Article.PATH}/preview", RouteType.asnc_local, action=("GET", "POST"))
+@route(
+    f"{Wiki.PATH}{Article.PATH}/preview", RouteType.asnc_local, action=("GET", "POST")
+)
 @article_env
 async def article_preview(env: Request, wiki: Wiki, user: Author, article: Article):
 
@@ -966,7 +969,7 @@ async def modal_insert_image_search(
     env: Request, wiki: Wiki, user: Author, article: Article
 ):
 
-    search = env.form.get("search", None)
+    search = env.form.get("search_query", None)
     return Response(image_search(wiki, search))
 
 
@@ -1022,7 +1025,7 @@ async def modal_tags(env: Request, wiki: Wiki, user: Author, article: Article):
 @route(f"{Wiki.PATH}{Article.PATH}/insert-tag", RouteType.asnc_local, action="POST")
 @article_env
 async def modal_tags_search(env: Request, wiki: Wiki, user: Author, article: Article):
-    search = env.form.get("search", None)
+    search = env.form.get("search_query", None)
     return Response(search_results(wiki, search))
 
 
@@ -1089,7 +1092,7 @@ async def modal_edit_metadata_post(
 def link_search(wiki, search):
     if search is None or search == "":
         search_results = (
-            wiki.articles.select().order_by(SQL("title COLLATE NOCASE")).limit(50)
+            wiki.articles.select().order_by(SQL("title COLLATE NOCASE")).limit(10)
         )
     else:
         search_results = (
@@ -1120,6 +1123,7 @@ async def modal_insert_link_search(
                 url=f"{article.link}/insert-link/",
                 modal_post_enter="",
                 search_results=link_search(wiki, None),
+                alt_input=("Text for link", "link_text"),
             ),
             footer="",
         )
@@ -1132,7 +1136,7 @@ async def modal_insert_link_search_post(
     env: Request, wiki: Wiki, user: Author, article: Article
 ):
 
-    search = env.form.get("search", None)
+    search = env.form.get("search_query", None)
     return Response(link_search(wiki, search))
 
 
@@ -1332,7 +1336,7 @@ async def favicon(env: Request):
 def image_search(wiki, search):
     if search is None or search == "":
         search_results = (
-            wiki.media.select().order_by(SQL("file_path COLLATE NOCASE")).limit(20)
+            wiki.media.select().order_by(SQL("file_path COLLATE NOCASE")).limit(10)
         )
     else:
         search_results = (
