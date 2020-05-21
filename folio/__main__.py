@@ -69,13 +69,28 @@ import pixie_web
 pixie_web.DEBUG = debug
 pixie_web.TEMPLATE_PATH = "folio/templates"
 
+
 if __name__ == "__main__":
 
     if INIT:
         import models
+
         models.create_db()
 
     import routes
+
+    img_paths = getattr(config, "IMG_PATHS", None)
+    if img_paths:
+
+        for alias, img_path in img_paths:
+
+            @routes.route(f"{routes.Wiki.PATH}/media/{alias}/<file_name>", routes.RouteType.sync_nothread, action='GET')
+            def media_files(env, wiki, file_name):
+                return routes.static_file(
+                    routes.Wiki.url_to_file(file_name),
+                    path=img_path,
+                    last_modified=env.headers.get("HTTP_IF_MODIFIED_SINCE", None),
+                )
 
     if launch_browser:
         import webbrowser
@@ -83,4 +98,3 @@ if __name__ == "__main__":
         webbrowser.open(f"http://localhost:{port}")
 
     routes.run(host="0.0.0.0", port=port, workers=None)
-
