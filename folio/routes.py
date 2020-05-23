@@ -339,7 +339,7 @@ async def clone_wiki_confirm(env: Request, wiki: Wiki, user: Author):
         # FIXME: use existing article if any has already been created
 
         if article.has_tag("@form"):
-            make_auto = new_article.get_metadata("make-auto")
+            make_auto = new_article.get_metadata("@make-auto")
             if make_auto:
                 new_article.make_from_form(make_auto)
 
