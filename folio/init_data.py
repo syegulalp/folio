@@ -1,6 +1,6 @@
 wiki_init = {
 "Contents": {
-   "tags": ['@meta'],
+   "tags": ['@template'],
    "content": """$$[Welcome to Folio!]$$
 
 # Welcome to Folio!
@@ -17,16 +17,17 @@ If you just want to jump in, the [quickstart](Quick Start) article has basic ins
 * <<<Image management>>>
 * <<<Includes>>>
 * <<<Metadata>>>
-* <<<Macros>>>"""},
+* <<<Macros>>>
+* <<<Forms and templates>>>"""},
 "Editor": {
-   "tags": ['@meta'],
+   "tags": ['@template'],
    "content": """$$[The tool used to create and edit wiki articles.]$$
 
 The editor for Folio lets you edit, save drafts of changes, and publish changes to articles in a Folio wiki.
 
 # Starting a new article
 
-When you click on the <span class="oi oi-file"></span> icon in the sidebar to open a new, blank article, it is by default named **Untitled.** Ideally, you should change the name before doing anything else (although you can change the name at any time). Type the new name in the title bar and press the <button type="button" class="btn btn-sm btn-success">Save and create article</button> button, or press the Enter key while the title bar is in focus.
+When you click on the <span class="oi oi-file"></span> icon in the sidebar to open a new, blank article, the new article is by default named **Untitled.** Ideally, you should change the name before doing anything else (although you can change the name at any time). Type the new name in the title bar and press the <button type="button" class="btn btn-sm btn-success">Save and create article</button> button, or press the Enter key while the title bar is in focus.
 
 Once you've done this, the new article will be officially created, and you'll see the full range of editing options. Not all of the editing options are available before you save a new article for the first time.
 
@@ -109,13 +110,44 @@ To add or change *tags* for an article, click the **Edit tags** <span class="oi 
 Note that any tag changes are saved first to an article draft, and only to the actual article after it's published.
 
 * [Learn more about tagging.](Tags)"""},
+"Forms and templates": {
+   "tags": ['@template'],
+   "content": """$$[How to use articles and wikis as the basis for more articles and other wikis.]$$
+
+Forms and templates let you use Folio articles, or entire Folio wikis, as the basis for a new article or a new wiki.
+
+# Forms
+
+A **form** is any Folio article [tagged](Tags) with the special system tag `@form`. When you apply this tag, the rendered article will appear with a button:
+
+<button type="button" class="btn btn-sm btn-success">Create new article from this form article</button>
+
+Click this button and you'll create a new article from the text of the form article.
+
+# Templates
+
+If you tag pages in a Folio wiki with the system tag `@template`, you can use those pages as the basis for a newly created wiki.
+
+Once you tag one or more pages in a wiki with `@template`, go to the wiki's settings and click:
+
+<button type="button" class="btn btn-sm btn-secondary">Create a new wiki using this one as a template</button>
+
+You'll be presented with a list of all the articles that will be used to create the new wiki. Click <button type="button" class="btn btn-sm btn-success">Create the new wiki</button> and you'll be taken to the settings page for the new wiki.
+
+## Special tags for templates
+
+All pages tagged with `@template` will be created in the new wiki. However, *only the page's metadata (such as its blurb)* will be copied to the new wiki, not the article text. This way, you can use the *structure* of a wiki, rather than its actual *contents*, as the basis for the new wiki.
+
+However, if you want to have a `@template` page copy its full text as-is, just add the `@asis` tag to a `@template` page.
+
+If you have a `@form` page tagged as `@template`, it will also be copied into the new wiki. But if you also want to have a new page automatically generated in the wiki from that form, you can add a metadata entry to the article with the key `@make-auto` and the value being the name of the newly created article from the form."""},
 "Image management": {
-   "tags": ['@meta'],
+   "tags": ['@template'],
    "content": """$$[How to upload images into a wiki and display them in articles.]$$
 
 You can upload images into a wiki and insert them into articles.
 
-To upload an image to a wiki, simply drag and drop the image anywhere into the browser. The image will be uploaded and made available in the wiki's image manager, available from the <span title="See wiki media" class="oi oi-image"></span> icon in the sidebar.
+To upload an image to a wiki, simply drag and drop the image anywhere into the browser. The image will be uploaded and made available in the wiki's image manager, available from the media icon <span title="See wiki media" class="oi oi-image"></span> in the sidebar.
 
 To insert an image in an article, click the "Image" <span class="oi button-oi oi-image"></span> icon in the editor's toolbar. You can also insert an image reference manually by using the format `![](filename.jpg)`.
 
@@ -127,7 +159,7 @@ If you change the filename of an image, all references to that file are automati
 
 If you click the button <button type="button" class="btn btn-sm btn-info">Use this image as the wiki's cover image</button> , the image in question will be used as the image that shows in the wiki's sidebar and in its entry on the Folio homepage."""},
 "Includes": {
-   "tags": ['@meta'],
+   "tags": ['@template'],
    "content": """$$[How to place the contents of one article within another.]$$
 
 To include the rendered contents of one document inside another, place the name of the document in double curly braces.
@@ -138,7 +170,7 @@ If you want to include the *literal text* of another document, not its rendered/
 
 To show curly braces as-is, escape them with slashes: `\{\{` and `\}\}` yields \{\{ and \}\}."""},
 "Linking": {
-   "tags": ['@meta'],
+   "tags": ['@template'],
    "content": """$$[How to generate links between articles and to external content.]$$
 
 # Simple links
@@ -164,7 +196,7 @@ To make a link but show a different text, use Markdown-style links:
 
 To link to a *tag*, use `/tag/tag_name` as your target.
 
-`[[/tag/@meta]]` - [[/tag/@meta]]
+`[[/tag/@template]]` - [[/tag/@template]]
 
 # Linking to an external URL
 
@@ -194,7 +226,7 @@ To link to an image in the wiki's [image manager](Image management), use Markdow
 
 `![](picture.jpg)`"""},
 "Macros": {
-   "tags": ['@meta'],
+   "tags": ['@template'],
    "content": """$$[ Special in-article commands for extended formatting.]$$
 
 **Macros** allow parts of articles to be included in other articles. Macros look like XML tags, but use double angle brackets.
@@ -224,7 +256,7 @@ Extracts a given piece of metadata from a specific article with a specific metad
 
 * `<<items tag="Places">>` -- Display all documents (items) tagged with `Places`, in alpha sort, with blurbs if available."""},
 "Metadata": {
-   "tags": ['@meta'],
+   "tags": ['@template'],
    "content": """$$[Sidecar data for articles.]$$
 
 Every object in a Folio wiki can have *metadata* associated with it. Metadata consists of key-value pairs that you can add to, edit, or remove from wiki objects.
@@ -271,7 +303,7 @@ Folio is a wiki you can use for anything from simple to-do lists to organizing a
 
 # Creating a new, blank wiki
 
-To get started with a new wiki with nothing in it, click on the globe <span title="Wiki server homepage" class="oi oi-globe"></span> icon on the sidebar at right. (You'll want to Ctrl-click the icon to open the new article in a new tab, so you don't close these instructions.) That takes you to the homepage for your Folio installation.
+To get started with a new wiki with nothing in it, click on the home <span title="Wiki server homepage" class="oi oi-home"></span> icon on the sidebar at right. (You'll want to Ctrl-click the icon to open the new article in a new tab, so you don't close these instructions.) That takes you to the homepage for your Folio installation.
 
 From there, click <button type="button" class="btn btn-sm btn-success">Create a new wiki</button> to create a new wiki. You'll need to pick a name for it and an optional description. 
 
@@ -343,7 +375,7 @@ You can also use **macros**, or special wiki commands, to extract parts of artic
 * [Learn more about includes.](Includes)
 * [Learn more about macros.](Macros)"""},
 "Tags": {
-   "tags": ['@meta'],
+   "tags": ['@template'],
    "content": """$$[Ways to categorize and group articles.]$$
 
 **Tags** allow you to group articles together in categories.
@@ -357,16 +389,17 @@ You can also see a list of tags in the **Tags** tab in the sidebar.
 To link to a *tag*, use `/tag/tag_name` as your target.
 
 
-`[[/tag/@meta]]` - [[/tag/@meta]]
+`[[/tag/@template]]` - [[/tag/@template]]
 
 # Special `@` tags
 
 Tag names beginning with an `@` are used for tags that have system functions.
 
-* `@meta`: Used to tag articles that are part of a wiki's basic structure. When a blank wiki is created from an existing wiki as a template, all articles tagged `@meta` are created automatically in the new wiki.
-* `@template`: Used to tag articles that can be used as a template for other articles in the same wiki. For instance, a blank character sheet could be tagged `@template`."""},
+* `@template`: Used to tag articles that are part of a wiki's basic structure. When a blank wiki is created from an existing wiki as a template, all articles tagged `@template` are created automatically in the new wiki (although by default only their titles and metadata are copied).
+* `@form`: Used to tag articles that can be used as a blank form for other articles in the same wiki. For instance, a blank character sheet could be tagged `@form`.
+* `@asis`: Used to tag articles that are to be copied with their full text when used with `@template`. See [[Forms and templates]] for more information."""},
 "What's a wiki?": {
-   "tags": ['@meta'],
+   "tags": ['@template'],
    "content": """$$[A quick introduction to wikis, and why to use them for creative projects.]$$
 
 A *wiki* is a system for storing and interlinking web documents, using a text format that makes writing and editing documents easy and fast.  [Wikipedia](https://www.wikipedia.org) popularized the concept of the wiki, and many other projects -- not just wiki sites, but the underlying wiki *software* -- have taken inspiration from the same idea.
@@ -379,7 +412,7 @@ If you take notes on paper, or in a word processing program -- Notepad, Word, et
 
 A wiki provides a better paradigm for holding and organizing freeform data. You can write things down first, and then gradually impose structure on your data as you go along. Documents can be [linked](Linking) between each other freely, as with web pages (since they *are* web pages!), and can be [tagged](Tagging and metadata) to give them organization and structure. What's more, once you find a structure you're comfortable with, you can turn that structure into a template you can use for future projects that have the same basic outlines."""},
 "Wiki formatting": {
-   "tags": ['@meta'],
+   "tags": ['@template'],
    "content": """$$[How articles are written and marked up.]$$
 
 This wiki uses the Markdown formatting system, with a few changes. If you're already familiar with Markdown, you should be able to use most of its functionality, but for your convenience here's a rundown of how to add all the formatting supported.
