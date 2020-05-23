@@ -41,6 +41,7 @@ from typing import Union
 home_template = Template(file="home.html")
 article_template = Template(file="article.html")
 wiki_edit_template = Template(file="wiki_edit.html")
+wiki_clone_template = Template(file="wiki_clone.html")
 article_edit_template = Template(file="article_edit.html")
 article_preview_template = Template(file="includes/article_core.html")
 article_history_template = Template(file="article_history.html")
@@ -205,7 +206,7 @@ async def new_wiki_save(env: Request):
         )
 
     wiki = Wiki.new_wiki(wiki_title, wiki_description, author, first_wiki=False)
-    return redirect(wiki.link)    
+    return redirect(wiki.link)
 
 
 ######################################################################
@@ -278,6 +279,73 @@ async def wiki_settings_edit(env: Request, wiki: Wiki, user: Author):
         ),
         headers=default_headers,
     )
+
+
+@route(f"{Wiki.PATH}/clone", RouteType.asnc_local)
+@wiki_env
+async def clone_wiki(env: Request, wiki: Wiki, user: Author):
+
+    return Response(
+        wiki_clone_template.render(
+            wiki=wiki, user=user, page_title=f"Create new wiki from existing wiki"
+        )
+    )
+
+
+@route(f"{Wiki.PATH}/clone", RouteType.asnc_local, action="POST")
+@wiki_env
+async def clone_wiki_confirm(env: Request, wiki: Wiki, user: Author):
+
+    new_wiki = Wiki.new_wiki(
+        f"New wiki created from {wiki.title}", "", user, empty=True
+    )
+
+    # TODO: move to models
+
+    for article in wiki.template:
+        if article.has_tag("@asis") or article.has_tag("@form"):
+            article_content = article.content
+        else:
+            article_content = ""
+            blurb = article.get_metadata("@blurb")
+            if blurb:
+                extract_blurb_cleared = article.metadata_cleared_re.search(
+                    article.content
+                )
+                if extract_blurb_cleared:
+                    article_content = extract_blurb_cleared[0]
+                else:
+                    extract_blurb = article.metadata_re.search(article.content)
+                    if extract_blurb:
+                        article_content = extract_blurb[0]
+
+        new_article = Article(
+            wiki=new_wiki, author=user, title=article.title, content=article_content
+        )
+        new_article.save()
+
+        # FIXME: I thought article.tags gave us tags, not associations
+
+        for tag in article.tags:
+            new_article.add_tag(tag.tag.title)
+
+        for metadata in article.metadata_not_autogen:
+            new_article.set_metadata(metadata.key, metadata.value)
+
+        new_article.update_index()
+        new_article.update_links()
+        new_article.update_autogen_metadata()
+
+        # FIXME: use existing article if any has already been created
+
+        if article.has_tag("@form"):
+            make_auto = new_article.get_metadata("make-auto")
+            if make_auto:
+                new_article.make_from_form(make_auto)
+
+    new_wiki.invalidate_cache()
+
+    return redirect(new_wiki.edit_link)
 
 
 @route(f"{Wiki.PATH}/delete", RouteType.asnc_local)
@@ -384,7 +452,10 @@ async def wiki_search(env: Request, wiki: Wiki, user: Author):
 
             article_contents_result = (
                 wiki.articles.select()
-                .where(Article.revision_of.is_null(), Article.id << _article_contents_result)
+                .where(
+                    Article.revision_of.is_null(),
+                    Article.id << _article_contents_result,
+                )
                 .order_by(SQL("title COLLATE NOCASE"))
             )
 
@@ -533,39 +604,35 @@ async def article_display(env: Request, wiki: Wiki, user: Author, article: Artic
 
     if article.id is None:
         try:
-            template_tag = Tag.select(Tag.id).where(
-                Tag.wiki == wiki, Tag.title == "@template"
+            form_tag = Tag.select(Tag.id).where(Tag.wiki == wiki, Tag.title == "@form")
+
+            tagged_as_form = TagAssociation.select(TagAssociation.article).where(
+                TagAssociation.tag << form_tag
             )
 
-            tagged_as_template = TagAssociation.select(TagAssociation.article).where(
-                TagAssociation.tag << template_tag
-            )
-
-            templates = wiki.articles_alpha.select().where(
-                Article.id << tagged_as_template
-            )
+            forms = wiki.articles_alpha.select().where(Article.id << tagged_as_form)
 
         except (
             Tag.DoesNotExist,
             TagAssociation.DoesNotExist,
             Article.DoesNotExist,
         ) as e:
-            templates = ""
+            forms_txt_list = ""
         else:
-            if templates.count():
-                template_list = [
-                    "<p>You can also create this article using a template:</p><hr/><ul>"
+            if forms.count():
+                form_list = [
+                    "<p>You can also create this article using a form article:</p><hr/><ul>"
                 ]
-                for template in templates:
-                    template_list.append(
-                        f'<li><a href="{article.template_creation_link(template)}">{template.title}</a></li>'
+                for form in forms:
+                    form_list.append(
+                        f'<li><a href="{article.form_creation_link(form)}">{form.title}</a></li>'
                     )
-                template_list.append("</ul>")
-                templates = "".join(template_list)
+                form_list.append("</ul>")
+                forms_txt_list = "".join(form_list)
             else:
-                templates = ""
+                forms_txt_list = ""
 
-        article.content = f'This article does not exist. Click the <a class="autogenerate" href="{article.edit_link}">edit link</a> to create this article.{templates}'
+        article.content = f'This article does not exist. Click the <a class="autogenerate" href="{article.edit_link}">edit link</a> to create this article.{forms_txt_list}'
 
     result = article_template.render(
         articles=[article], page_title=f"{article.title} ({wiki.title})", wiki=wiki
@@ -576,22 +643,13 @@ async def article_display(env: Request, wiki: Wiki, user: Author, article: Artic
     return Response(result, headers=default_headers,)
 
 
-@route(f"{Wiki.PATH}/new_from_template/<template>", RouteType.asnc_local)
+@route(f"{Wiki.PATH}/new_from_form/<form>", RouteType.asnc_local)
 @wiki_env
-async def article_new_from_template(
-    env: Request, wiki: Wiki, user: Author, template: str
-):
-    template_text = (
-        wiki.articles.where(Article.title == wiki.url_to_title(template)).get().content
-    )
-
-    article = Article(title="Untitled", content=template_text, author=user, wiki=wiki)
-
-    article.save()
-
-    wiki.invalidate_cache()
-
-    return redirect(article.edit_link)
+async def article_new_from_form(env: Request, wiki: Wiki, user: Author, form: str):
+    form_article = wiki.articles.where(Article.title == wiki.url_to_title(form)).get()
+    
+    new_article = form_article.make_from_form("Untitled")
+    return redirect(new_article.edit_link)
 
 
 @route(f"{Wiki.PATH}{Article.PATH}/revision/<revision_id>", RouteType.asnc_local)

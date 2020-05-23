@@ -261,7 +261,7 @@ class Wiki(BaseModel):
         Wiki.article_cache = {}
 
     @classmethod
-    def new_wiki(cls, title, description, author, first_wiki=False):
+    def new_wiki(cls, title, description, author, first_wiki=False, empty=False):
         """
         Create a new wiki with the provided title, description, and author.
         """
@@ -291,13 +291,14 @@ class Wiki(BaseModel):
                 new_article.update_autogen_metadata()
 
         else:
-            new_article = Article.default(new_wiki, author)
-            new_article.save()
+            if not empty:
+                new_article = Article.default(new_wiki, author)
+                new_article.save()
 
-            new_article.add_tag("@meta")
-            new_article.update_index()
-            new_article.update_links()
-            new_article.update_autogen_metadata()
+                new_article.add_tag("@template")
+                new_article.update_index()
+                new_article.update_links()
+                new_article.update_autogen_metadata()
 
         return new_wiki
 
@@ -407,13 +408,16 @@ class Wiki(BaseModel):
         return self.recent_articles()[0].last_edited.strftime(ARTICLE_TIME_FORMAT)
 
     def articles_tagged_with(self, tag):
-        tag_q = Tag.get(Tag.title == tag, Tag.wiki == self)
-        tag_assoc = TagAssociation.select(TagAssociation.article).where(
-            TagAssociation.tag == tag_q
-        )
-        return self.articles.where(Article.id << tag_assoc).order_by(
-            Article.title.asc()
-        )
+        try:
+            tag_q = Tag.get(Tag.title == tag, Tag.wiki == self)
+            tag_assoc = TagAssociation.select(TagAssociation.article).where(
+                TagAssociation.tag == tag_q
+            )
+            return self.articles.where(Article.id << tag_assoc).order_by(
+                Article.title.asc()
+            )
+        except Tag.DoesNotExist:
+            return []
 
     @property
     def articles_alpha(self):
@@ -438,6 +442,18 @@ class Wiki(BaseModel):
     @property
     def articles_draft_only(self):
         return self.articles_main_only.where(~Article.draft_of.is_null())
+
+    @property
+    def template(self):
+        template_articles = []
+
+        articles = self.articles_tagged_with("@template")
+        if articles:
+            template_articles = articles.where(
+                Article.revision_of.is_null(), Article.draft_of.is_null()
+            )
+
+        return template_articles
 
 
 class Author(BaseModel):
@@ -509,8 +525,28 @@ class Article(BaseModel):
         self.clear_index()
         ArticleIndex(rowid=self.id, content=self.content).save()
 
-    def template_creation_link(self, template):
-        return f"{self.wiki.link}/new_from_template/{self.title_to_url(template.title)}"
+    def form_creation_link(self, form):
+        return f"{self.wiki.link}/new_from_form/{self.title_to_url(form.title)}"
+    
+    def make_from_form(self, new_title):
+        new_form_article = Article(
+            title=new_title, content=self.content, author=self.author, wiki=self.wiki
+        )
+        new_form_article.save()
+
+        for tag in self.tags:
+            if tag.tag.title not in ('@form','@template'):
+                new_form_article.add_tag(tag.tag.title)
+
+        for metadata in self.metadata_not_autogen:
+            new_form_article.set_metadata(metadata.key, metadata.value)
+
+        new_form_article.update_index()
+        new_form_article.update_links()
+        new_form_article.update_autogen_metadata()        
+        new_form_article.wiki.invalidate_cache()
+
+        return new_form_article
 
     def update_autogen_metadata(self):
         if getattr(self, "autogen_metadata", None) is None:
@@ -733,14 +769,6 @@ class Article(BaseModel):
             new_link = MediaLinks(media=media, article=self)
 
             new_link.save()
-
-    def get_metadata_old(self):
-        """
-        Extracts only the RAW metadata from an article.
-        """
-        md = markdown.Markdown(extensions=["markdown.extensions.meta"])
-        md.convert(self.content)
-        return md.Meta
 
     @property
     def formatted(self):

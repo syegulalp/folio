@@ -46,10 +46,10 @@
 <small><b>{{article.author.name if article.author else ''}}</b> {{article.formatted_date}}</small>
 <hr />
 % end
-% if article.has_tag('@template'):
+% if article.has_tag('@form'):
 % new_article = article.__class__(title='Untitled',wiki=article.wiki, author=article.author)
 <div class="wiki-create-from-template">
-<a href="{{new_article.template_creation_link(article)}}"><button type="button" class="btn btn-sm btn-success">Create new article with this template</button></a><hr/>
+<a href="{{new_article.form_creation_link(article)}}"><button type="button" class="btn btn-sm btn-success">Create new article from this form article</button></a><hr/>
 </div>
 % end
 <div class="wiki-article-container">
