@@ -1159,7 +1159,7 @@ def create_db():
 
     metadata = System.set_metadata("schema", DB_SCHEMA)
 
-    Wiki.new_wiki("Welcome to Folio", "", new_admin, first_wiki=True)
+    Wiki.new_wiki("Welcome to Folio", "Introduction and documentation for your personal wiki.", new_admin, first_wiki=True)
 
     ArticleIndex.rebuild()
     ArticleIndex.optimize()
