@@ -6,7 +6,8 @@
 
 ### New features
 
-* The documentation is now feature-complete.
+* The first full version of Folio's internal documentation is complete. When you launch Folio for the first time, it'll create a new wiki with instructions pre-loaded into it.
+* You can now create new wikis using existing ones as templates.
 * You can now use the `$$[ ]$$` tags to specify auto-generated metadata that is not shown in the underlying article text.
 * The link insert function in the editor now lets you specify what text to use when you insert the link. By default the text is the topmost item in the link search box.
 * Links now respect anchors. For instance, `[[A link#An anchor]]` will link to the anchor `An anchor` on the article named `A link`.
