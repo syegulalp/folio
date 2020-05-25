@@ -136,11 +136,23 @@ You'll be presented with a list of all the articles that will be used to create 
 
 ## Special tags for templates
 
+### `@template`
+
 All pages tagged with `@template` will be created in the new wiki. However, *only the page's metadata (such as its blurb)* will be copied to the new wiki, not the article text. This way, you can use the *structure* of a wiki, rather than its actual *contents*, as the basis for the new wiki.
 
-However, if you want to have a `@template` page copy its full text as-is, just add the `@asis` tag to a `@template` page.
+### `@asis`
 
-If you have a `@form` page tagged as `@template`, it will also be copied into the new wiki. But if you also want to have a new page automatically generated in the wiki from that form, you can add a metadata entry to the article with the key `@make-auto` and the value being the name of the newly created article from the form."""},
+if you want to have a `@template` page copy its full text as-is, including metadata references, just add the `@asis` tag to a `@template` page.
+
+### `@make-auto`
+
+If you have a `@form` page tagged as `@template`, it will also be copied into the new wiki. But if you also want to have a new page automatically generated in the wiki from that form, you can add a metadata entry to the article with the key `@make-auto` and the value being the name of the newly created article from the form.
+
+## Special metadata for templates
+
+### `@default`
+
+If you have an article with a metadata entry (not a tag) named `@default`, the value of that entry will be used to populate the newly created article. This is useful if you want to have boilerplate text in an article when a wiki is newly created, but don't want to make that article into a form."""},
 "Image management": {
    "tags": ['@template'],
    "content": """$$[How to upload images into a wiki and display them in articles.]$$
