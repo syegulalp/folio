@@ -841,7 +841,7 @@ async def article_edit(
                     revision.save()
                     revision.update_links()
                     revision.update_autogen_metadata()
-                    revision.copy_metdata_from(new_article)
+                    revision.copy_metadata_from(new_article)
                     revision.copy_tags_from(new_article)
 
                 if article.new_title:
