@@ -11,6 +11,8 @@
         <p>To insert an image from the clipboard, click here, then paste.</p>
       </div>
       <hr />
+      {{!paginator}}
+      <p>
       <ul class="list-unstyled">
         % if media.count()==0:
         [<i>No media in this wiki. Drag images anywhere onto this page to upload media.</i>]
@@ -26,6 +28,8 @@
         % end
         % end
       </ul>
+      <p>
+      {{!paginator}}
       <hr />
     </div>
     <div id="sidebar" class="sidebar-col">

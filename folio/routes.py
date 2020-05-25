@@ -37,6 +37,7 @@ from utils import Message, Error
 from peewee import fn, SQL
 from pathlib import Path
 from typing import Union
+from urllib.parse import urlencode
 
 home_template = Template(file="home.html")
 article_template = Template(file="article.html")
@@ -1222,9 +1223,45 @@ async def static_content(env: Request, filename: str):
 @wiki_env
 async def wiki_media(env: Request, wiki: Wiki, user: Author):
 
+    media = wiki.media_alpha
+
+    search = env.params.get('search',[None])[0]
+    if search:        
+        media = media.where(Media.file_path.contains(search))
+    else:
+        search=''
+
+    page = int(env.params.get('p',[1])[0])
+
+    last = (media.count()//5)+1
+
+    if page == -1 or page > last:
+        page = last
+    
+    previous_page = max(page-1,1)
+    next_page = min(page+1, last)
+    
+    media = media.paginate(page,5)
+
+    first_url = urlencode({"p":1, "search":search})
+    previous_url = urlencode({"p":previous_page, "search":search})
+    next_url = urlencode({"p":next_page, "search":search})
+    last_url = urlencode({"p":-1, "search":search})
+
+    paginator = f"""
+    <div class="btn-group btn-group-sm" role="group">
+    <a class="btn btn-info" role="button" href="?{first_url}">First</a>
+    <a class="btn btn-info" role="button" href="?{previous_url}">Previous</a>
+    <a class="btn btn-secondary" role="button" href="#">{page}/{last}</a>
+    <a class="btn btn-info" role="button" href="?{next_url}">Next</a>
+    <a <a class="btn btn-info" role="button" href="?{last_url}">Last</a>
+    </div>
+    """
+
     return Response(
         wiki_media_template.render(
-            wiki=wiki, media=wiki.media_alpha, page_title=f"Media ({wiki.title})"
+            wiki=wiki, media=media, page_title=f"Media ({wiki.title})",
+            paginator = paginator
         ),
         headers=default_headers,
     )
