@@ -18,7 +18,7 @@
 
             <label for="media-filename">Filename (edit to change):</label>
 
-            <div id="media-filename" class="input-group mb-3">
+            <div id="media-filename-div" class="input-group mb-3">
               <input class="form-control form-control-lg" placeholder="{{filename_body}}" id="media-filename"
                 name="media-filename" value="{{filename_body}}">
 
@@ -26,6 +26,12 @@
                 <span class="input-group-text" id="basic-addon2">.{{filename_ext}}</span>
               </div>
 
+            </div>
+
+            <label for="media-datetime">Date uploaded:</label>
+
+            <div id="media-datetime-div" class="input-group mb-3">
+              <input class="form-control form-control-lg" placeholder="{{filename_body}}" id="media-datetime" value="{{media.date_uploaded}}">
             </div>
 
             <div class="input-group mb-3">

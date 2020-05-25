@@ -7,6 +7,25 @@ function reset_msg() {
     d.hide();
 }
 
+function show_msg(text, css_class, timeout = 3000, html = false) {
+    d = $("#drop-message");
+    if (html) {
+        d.html(text);
+    }
+    else {
+        d.text(text)
+    }
+    d.prop("class", "alert alert-" + css_class)
+    d.show();
+    clearTimeout(drop_timeout);
+    if (timeout > 0) {
+        drop_timeout = setTimeout(function () { d.fadeOut(); }, timeout);
+    }
+    else {
+        d.html(d.html() + "<p><a href='#' class='small'>Close this message</a></p>")
+    }
+}
+
 function is_file(e) {
     return e.originalEvent.dataTransfer.types[0] == "Files";
 }
@@ -59,31 +78,45 @@ $("#drop-target").on('drop', function (e) {
         $("#drop-target").hide();
         reset_msg();
 
-        filename = e.originalEvent.dataTransfer.files[0].name;
+        var files = e.originalEvent.dataTransfer.files;
 
-        var fd = new FormData();
-        fd.append('file', e.originalEvent.dataTransfer.files[0]);
-        fd.append('filename', filename);
+        if (files.length > 0) {
 
-        d = $("#drop-message");
+            var status = true
 
-        $.ajax({
-            type: 'POST',
-            url: upload_path,
-            data: fd,
-            processData: false,
-            contentType: false
-        })
-            .done(function () {
-                d.text("Image uploaded successfully.");
-                d.prop("class", "alert alert-success")
-            }).fail(function () {
-                d.text("Error uploading image.");
-                d.prop("class", "alert alert-danger")
-            }).always(function () {
-                d.show();
-                drop_timeout = setTimeout(function () { d.fadeOut(); }, 1000);
-            });
+            for (var i = 0; i < files.length; i++) {
+                file = files[i];
+                console.log(file);
+
+                var fd = new FormData();
+                fd.append('file', file);
+                fd.append('filename', file.name);
+
+                d = $("#drop-message");
+
+                $.ajax({
+                    type: 'POST',
+                    url: upload_path,
+                    data: fd,
+                    processData: false,
+                    contentType: false
+                })
+                    .done(function () { })
+                    .fail(function () {
+                        status = false
+                    })
+                    .always(function () { });
+
+            }
+
+            if (status) {
+                show_msg(files.length + " files uploaded successfully.<br><a href='"+media_path+"'>Click here to view uploads.</a>", "success", timeout=0, html=true)
+            }
+            else {
+                show_msg("Some files did not upload.", "danger")
+            }
+
+        }
 
     }
 });
