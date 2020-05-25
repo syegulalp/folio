@@ -1,5 +1,19 @@
 # Changelog
 
+## HEAD
+
+**This version has a breaking schema from the previous versions.**
+
+### New features
+
+* You can now drag and drop multiple images to upload.
+* Image upload dates and times are now recorded.
+* Template creation now allows `@default`-tagged autogen metadata to populate articles with text, without having to make them into form articles.
+
+### Bugfixes
+
+* Some issues with how text rendered in tables has been fixed.
+
 ## [0.0.4-alpha](https://github.com/syegulalp/folio/releases/tag/0.0.4-alpha)
 
 **This version has a breaking schema from the previous versions.**
