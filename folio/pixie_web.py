@@ -35,7 +35,7 @@ from pathlib import Path
 from functools import lru_cache
 from email import utils as email_utils
 
-from urllib.parse import unquote_plus
+from urllib.parse import unquote_plus, parse_qs, urlparse
 from http import cookies as http_cookies
 from mimetypes import guess_type
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
@@ -159,16 +159,13 @@ class Request:
 
     @property
     def params(self):
+        """
+        Provide URL parameters as a dictionary.
+        Use cached copy if available.
+        """
         if self._param_dict:
             return self._param_dict
-        self._param_dict = {}
-        p1 = self.headers["PATH_INFO"].split("?", 1)
-        if len(p1) < 2:
-            return self._param_dict
-        p2 = p1[1].split("&")
-        for _ in p2:
-            k = _.split("=")
-            self._param_dict[k[0]] = k[1]
+        self._param_dict = parse_qs(urlparse(self.headers["PATH_INFO"]).query)
         return self._param_dict
 
     @property
