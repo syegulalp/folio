@@ -59,8 +59,14 @@ class DocTagParser(HTMLParser):
             for k, v in attrs:
                 if k == "tag":
                     try:
-                        self.query = self.article.wiki.articles_tagged_with(v).order_by(
-                            SQL("title COLLATE NOCASE")
+                        # TODO: this kind of construction happens often enough that we should probably make a special constructor
+                        self.query = (
+                            self.article.wiki.articles_tagged_with(v)
+                            .where(
+                                Article.draft_of.is_null(),
+                                Article.revision_of.is_null(),
+                            )
+                            .order_by(SQL("title COLLATE NOCASE"))
                         )
                     except Exception:
                         error = v
@@ -83,7 +89,9 @@ class DocTagParser(HTMLParser):
                 if k in ("doc", "article", "item"):
                     try:
                         self.query = self.article.wiki.articles.where(
-                            Article.title == v
+                            Article.title == v,
+                            Article.draft_of.is_null(),
+                            Article.revision_of.is_null(),
                         ).get()
                     except Article.DoesNotExist:
                         error = v
@@ -530,7 +538,7 @@ class Article(BaseModel):
 
     def form_creation_link(self, form):
         return f"{self.wiki.link}/new_from_form/{self.title_to_url(form.title)}"
-    
+
     def make_from_form(self, new_title):
         new_form_article = Article(
             title=new_title, content=self.content, author=self.author, wiki=self.wiki
@@ -538,7 +546,7 @@ class Article(BaseModel):
         new_form_article.save()
 
         for tag in self.tags:
-            if tag.tag.title not in ('@form','@template'):
+            if tag.tag.title not in ("@form", "@template"):
                 new_form_article.add_tag(tag.tag.title)
 
         for metadata in self.metadata_not_autogen:
@@ -546,7 +554,7 @@ class Article(BaseModel):
 
         new_form_article.update_index()
         new_form_article.update_links()
-        new_form_article.update_autogen_metadata()        
+        new_form_article.update_autogen_metadata()
         new_form_article.wiki.invalidate_cache()
 
         return new_form_article
@@ -1011,7 +1019,7 @@ class Article(BaseModel):
                         content = self._format_table(content)
                         content = self.strike_re.sub(self._strike_re, content)
                         content = self.media_re.sub(self._media_re, content)
-                        content = self.link_re.sub(self._link_re, content)                        
+                        content = self.link_re.sub(self._link_re, content)
                         content = self.checkbox_re.sub(self._checkbox_re, content)
 
                         inline_output.append(content)
@@ -1086,7 +1094,7 @@ class Media(BaseModel):
     wiki = ForeignKeyField(Wiki, backref="media")
     file_path = TextField()
     description = TextField(null=True)
-    date_uploaded = DateTimeField(default = datetime.datetime.now)
+    date_uploaded = DateTimeField(default=datetime.datetime.now)
 
     @classmethod
     def exists(cls, file_path, wiki):
@@ -1163,7 +1171,12 @@ def create_db():
 
     metadata = System.set_metadata("schema", DB_SCHEMA)
 
-    Wiki.new_wiki("Welcome to Folio", "Introduction and documentation for your personal wiki.", new_admin, first_wiki=True)
+    Wiki.new_wiki(
+        "Welcome to Folio",
+        "Introduction and documentation for your personal wiki.",
+        new_admin,
+        first_wiki=True,
+    )
 
     ArticleIndex.rebuild()
     ArticleIndex.optimize()
