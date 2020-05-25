@@ -312,7 +312,7 @@ async def clone_wiki_confirm(env: Request, wiki: Wiki, user: Author):
             matches = article.metadata_all_re.finditer(article.content)
             for match in matches:
                 article_content.append(match[0])
-            article_content = '\n'.join(article_content)
+            article_content = "\n".join(article_content)
 
         new_article = Article(
             wiki=new_wiki, author=user, title=article.title, content=article_content
@@ -336,7 +336,7 @@ async def clone_wiki_confirm(env: Request, wiki: Wiki, user: Author):
             if make_auto:
                 new_article.make_from_form(make_auto)
 
-        default = new_article.get_metadata('@default')
+        default = new_article.get_metadata("@default")
         if default:
             new_article.content += default
             new_article.save()
@@ -645,7 +645,7 @@ async def article_display(env: Request, wiki: Wiki, user: Author, article: Artic
 @wiki_env
 async def article_new_from_form(env: Request, wiki: Wiki, user: Author, form: str):
     form_article = wiki.articles.where(Article.title == wiki.url_to_title(form)).get()
-    
+
     new_article = form_article.make_from_form("Untitled")
     return redirect(new_article.edit_link)
 
@@ -1230,6 +1230,37 @@ async def wiki_media(env: Request, wiki: Wiki, user: Author):
     )
 
 
+@route(f"{Wiki.PATH}/media-paste", RouteType.asnc_local, action="POST")
+@wiki_env
+async def wiki_media_paste(env: Request, wiki: Wiki, user: Author):
+
+    paste_file = env.files.get("file")
+    if not paste_file:
+        return simple_response("", code="500")
+
+    file_data = paste_file[1]
+    file_id = 0
+    
+    while True:        
+        filename = f"{wiki.title}_{file_id}.png"
+        if not Path(wiki.data_path, filename).exists():
+            break
+        file_id+=1
+
+    with open(Path(wiki.data_path, filename), "wb") as f:
+        f.write(file_data)
+
+    new_image = Media(
+        wiki = wiki,
+        file_path = filename,        
+    )
+    new_image.save()
+
+    return simple_response(
+        new_image.edit_link
+    )
+
+
 @route(f"{Wiki.PATH}/media/<file_name>", RouteType.asnc_local)
 @wiki_env
 async def media_file(env: Request, wiki: Wiki, user: Author, file_name: str):
@@ -1334,7 +1365,7 @@ async def media_file_delete(env: Request, wiki: Wiki, user: Author, media: Media
     warning = f'Media "{Unsafe(media.file_path)}" is going to be deleted! Deleted media are GONE FOREVER.'
 
     cover_media_id = wiki.get_metadata("cover_img")
-    
+
     if cover_media_id and int(cover_media_id) == media.id:
 
         warning += f"<hr>Also note: This media is in use as the cover image for this wiki. Deleting it will cause the cover image to revert to the default."

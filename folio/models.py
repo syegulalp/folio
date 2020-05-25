@@ -390,6 +390,10 @@ class Wiki(BaseModel):
     def media_link(self):
         return f"{self.link}/media"
 
+    @property
+    def media_paste_link(self):
+        return f"{self.link}/media-paste"
+
     @classmethod
     def default(cls):
         return cls(

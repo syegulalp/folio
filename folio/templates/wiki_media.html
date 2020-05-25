@@ -7,7 +7,10 @@
   <div class="row">
     <div class="col">
       <h2>Media for {{wiki.title}}</h2>
-      <hr/>
+      <div id="paste-area">
+        <p>To insert an image from the clipboard, click here, then paste.</p>
+      </div>
+      <hr />
       <ul class="list-unstyled">
         % if media.count()==0:
         [<i>No media in this wiki. Drag images anywhere onto this page to upload media.</i>]
@@ -23,7 +26,7 @@
         % end
         % end
       </ul>
-      <hr/>
+      <hr />
     </div>
     <div id="sidebar" class="sidebar-col">
       % include includes/sidebar.html
@@ -33,3 +36,47 @@
 </main>
 
 % include includes/footer.html
+
+<script>
+  var media_paste = "{{wiki.media_paste_link}}";
+
+  $("#paste-area").on("paste", function (e) {
+    var items = (e.clipboardData || e.originalEvent.clipboardData).items;
+    valid = false;
+    for (index in items) {
+      var item = items[index];
+      console.log(item);
+      if (item.kind === 'file') {
+        
+        valid = true;
+        var blob = item.getAsFile();
+        console.log(blob);
+        
+        var reader = new FileReader();
+        reader.readAsDataURL(blob);
+        
+        var formData = new FormData();
+        formData.append("file", blob, blob.name)
+        
+        console.log(formData);
+        $.ajax({
+          type: "POST",
+          url: media_paste,
+          data: formData,
+          contentType: false,
+          processData: false,
+          success: function(data) {
+            show_msg("<p>Pasted image of " + blob.size + " bytes.<br/><a href='"+data+"'>Click here</a> to see the uploaded image.</p>", "alert alert-success", timeout = 0, html = true);
+          }
+        }
+        );
+        
+        
+
+      }
+    }
+    if (!valid) {
+      show_msg("Image pastes must be an image.", "alert alert-danger");
+    }
+  });
+</script>
