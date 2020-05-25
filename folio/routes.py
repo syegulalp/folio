@@ -304,20 +304,15 @@ async def clone_wiki_confirm(env: Request, wiki: Wiki, user: Author):
 
     for article in wiki.template:
         if article.has_tag("@asis") or article.has_tag("@form"):
+            # copy article text
             article_content = article.content
         else:
-            article_content = ""
-            blurb = article.get_metadata("@blurb")
-            if blurb:
-                extract_blurb_cleared = article.metadata_cleared_re.search(
-                    article.content
-                )
-                if extract_blurb_cleared:
-                    article_content = extract_blurb_cleared[0]
-                else:
-                    extract_blurb = article.metadata_re.search(article.content)
-                    if extract_blurb:
-                        article_content = extract_blurb[0]
+            # copy only autogen metadata
+            article_content = []
+            matches = article.metadata_all_re.finditer(article.content)
+            for match in matches:
+                article_content.append(match[0])
+            article_content = '\n'.join(article_content)
 
         new_article = Article(
             wiki=new_wiki, author=user, title=article.title, content=article_content
@@ -336,12 +331,15 @@ async def clone_wiki_confirm(env: Request, wiki: Wiki, user: Author):
         new_article.update_links()
         new_article.update_autogen_metadata()
 
-        # FIXME: use existing article if any has already been created
-
         if article.has_tag("@form"):
             make_auto = new_article.get_metadata("@make-auto")
             if make_auto:
                 new_article.make_from_form(make_auto)
+
+        default = new_article.get_metadata('@default')
+        if default:
+            new_article.content += default
+            new_article.save()
 
     new_wiki.invalidate_cache()
 
@@ -1335,7 +1333,10 @@ async def media_file_delete(env: Request, wiki: Wiki, user: Author, media: Media
 
     warning = f'Media "{Unsafe(media.file_path)}" is going to be deleted! Deleted media are GONE FOREVER.'
 
-    if int(wiki.get_metadata("cover_img")) == media.id:
+    cover_media_id = wiki.get_metadata("cover_img")
+    
+    if cover_media_id and int(cover_media_id) == media.id:
+
         warning += f"<hr>Also note: This media is in use as the cover image for this wiki. Deleting it will cause the cover image to revert to the default."
 
     if media.in_articles.count():
@@ -1359,7 +1360,8 @@ async def media_file_delete_confirm(
     env: Request, wiki: Wiki, user: Author, media: Media, delete_key: str
 ):
 
-    if int(wiki.get_metadata("cover_img")) == media.id:
+    cover_media_id = wiki.get_metadata("cover_img")
+    if cover_media_id and int(cover_media_id) == media.id:
         wiki.delete_metadata("cover_img")
 
     media.delete_()
