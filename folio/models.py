@@ -498,6 +498,9 @@ class Article(BaseModel):
     metadata_cleared_re = re.compile(
         r"(\$\$\[(.*?)\]\$\$)+(\(([^)]*?)\))?", re.MULTILINE | re.DOTALL
     )
+    metadata_all_re = re.compile(
+        r"(\${1,2}\[(.*?)\]\${1,2})+(\(([^)]*?)\))?", re.MULTILINE | re.DOTALL
+    )
 
     # Everything else
     href_re = re.compile(r'(<a .*?)href="([^"]*?)"([^>]*?>)')
@@ -1005,10 +1008,10 @@ class Article(BaseModel):
                         content = self.function_re.sub(self._function_re, content)
 
                         # then local post-processing
+                        content = self._format_table(content)
                         content = self.strike_re.sub(self._strike_re, content)
                         content = self.media_re.sub(self._media_re, content)
-                        content = self.link_re.sub(self._link_re, content)
-                        content = self._format_table(content)
+                        content = self.link_re.sub(self._link_re, content)                        
                         content = self.checkbox_re.sub(self._checkbox_re, content)
 
                         inline_output.append(content)
@@ -1083,6 +1086,7 @@ class Media(BaseModel):
     wiki = ForeignKeyField(Wiki, backref="media")
     file_path = TextField()
     description = TextField(null=True)
+    date_uploaded = DateTimeField(default = datetime.datetime.now)
 
     @classmethod
     def exists(cls, file_path, wiki):
