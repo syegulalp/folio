@@ -13,6 +13,7 @@
 ### Bugfixes
 
 * Some issues with how text rendered in tables has been fixed.
+* Fixed issue where drafts and revisions incorrectly showed up in `documents` macro results.
 
 ## [0.0.4-alpha](https://github.com/syegulalp/folio/releases/tag/0.0.4-alpha)
 
