@@ -9,6 +9,7 @@
 * You can now drag and drop multiple images to upload.
 * Image upload dates and times are now recorded.
 * Template creation now allows `@default`-tagged autogen metadata to populate articles with text, without having to make them into form articles.
+* The media browser is now paginated.
 
 ### Bugfixes
 
