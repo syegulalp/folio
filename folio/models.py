@@ -821,6 +821,16 @@ class Article(BaseModel):
             link_to_find = self.url_to_title(link_to_find)
             link_test = self.wiki.article_exists(link_to_find)
             link_class = "wiki-link"
+        elif link.startswith(f"{self.wiki.link}/new_from_form/"):
+            link_to_find = link.split(f"{self.wiki.link}/new_from_form/")[1]
+            link_to_render = link
+            link_class = "wiki-link"
+            link_with_opt_name = link_to_find.split("/", 1)
+            if len(link_with_opt_name) > 1:
+                link_to_find = self.url_to_title(link_with_opt_name[0])
+            else:
+                link_to_find = self.url_to_title(link_to_find)
+            link_test = self.wiki.article_exists(link_to_find)
         elif link.startswith(f"/tag/"):
             link_to_find = link.split(f"/tag/")[1]
             link_to_render = f"{self.wiki.link}/tag/{link_to_find}"
