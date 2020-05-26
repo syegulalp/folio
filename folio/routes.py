@@ -23,6 +23,7 @@ from models import (
     Metadata,
     ARTICLE_TIME_FORMAT,
     re,
+    db,
 )
 import asyncio
 import urllib
@@ -74,6 +75,15 @@ class LocalException(Exception):
 
 def get_user():
     return Author.get(Author.name == "Admin")
+
+
+def transaction(func):
+    def wrapper(*a, **ka):
+        with db.atomic():
+            result = func(*a, **ka)
+        return result
+
+    return wrapper
 
 
 def get_wiki(wiki_title):
@@ -181,6 +191,7 @@ async def new_wiki(env: Request):
 
 
 @route("/new", RouteType.asnc_local, action="POST")
+@transaction
 async def new_wiki_save(env: Request):
     author = Author.get(Author.name == "Admin")
 
@@ -234,6 +245,7 @@ async def wiki_home(env: Request, wiki: Wiki, user: Author):
 
 
 @route(f"{Wiki.PATH}/edit", RouteType.asnc_local, action=("GET", "POST"))
+@transaction
 @wiki_env
 async def wiki_settings_edit(env: Request, wiki: Wiki, user: Author):
     action = None
@@ -294,6 +306,7 @@ async def clone_wiki(env: Request, wiki: Wiki, user: Author):
 
 
 @route(f"{Wiki.PATH}/clone", RouteType.asnc_local, action="POST")
+@transaction
 @wiki_env
 async def clone_wiki_confirm(env: Request, wiki: Wiki, user: Author):
 
@@ -364,6 +377,7 @@ async def wiki_delete(env: Request, wiki: Wiki, user: Author):
 
 
 @route(f"{Wiki.PATH}/delete/<delete_key>", RouteType.asnc_local)
+@transaction
 @wiki_env
 async def wiki_delete_confirm(env: Request, wiki: Wiki, user: Author, delete_key: str):
     wiki_title = wiki.title
@@ -373,6 +387,7 @@ async def wiki_delete_confirm(env: Request, wiki: Wiki, user: Author, delete_key
 
 
 @route(f"{Wiki.PATH}/new", RouteType.asnc_local, action=("GET", "POST"))
+@transaction
 @wiki_env
 async def article_new(env: Request, wiki: Wiki, user: Author):
 
@@ -424,6 +439,7 @@ async def article_new(env: Request, wiki: Wiki, user: Author):
 
 
 @route(f"{Wiki.PATH}/search", RouteType.asnc_local, action=("GET", "POST"))
+@transaction
 @wiki_env
 async def wiki_search(env: Request, wiki: Wiki, user: Author):
 
@@ -525,6 +541,7 @@ async def tags_all(env: Request, wiki: Wiki, user: Author):
 
 
 @route(f"{Wiki.PATH}/upload", RouteType.asnc_local, action="POST")
+@transaction
 @wiki_env
 async def upload_to_wiki(env: Request, wiki: Wiki, user: Author):
 
@@ -624,7 +641,7 @@ async def article_display(env: Request, wiki: Wiki, user: Author, article: Artic
                 ]
                 for form in forms:
                     form_list.append(
-                        f'<li><a href="{article.form_creation_link(form)}">{form.title}</a></li>'
+                        f'<li><a href="{article.form_creation_link(form)}/{article.title}">{form.title}</a></li>'
                     )
                 form_list.append("</ul>")
                 forms_txt_list = "".join(form_list)
@@ -643,13 +660,22 @@ async def article_display(env: Request, wiki: Wiki, user: Author, article: Artic
 
 
 @route(f"{Wiki.PATH}/new_from_form/<form>", RouteType.asnc_local)
+@transaction
 @wiki_env
 async def article_new_from_form(env: Request, wiki: Wiki, user: Author, form: str):
+    return new_article_from_form_core(env, wiki, user, form, "Untitled")
+
+@route(f"{Wiki.PATH}/new_from_form/<form>/<title>", RouteType.asnc_local)
+@transaction
+@wiki_env
+async def article_new_from_form_with_title(env: Request, wiki: Wiki, user: Author, form: str, title: str):
+    return new_article_from_form_core(env, wiki, user, form, title)
+
+def new_article_from_form_core(env: Request, wiki: Wiki, user: Author, form: str, title: str):
     form_article = wiki.articles.where(Article.title == wiki.url_to_title(form)).get()
 
-    new_article = form_article.make_from_form("Untitled")
-    return redirect(new_article.edit_link)
-
+    new_article = form_article.make_from_form(wiki.url_to_title(title))
+    return redirect(new_article.edit_link)    
 
 @route(f"{Wiki.PATH}{Article.PATH}/revision/<revision_id>", RouteType.asnc_local)
 @article_env
@@ -720,6 +746,7 @@ async def article_save_ajax(env: Request, wiki_title: str, article_title: str):
 
 
 @route(f"{Wiki.PATH}{Article.PATH}/edit", RouteType.asnc_local, action=("GET", "POST"))
+@transaction
 @article_env
 async def article_edit(
     env: Request, wiki: Wiki, user: Author, article: Article, ajax=False
@@ -881,7 +908,7 @@ async def article_edit(
     if ajax:
         if error:
             return simple_response(str(error))
-        return simple_response(str(Message("Article successfully saved.")))
+        return simple_response(str(Message("Article successfully saved.", color="success")))
 
     article.content = article.content.replace("&", "&amp;")
 
@@ -917,49 +944,6 @@ async def article_delete(env: Request, wiki: Wiki, user: Author, article: Articl
             ],
         ),
         headers=default_headers,
-    )
-
-
-@route(f"{Wiki.PATH}{Article.PATH}/discard-draft", RouteType.asnc_local)
-@article_env
-async def draft_discard(env: Request, wiki: Wiki, user: Author, article: Article):
-
-    if article.id is None:
-        return redirect(article.link)
-
-    if article.draft_of is None:
-        return redirect(article.link)
-
-    warning = f'"{Unsafe(article.title)}" is going to be discarded.'
-
-    if article.content != article.draft_of.content:
-
-        warning += (
-            "<br/>THIS DRAFT HAS MODIFICATIONS THAT WERE NOT SAVED TO THE ARTICLE."
-        )
-
-    return Response(
-        article_template.render(
-            articles=[article],
-            page_title=f"Discard draft: {article.title} ({wiki.title})",
-            wiki=wiki,
-            messages=[
-                Message(
-                    warning, yes=article.discard_draft_confirm_link, no=article.link,
-                )
-            ],
-        ),
-        headers=default_headers,
-    )
-
-
-@route(f"{Wiki.PATH}{Article.PATH}/discard-draft/<delete_key>", RouteType.asnc_local)
-@article_env
-async def draft_discard_confirm(
-    env: Request, wiki: Wiki, user: Author, article: Article, delete_key: str,
-):
-    return await article_delete_confirm.__wrapped__(
-        env, wiki, user, article, delete_key, redirect_to=article.draft_of
     )
 
 
@@ -1000,6 +984,50 @@ async def article_delete_confirm(
             messages=[Error(f'Article "{Unsafe(article.title)}" has been deleted.')],
         ),
         headers=default_headers,
+    )
+
+
+@route(f"{Wiki.PATH}{Article.PATH}/discard-draft", RouteType.asnc_local)
+@transaction
+@article_env
+async def draft_discard(env: Request, wiki: Wiki, user: Author, article: Article):
+
+    if article.id is None:
+        return redirect(article.link)
+
+    if article.draft_of is None:
+        return redirect(article.link)
+
+    warning = f'"{Unsafe(article.title)}" is going to be discarded.'
+
+    if article.content != article.draft_of.content:
+
+        warning += (
+            "<br/>THIS DRAFT HAS MODIFICATIONS THAT WERE NOT SAVED TO THE ARTICLE."
+        )
+
+    return Response(
+        article_template.render(
+            articles=[article],
+            page_title=f"Discard draft: {article.title} ({wiki.title})",
+            wiki=wiki,
+            messages=[
+                Message(
+                    warning, yes=article.discard_draft_confirm_link, no=article.link,
+                )
+            ],
+        ),
+        headers=default_headers,
+    )
+
+
+@route(f"{Wiki.PATH}{Article.PATH}/discard-draft/<delete_key>", RouteType.asnc_local)
+@article_env
+async def draft_discard_confirm(
+    env: Request, wiki: Wiki, user: Author, article: Article, delete_key: str,
+):
+    return await article_delete_confirm.__wrapped__(
+        env, wiki, user, article, delete_key, redirect_to=article.draft_of
     )
 
 
@@ -1121,6 +1149,7 @@ async def modal_edit_metadata(env: Request, wiki: Wiki, user: Author, article: A
 
 
 @route(f"{Wiki.PATH}{Article.PATH}/edit-metadata", RouteType.asnc_local, action="POST")
+@transaction
 @article_env
 async def modal_edit_metadata_post(
     env: Request, wiki: Wiki, user: Author, article: Article
@@ -1219,36 +1248,31 @@ async def static_content(env: Request, filename: str):
     return static_file(filename, path="folio/static")
 
 
-@route(f"{Wiki.PATH}/media", RouteType.asnc_local)
-@wiki_env
-async def wiki_media(env: Request, wiki: Wiki, user: Author):
-
-    media = wiki.media_alpha
-
-    search = env.params.get('search',[None])[0]
-    if search:        
+def paginator(env: Request, media: Media):
+    search = env.params.get("search", [None])[0]
+    if search:
         media = media.where(Media.file_path.contains(search))
     else:
-        search=''
+        search = ""
 
-    page = int(env.params.get('p',[1])[0])
+    page = int(env.params.get("p", [1])[0])
 
-    last = (media.count()//5)+1
+    last = (media.count() // 5) + 1
 
     if page == -1 or page > last:
         page = last
-    
-    previous_page = max(page-1,1)
-    next_page = min(page+1, last)
-    
-    media = media.paginate(page,5)
 
-    first_url = urlencode({"p":1, "search":search})
-    previous_url = urlencode({"p":previous_page, "search":search})
-    next_url = urlencode({"p":next_page, "search":search})
-    last_url = urlencode({"p":-1, "search":search})
+    previous_page = max(page - 1, 1)
+    next_page = min(page + 1, last)
 
-    paginator = f"""
+    media = media.paginate(page, 5)
+
+    first_url = urlencode({"p": 1, "search": search})
+    previous_url = urlencode({"p": previous_page, "search": search})
+    next_url = urlencode({"p": next_page, "search": search})
+    last_url = urlencode({"p": -1, "search": search})
+
+    pagination = f"""
     <div class="btn-group btn-group-sm" role="group">
     <a class="btn btn-info" role="button" href="?{first_url}">First</a>
     <a class="btn btn-info" role="button" href="?{previous_url}">Previous</a>
@@ -1258,10 +1282,21 @@ async def wiki_media(env: Request, wiki: Wiki, user: Author):
     </div>
     """
 
+    return media, pagination
+
+
+@route(f"{Wiki.PATH}/media", RouteType.asnc_local)
+@wiki_env
+async def wiki_media(env: Request, wiki: Wiki, user: Author):
+
+    media, pagination = paginator(env, wiki.media_alpha)
+
     return Response(
         wiki_media_template.render(
-            wiki=wiki, media=media, page_title=f"Media ({wiki.title})",
-            paginator = paginator
+            wiki=wiki,
+            media=media,
+            page_title=f"Media ({wiki.title})",
+            paginator=pagination,
         ),
         headers=default_headers,
     )
@@ -1277,25 +1312,20 @@ async def wiki_media_paste(env: Request, wiki: Wiki, user: Author):
 
     file_data = paste_file[1]
     file_id = 0
-    
-    while True:        
+
+    while True:
         filename = f"{wiki.title}_{file_id}.png"
         if not Path(wiki.data_path, filename).exists():
             break
-        file_id+=1
+        file_id += 1
 
     with open(Path(wiki.data_path, filename), "wb") as f:
         f.write(file_data)
 
-    new_image = Media(
-        wiki = wiki,
-        file_path = filename,        
-    )
+    new_image = Media(wiki=wiki, file_path=filename,)
     new_image.save()
 
-    return simple_response(
-        new_image.edit_link
-    )
+    return simple_response(new_image.edit_link)
 
 
 @route(f"{Wiki.PATH}/media/<file_name>", RouteType.asnc_local)
@@ -1322,6 +1352,7 @@ async def media_file_edit(env: Request, wiki: Wiki, user: Author, media: Media):
 
 
 @route(f"{Wiki.PATH}/media/<file_name>/edit", RouteType.asnc_local, action="POST")
+@transaction
 @media_env
 async def media_file_edit_post(env: Request, wiki: Wiki, user: Author, media: Media):
 
@@ -1383,9 +1414,12 @@ async def media_file_edit_post(env: Request, wiki: Wiki, user: Author, media: Me
             pass
 
         else:
+
+            media, pagination = paginator(env, wiki.media_alpha)
+
             return Response(
                 wiki_media_template.render(
-                    wiki=wiki, media=wiki.media_alpha, messages=[note]
+                    wiki=wiki, media=media, messages=[note], paginator=pagination
                 )
             )
 
@@ -1423,6 +1457,7 @@ async def media_file_delete(env: Request, wiki: Wiki, user: Author, media: Media
 
 
 @route(f"{Wiki.PATH}/media/<file_name>/delete/<delete_key>", RouteType.asnc_local)
+@transaction
 @media_env
 async def media_file_delete_confirm(
     env: Request, wiki: Wiki, user: Author, media: Media, delete_key: str
