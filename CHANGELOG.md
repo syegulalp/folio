@@ -6,15 +6,17 @@
 
 ### New features
 
-* You can now drag and drop multiple images to upload.
+* You can now drag and drop multiple images to upload. (The upload note does not yet single them out individually; this is coming later.)
 * Image upload dates and times are now recorded.
 * Template creation now allows `@default`-tagged autogen metadata to populate articles with text, without having to make them into form articles.
 * The media browser is now paginated.
+* The "article not found" page will now pass along the title of the article you were looking for as a parameter to any form pages you might want to create an article with.
 
 ### Bugfixes
 
 * Some issues with how text rendered in tables has been fixed.
 * Fixed issue where drafts and revisions incorrectly showed up in `documents` macro results.
+* Error messages in the editor weren't being thrown if a save action was attempted when the server had stopped running.
 
 ## [0.0.4-alpha](https://github.com/syegulalp/folio/releases/tag/0.0.4-alpha)
 
