@@ -73,6 +73,11 @@ function ajaxSave() {
             setTimeout(function () { $('#flash-message').fadeOut() }, 3000);
             loadPreview();
         },
+        error: function(data){
+            clearDirty();
+            $('#flash-message').html('<div class="alert-box alert alert-warning">Error saving document. (Is the app still running?)</div>');
+            $('#flash-message').fadeIn();
+        },
         complete: function () {
         }
     });
