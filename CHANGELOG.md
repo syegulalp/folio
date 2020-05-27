@@ -1,5 +1,15 @@
 # Changelog
 
+## HEAD
+
+### New features
+
+* You can now paste images from the clipboard directly into the article editor. The image will be uploaded to the wiki, and an image reference will be inserted at the edit point.
+
+### Bugfixes
+
+* Fixed isses with the paginator and the redirection behavior on deleting an image from the image manager.
+
 ## [0.0.5-alpha](https://github.com/syegulalp/folio/releases/tag/0.0.5-alpha)
 
 ### New features
