@@ -1,4 +1,4 @@
-**Folio** is a personal wiki, using Python 3.7+. It's somewhat akin to TiddkyWiki, in that it's intended for single-user use.
+**Folio** is a personal wiki, using Python 3.7+. It's somewhat akin to [TiddlyWiki](https://tiddlywiki.com/), in that it's intended for single-user use.
 
 ![](screenshot.png)
 
