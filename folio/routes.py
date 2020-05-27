@@ -1247,6 +1247,7 @@ def quit(*a):
 async def static_content(env: Request, filename: str):
     return static_file(filename, path="folio/static")
 
+from math import ceil
 
 def paginator(env: Request, media: Media):
     search = env.params.get("search", [None])[0]
@@ -1257,7 +1258,7 @@ def paginator(env: Request, media: Media):
 
     page = int(env.params.get("p", [1])[0])
 
-    last = (media.count() // 5) + 1
+    last = ceil(media.count()/5)
 
     if page == -1 or page > last:
         page = last
@@ -1325,7 +1326,7 @@ async def wiki_media_paste(env: Request, wiki: Wiki, user: Author):
     new_image = Media(wiki=wiki, file_path=filename,)
     new_image.save()
 
-    return simple_response(new_image.edit_link)
+    return simple_response(f"{new_image.edit_link}\n![]({new_image.file_path})")
 
 
 @route(f"{Wiki.PATH}/media/<file_name>", RouteType.asnc_local)
@@ -1407,21 +1408,12 @@ async def media_file_edit_post(env: Request, wiki: Wiki, user: Author, media: Me
             wiki.invalidate_cache()
 
             note = Message(
-                f'Filename "{Unsafe(old_filename)}" successfully renamed to "<a href="{media.edit_link}">{Unsafe(new_filename)}</a>".'
+                f'Filename "{Unsafe(old_filename)}" successfully renamed to "{Unsafe(new_filename)}".'
             )
 
         except LocalException:
             pass
 
-        else:
-
-            media, pagination = paginator(env, wiki.media_alpha)
-
-            return Response(
-                wiki_media_template.render(
-                    wiki=wiki, media=media, messages=[note], paginator=pagination
-                )
-            )
 
     return Response(
         wiki_media_edit_template.render(wiki=wiki, media=media, messages=[note]),
@@ -1471,11 +1463,14 @@ async def media_file_delete_confirm(
 
     wiki.invalidate_cache()
 
+    media_list, pagination = paginator(env, wiki.media_alpha)
+
     return Response(
         wiki_media_template.render(
             wiki=wiki,
-            media=wiki.media_alpha,
+            media=media_list,
             messages=[Error(f'Article "{Unsafe(media.file_path)}" has been deleted.')],
+            paginator=pagination
         )
     )
 

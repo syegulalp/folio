@@ -113,6 +113,10 @@ function documentAddItalic() {
     wrapText($("#article_content")[0], '*', '*');
 }
 
+function documentInsert(txt){
+    document.execCommand('insertText', false, txt);
+}
+
 function openModal(destination) {
     $.ajax({
         url: articleTarget + '/' + destination,
@@ -255,6 +259,8 @@ $("#article_title").on("keypress", function (e) {
 $("#article_content").on("change", function (e) {
     setDirty();
 });
+
+$("#article_content").on("paste", handleImagePaste);
 
 $("#article_content").on("keydown", function (e) {
     if (e.code == 'Tab') {

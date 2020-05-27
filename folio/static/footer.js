@@ -7,7 +7,7 @@ function reset_msg() {
     d.hide();
 }
 
-function show_msg(text, css_class, timeout = 3000, html = false) {
+function show_msg(text, css_class, timeout = 3000, html = false) {    
     d = $("#drop-message");
     if (html) {
         d.html(text);
@@ -22,12 +22,48 @@ function show_msg(text, css_class, timeout = 3000, html = false) {
         drop_timeout = setTimeout(function () { d.fadeOut(); }, timeout);
     }
     else {
-        d.html(d.html() + "<p><a href='#' class='small'>Close this message</a></p>")
+        d.html(d.html() + "<p><a href='#' onclick='$(\"#drop-message\").hide()' class='small'>Close this message</a></p>")
     }
 }
 
 function is_file(e) {
     return e.originalEvent.dataTransfer.types[0] == "Files";
+}
+
+function handleImagePaste(e) {
+    var cd = (e.clipboardData || e.originalEvent.clipboardData);
+    var items = cd.items;
+    item = items[0];
+    valid = false;
+    if (item!=undefined && item.kind === 'file'){
+        e.preventDefault();
+        valid = true;
+        var blob = item.getAsFile();
+        console.log(blob);
+        
+        var reader = new FileReader();
+        reader.readAsDataURL(blob);
+        
+        var formData = new FormData();
+        formData.append("file", blob, blob.name)
+        
+        console.log(formData);
+        $.ajax({
+          type: "POST",
+          url: mediaPaste,
+          data: formData,
+          contentType: false,
+          processData: false,
+          success: function(data) {
+            txt = data.split('\n')            
+            show_msg("<p>Pasted image of " + blob.size + " bytes.<br/><a href='"+txt[0]+"'>Click here</a> to see the uploaded image.</p>", "alert alert-success", timeout = 0, html = true);
+            if (documentInsert!=undefined){
+                documentInsert(txt[1]);
+            }
+          }
+        }
+        );
+    }
 }
 
 $(document).on('dragover', function (e) {
@@ -120,3 +156,4 @@ $("#drop-target").on('drop', function (e) {
 
     }
 });
+
