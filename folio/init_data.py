@@ -449,8 +449,6 @@ Note that *formatting only applies to article contents.* Article titles cannot b
 
 ~~Strikethrough~~: `~~Strikethrough~~`
 
-Superscript^^superscript^^
-
 # Links
 
 {{Linking}}
