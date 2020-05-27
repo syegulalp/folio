@@ -2,8 +2,6 @@
 
 ## HEAD
 
-**This version has a breaking schema from the previous versions.**
-
 ### New features
 
 * You can now drag and drop multiple images to upload. (The upload note does not yet single them out individually; this is coming later.)
