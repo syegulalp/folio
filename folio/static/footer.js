@@ -22,7 +22,7 @@ function show_msg(text, css_class, timeout = 3000, html = false) {
         drop_timeout = setTimeout(function () { d.fadeOut(); }, timeout);
     }
     else {
-        d.html(d.html() + "<p><a href='#' onclick='$(\"#drop-message\").hide()' class='small'>Close this message</a></p>")
+        d.html(d.html() + "<p><a href='#' onclick='d=$(\"#drop-message\");d.hide();d.html(\"\");' class='small'>Close this message</a></p>")
     }
 }
 
