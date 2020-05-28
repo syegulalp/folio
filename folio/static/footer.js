@@ -56,9 +56,9 @@ function handleImagePaste(e) {
           processData: false,
           success: function(data) {
             txt = data.split('\n')            
-            show_msg("<p>Pasted image of " + blob.size + " bytes.<br/><a href='"+txt[0]+"'>Click here</a> to see the uploaded image.</p>", "alert alert-success", timeout = 0, html = true);
+            show_msg("<div class='media'><a target='_blank' href='"+txt[1]+"'><img src='"+txt[0]+"'></a><div class='media-body'><p>Pasted image of " + blob.size + " bytes.<br/><a target='_blank' href='"+txt[1]+"'>Click here</a> to see the uploaded image.</p></div></div>", "alert alert-success", timeout = 0, html = true);
             if (documentInsert!=undefined){
-                documentInsert(txt[1]);
+                documentInsert(txt[2]);
             }
           }
         }
