@@ -118,7 +118,19 @@ $("#drop-target").on('drop', function (e) {
 
         if (files.length > 0) {
 
-            var status = true
+            var status = true;
+
+            var filesList = [];
+
+            $(document).ajaxStop(function() {
+
+                if (status) {
+                    show_msg(filesList.join('')+"<hr>"+ files.length + " files uploaded successfully.", "success", timeout=0, html=true)
+                }
+                else {
+                    show_msg("Some files did not upload.", "danger")
+                }
+            });
 
             for (var i = 0; i < files.length; i++) {
                 file = files[i];
@@ -137,19 +149,15 @@ $("#drop-target").on('drop', function (e) {
                     processData: false,
                     contentType: false
                 })
-                    .done(function () { })
+                    .done(function (data) {
+                        txt = data.split('\n');
+                        filesList.push("<div class='media'><a target='_blank' href='"+txt[1]+"'><img src='"+txt[0]+"'></a><div class='media-body'>"+txt[2]+"</div></div>");
+                    })
                     .fail(function () {
                         status = false
                     })
                     .always(function () { });
 
-            }
-
-            if (status) {
-                show_msg(files.length + " files uploaded successfully.<br><a href='"+media_path+"'>Click here to view uploads.</a>", "success", timeout=0, html=true)
-            }
-            else {
-                show_msg("Some files did not upload.", "danger")
             }
 
         }

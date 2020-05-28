@@ -546,6 +546,8 @@ async def tags_all(env: Request, wiki: Wiki, user: Author):
 @wiki_env
 async def upload_to_wiki(env: Request, wiki: Wiki, user: Author):
 
+    # FIXME: this SHOULD only be one file
+
     for file_name, file_data in env.files.values():
         rename = 1
         dest_file_name = file_name
@@ -564,7 +566,7 @@ async def upload_to_wiki(env: Request, wiki: Wiki, user: Author):
         new_img = Media(wiki=wiki, file_path=dest_file_name)
         new_img.save()
 
-    return simple_response("")
+    return simple_response(f"{new_img.link}\n{new_img.edit_link}\n{new_img.file_path}")
 
 
 @route(f"{Wiki.PATH}/tag/<tag_name>", RouteType.asnc_local)
