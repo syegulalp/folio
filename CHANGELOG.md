@@ -5,6 +5,7 @@
 ### New features
 
 * You can now paste images from the clipboard directly into the article editor. The image will be uploaded to the wiki, and an image reference will be inserted at the edit point.
+* Images dragged and dropped, or pasted, will have thumbnails show up in a modal on the page.
 
 ### Bugfixes
 
