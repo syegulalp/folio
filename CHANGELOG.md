@@ -8,7 +8,7 @@
 
 ### Bugfixes
 
-* Fixed isses with the paginator and the redirection behavior on deleting an image from the image manager.
+* Fixed issues with the paginator and the redirection behavior on deleting an image from the image manager.
 
 ## [0.0.5-alpha](https://github.com/syegulalp/folio/releases/tag/0.0.5-alpha)
 

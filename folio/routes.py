@@ -41,6 +41,7 @@ from typing import Union
 from urllib.parse import urlencode
 
 home_template = Template(file="home.html")
+blank_template = Template(file="blank.html")
 article_template = Template(file="article.html")
 wiki_edit_template = Template(file="wiki_edit.html")
 wiki_clone_template = Template(file="wiki_clone.html")
@@ -787,6 +788,7 @@ async def article_edit(
             draft.copy_tags_from(article)
             draft.copy_metadata_from(article)
             article = draft
+            wiki.invalidate_cache()
 
     original_article = article
     original_id = article.id
@@ -846,11 +848,12 @@ async def article_edit(
             article.update_index()
             article.update_links()
             article.update_autogen_metadata()
+            wiki.invalidate_cache()
+
 
             if action == "exit":
                 article.opened_by = None
                 article.save()
-                wiki.invalidate_cache()
                 return redirect(article.link)
 
             elif action in ("publish", "revise"):
@@ -889,14 +892,11 @@ async def article_edit(
 
                 article.delete_()
 
-                wiki.invalidate_cache()
                 return redirect(new_article.link)
 
             elif action == "save":
                 article.opened_by = None
                 article.save()
-
-                wiki.invalidate_cache()
 
                 if article.draft_of:
                     return redirect(article.draft_of.edit_link)
@@ -1326,7 +1326,7 @@ async def wiki_media_paste(env: Request, wiki: Wiki, user: Author):
     new_image = Media(wiki=wiki, file_path=filename,)
     new_image.save()
 
-    return simple_response(f"{new_image.edit_link}\n![]({new_image.file_path})")
+    return simple_response(f"{new_image.link}\n{new_image.edit_link}\n![]({new_image.file_path})")
 
 
 @route(f"{Wiki.PATH}/media/<file_name>", RouteType.asnc_local)
@@ -1466,11 +1466,9 @@ async def media_file_delete_confirm(
     media_list, pagination = paginator(env, wiki.media_alpha)
 
     return Response(
-        wiki_media_template.render(
+        blank_template.render(
             wiki=wiki,
-            media=media_list,
-            messages=[Error(f'Article "{Unsafe(media.file_path)}" has been deleted.')],
-            paginator=pagination
+            messages=[Error(f'<p>Media item "{Unsafe(media.file_path)}" has been deleted.</p><p><a href="{wiki.media_link}">Return to the media manager</a></p>')],
         )
     )
 
