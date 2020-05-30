@@ -74,7 +74,6 @@
 
     function setEnter(item) {
         item.on("keydown", function (e) {
-            console.log(e.originalEvent);
             if (e.originalEvent.key === "Enter") {
                 e.preventDefault();
                 $('#modal-metadata-button').click();

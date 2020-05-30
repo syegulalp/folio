@@ -1042,7 +1042,6 @@ async def modal_insert_image(env: Request, wiki: Wiki, user: Author, article: Ar
             title="Insert image into article",
             body=modal_search_template.render(
                 url=f"{article.link}/insert-image/",
-                modal_post_enter="",
                 search_results=image_search(wiki, None),
             ),
             footer="",
@@ -1097,7 +1096,6 @@ async def modal_tags(env: Request, wiki: Wiki, user: Author, article: Article):
     tags = existing_tags(article)
     body = modal_search_template.render(
         url=f"{article.link}/insert-tag",
-        modal_post_enter="tagEnter();",
         search_results=search_results(wiki, None),
     )
     return Response(
@@ -1143,7 +1141,6 @@ async def modal_edit_metadata(env: Request, wiki: Wiki, user: Author, article: A
             body=modal_metadata_template.render(
                 url=f"{article.link}/edit-metadata",
                 article=article,
-                modal_post_enter="",
             ),
             footer="",
         )
@@ -1172,7 +1169,7 @@ async def modal_edit_metadata_post(
 
     return Response(
         modal_metadata_template.render(
-            url=f"{article.link}/edit-metadata", article=article, modal_post_enter=""
+            url=f"{article.link}/edit-metadata", article=article,
         )
     )
 
@@ -1209,7 +1206,6 @@ async def modal_insert_link_search(
             title="Insert link into article",
             body=modal_search_template.render(
                 url=f"{article.link}/insert-link/",
-                modal_post_enter="",
                 search_results=link_search(wiki, None),
                 alt_input=("Text for link", "link_text"),
             ),

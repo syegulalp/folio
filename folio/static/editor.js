@@ -134,18 +134,6 @@ function insertImage(item) {
     document.execCommand("insertText", false, '![](' + $(item).data("url") + ')');
 }
 
-function tagEnter() {
-    if ($("#modal-search-query").val().length) {
-        $.post(
-            articleTarget + "/add-tag",
-            { tag: $("#modal-search-query").val() }
-        ).done(function (data) {
-            $("#modal-search-query").val('');
-            $('#modal-tag-listing').html(data);
-        })
-    }
-}
-
 function insertLink(item) {
     linkText = $(item).html();
     linkAltText = $("#modal-alt-input").val();
