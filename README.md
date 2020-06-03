@@ -30,6 +30,12 @@ For other OSes:
 5. The subdirectory `data` will contain the data for the wiki, which can be backed up or restored as needed.
 6. To shut the wiki down, either terminate the running Python session or navigate to the URL `/quit` in the wiki.
 
+# Updating from previous releases
+
+1. Unpack the new release.
+2. Copy (*not* move) the `data` folder from the old release into the new one. (Always keep your old data!)
+3. Launch the new release. If there are any changes to the database schema, they will be automatically applied by the new version.
+
 ## To do
 
 Quite a lot, but mainly:
