@@ -97,4 +97,7 @@ if __name__ == "__main__":
 
         webbrowser.open(f"http://localhost:{port}")
 
+    import settings
+    print(f"{settings.PRODUCT} running on port {port}\nNavigate to \"/quit\" in browser to shut down")
+    
     routes.run(host="0.0.0.0", port=port, workers=None)

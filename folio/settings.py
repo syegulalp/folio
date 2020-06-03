@@ -5,3 +5,9 @@ defaults = {
 }
 
 DB_SCHEMA = 0
+
+PRODUCT_NAME = "Folio"
+
+PRODUCT_VERSION = "0.0.5a"
+
+PRODUCT = f"{PRODUCT_NAME} ver {PRODUCT_VERSION}"
