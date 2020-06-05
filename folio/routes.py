@@ -471,11 +471,12 @@ async def wiki_replace(env: Request, wiki: Wiki, user: Author):
 
         if replace_query:
 
-            messages = [Message(f"Press [Replace all] to update {article_count} articles. Note that there is no undo for this operation.")]
+            messages = [Message(f"Press [Replace all] to update {article_count} articles.<br>Note that there is no undo for this operation, but every changed article will have a revision saved.")]
             
         if replace_query and env.form.get("replace", ""):
 
             for result in search_results:
+                result.make_revision()
                 result.content = result.content.replace(search_query, replace_query)
                 result.last_edited = datetime.datetime.now()
                 result.save()
@@ -943,20 +944,7 @@ async def article_edit(
                 new_article = article.draft_of
 
                 if action == "revise":
-                    revision = Article(
-                        wiki=new_article.wiki,
-                        title=new_article.title,
-                        # title=f"{new_article.title} [{new_article.last_edited.strftime(ARTICLE_TIME_FORMAT)}]",
-                        content=new_article.content,
-                        author=new_article.author,
-                        created=new_article.created,
-                        revision_of=new_article,
-                    )
-                    revision.save()
-                    revision.update_links()
-                    revision.update_autogen_metadata()
-                    revision.copy_metadata_from(new_article)
-                    revision.copy_tags_from(new_article)
+                    new_article.make_revision()
 
                 if article.new_title:
                     new_article.title = article.new_title

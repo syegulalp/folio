@@ -518,6 +518,23 @@ class Article(BaseModel):
     href_re = re.compile(r'(<a .*?)href="([^"]*?)"([^>]*?>)')
     literal_clean_re = re.compile(r"[^`]``[^`]")
 
+    def make_revision(self):
+        revision = Article(
+            wiki=self.wiki,
+            title=self.title,
+            content=self.content,
+            author=self.author,
+            created=self.created,
+            revision_of=self,
+        )
+        revision.save()
+        revision.update_links()
+        revision.update_autogen_metadata()
+        revision.copy_metadata_from(self)
+        revision.copy_tags_from(self)
+        
+        return revision
+
     def replace_text(self, re_to_find, new_text):
         if self.opened_by:
             raise self.ItemInUseError()
