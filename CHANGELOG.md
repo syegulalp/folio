@@ -9,6 +9,7 @@
 * You can now paste images from the clipboard directly into the article editor. The image will be uploaded to the wiki, and an image reference will be inserted at the edit point.
 * Images dragged and dropped, or pasted, will have thumbnails show up in a modal on the page.
 * The system metadata entries, `@default` and `@hide-title`, are now fully documented.
+* Wikis now have a rudimentary search-and-replace functionality. It is not yet exposed through a menu option, but it's available by going to a wiki's search page and replacing `/search` with `/replace` in the address bar. You can perform case-sensitive search-and-replace operations on article texts. Altered articles automatically have a revision saved. It does not work on any other content, such as article titles, tags, image names, etc. **This is an experimental feature which can result in data loss, so use it with caution.**
 
 ### Bugfixes
 
