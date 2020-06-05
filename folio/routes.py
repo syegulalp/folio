@@ -51,6 +51,7 @@ article_history_template = Template(file="article_history.html")
 wiki_tags_template = Template(file="wiki_tags.html")
 wiki_pages_template = Template(file="wiki_pages.html")
 wiki_search_template = Template(file="wiki_search.html")
+wiki_replace_template = Template(file="wiki_replace.html")
 wiki_media_template = Template(file="wiki_media.html")
 wiki_media_edit_template = Template(file="wiki_media_edit.html")
 modal_template = Template(file="includes/modal.html")
@@ -439,6 +440,80 @@ async def article_new(env: Request, wiki: Wiki, user: Author):
     )
 
 
+@route(f"{Wiki.PATH}/replace", RouteType.asnc_local, action=("GET", "POST"))
+@transaction
+@wiki_env
+async def wiki_replace(env: Request, wiki: Wiki, user: Author):
+
+    search_query = ""
+    replace_query = ""
+    result_query = ""
+    results = []
+    messages = []
+
+    if env.verb == "POST":
+        search_query = env.form.get("search_query", "")
+        replace_query = env.form.get("replace_query", "")
+
+        if search_query:
+
+            search_results = (
+                wiki.articles.select()
+                .where(
+                    Article.revision_of.is_null(),
+                    Article.content.contains(search_query),
+                )
+                .order_by(SQL("title COLLATE NOCASE"))
+            )
+            results = search_results
+            result_query = search_query
+            article_count = search_results.count()
+
+        if replace_query:
+
+            messages = [Message(f"Press [Replace all] to update {article_count} articles. Note that there is no undo for this operation.")]
+            
+        if replace_query and env.form.get("replace", ""):
+
+            for result in search_results:
+                result.content = result.content.replace(search_query, replace_query)
+                result.last_edited = datetime.datetime.now()
+                result.save()
+                result.update_index()
+                result.update_links()
+                result.update_autogen_metadata()
+            wiki.invalidate_cache()
+
+            search_results = (
+                wiki.articles.select()
+                .where(
+                    Article.revision_of.is_null(),
+                    Article.content.contains(replace_query),
+                )
+                .order_by(SQL("title COLLATE NOCASE"))
+            )
+            results = search_results
+            result_query = replace_query
+
+            article_count = search_results.count()
+            messages = [Message(f"{article_count} articles updated.", "success")]
+
+
+    return Response(
+        wiki_replace_template.render(
+            search_query=search_query,
+            replace_query=replace_query,
+            page_title=f"Search ({wiki.title})",
+            tags=wiki.tags,
+            wiki=wiki,
+            search_results=results,
+            messages=messages,
+            result_query = result_query,
+        ),
+        headers=default_headers,
+    )
+
+
 @route(f"{Wiki.PATH}/search", RouteType.asnc_local, action=("GET", "POST"))
 @transaction
 @wiki_env
@@ -668,17 +743,24 @@ async def article_display(env: Request, wiki: Wiki, user: Author, article: Artic
 async def article_new_from_form(env: Request, wiki: Wiki, user: Author, form: str):
     return new_article_from_form_core(env, wiki, user, form, "Untitled")
 
+
 @route(f"{Wiki.PATH}/new_from_form/<form>/<title>", RouteType.asnc_local)
 @transaction
 @wiki_env
-async def article_new_from_form_with_title(env: Request, wiki: Wiki, user: Author, form: str, title: str):
+async def article_new_from_form_with_title(
+    env: Request, wiki: Wiki, user: Author, form: str, title: str
+):
     return new_article_from_form_core(env, wiki, user, form, title)
 
-def new_article_from_form_core(env: Request, wiki: Wiki, user: Author, form: str, title: str):
+
+def new_article_from_form_core(
+    env: Request, wiki: Wiki, user: Author, form: str, title: str
+):
     form_article = wiki.articles.where(Article.title == wiki.url_to_title(form)).get()
 
     new_article = form_article.make_from_form(wiki.url_to_title(title))
-    return redirect(new_article.edit_link)    
+    return redirect(new_article.edit_link)
+
 
 @route(f"{Wiki.PATH}{Article.PATH}/revision/<revision_id>", RouteType.asnc_local)
 @article_env
@@ -852,7 +934,6 @@ async def article_edit(
             article.update_autogen_metadata()
             wiki.invalidate_cache()
 
-
             if action == "exit":
                 article.opened_by = None
                 article.save()
@@ -910,7 +991,9 @@ async def article_edit(
     if ajax:
         if error:
             return simple_response(str(error))
-        return simple_response(str(Message("Article successfully saved.", color="success")))
+        return simple_response(
+            str(Message("Article successfully saved.", color="success"))
+        )
 
     article.content = article.content.replace("&", "&amp;")
 
@@ -1095,8 +1178,7 @@ def search_results(wiki, search):
 async def modal_tags(env: Request, wiki: Wiki, user: Author, article: Article):
     tags = existing_tags(article)
     body = modal_search_template.render(
-        url=f"{article.link}/insert-tag",
-        search_results=search_results(wiki, None),
+        url=f"{article.link}/insert-tag", search_results=search_results(wiki, None),
     )
     return Response(
         modal_template.render(
@@ -1139,8 +1221,7 @@ async def modal_edit_metadata(env: Request, wiki: Wiki, user: Author, article: A
         modal_template.render(
             title="Edit article metadata",
             body=modal_metadata_template.render(
-                url=f"{article.link}/edit-metadata",
-                article=article,
+                url=f"{article.link}/edit-metadata", article=article,
             ),
             footer="",
         )
@@ -1245,7 +1326,9 @@ def quit(*a):
 async def static_content(env: Request, filename: str):
     return static_file(filename, path="folio/static")
 
+
 from math import ceil
+
 
 def paginator(env: Request, media: Media):
     search = env.params.get("search", [None])[0]
@@ -1256,7 +1339,7 @@ def paginator(env: Request, media: Media):
 
     page = int(env.params.get("p", [1])[0])
 
-    last = ceil(media.count()/5)
+    last = ceil(media.count() / 5)
 
     if page == -1 or page > last:
         page = last
@@ -1324,7 +1407,9 @@ async def wiki_media_paste(env: Request, wiki: Wiki, user: Author):
     new_image = Media(wiki=wiki, file_path=filename,)
     new_image.save()
 
-    return simple_response(f"{new_image.link}\n{new_image.edit_link}\n![]({new_image.file_path})")
+    return simple_response(
+        f"{new_image.link}\n{new_image.edit_link}\n![]({new_image.file_path})"
+    )
 
 
 @route(f"{Wiki.PATH}/media/<file_name>", RouteType.asnc_local)
@@ -1412,7 +1497,6 @@ async def media_file_edit_post(env: Request, wiki: Wiki, user: Author, media: Me
         except LocalException:
             pass
 
-
     return Response(
         wiki_media_edit_template.render(wiki=wiki, media=media, messages=[note]),
         headers=default_headers,
@@ -1466,7 +1550,11 @@ async def media_file_delete_confirm(
     return Response(
         blank_template.render(
             wiki=wiki,
-            messages=[Error(f'<p>Media item "{Unsafe(media.file_path)}" has been deleted.</p><p><a href="{wiki.media_link}">Return to the media manager</a></p>')],
+            messages=[
+                Error(
+                    f'<p>Media item "{Unsafe(media.file_path)}" has been deleted.</p><p><a href="{wiki.media_link}">Return to the media manager</a></p>'
+                )
+            ],
         )
     )
 
