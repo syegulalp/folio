@@ -56,6 +56,7 @@ wiki_media_template = Template(file="wiki_media.html")
 wiki_media_edit_template = Template(file="wiki_media_edit.html")
 modal_template = Template(file="includes/modal.html")
 modal_search_template = Template(file="includes/modal_search.html")
+modal_tag_template = Template(file="includes/modal_tag_search.html")
 modal_metadata_template = Template(file="includes/modal_metadata.html")
 sidebar_template = Template(file="includes/sidebar.html")
 
@@ -1227,7 +1228,7 @@ def search_results(wiki, search):
 @article_env
 async def modal_tags(env: Request, wiki: Wiki, user: Author, article: Article):
     tags = existing_tags(article)
-    body = modal_search_template.render(
+    body = modal_tag_template.render(
         url=f"{article.link}/insert-tag", search_results=search_results(wiki, None),
     )
     return Response(
