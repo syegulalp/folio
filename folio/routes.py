@@ -232,7 +232,10 @@ def home_page_render(messages=[]):
     return Response(
         home_template.render(
             wikis=Wiki.select().order_by(Wiki.title.asc()),
-            articles=Article.select().order_by(Article.last_edited.desc()).limit(25),
+            articles=Article.select()
+            .where(Article.draft_of.is_null(), Article.revision_of.is_null(),)
+            .order_by(Article.last_edited.desc())
+            .limit(25),
             page_title="Folio (Homepage)",
             messages=messages,
         ),
@@ -244,6 +247,78 @@ def home_page_render(messages=[]):
 @wiki_env
 async def wiki_home(env: Request, wiki: Wiki, user: Author):
     return await article_display.__wrapped__(env, wiki, user, wiki.main_article)
+
+
+@route(f"{Wiki.PATH}/export", RouteType.asnc_local)
+@wiki_env
+async def wiki_export(env: Request, wiki: Wiki, user: Author):
+
+    import os, glob, shutil
+
+    export_path = Path(config.DATA_PATH, "export", wiki.title_to_url(wiki.title))
+    if not export_path.exists():
+        os.makedirs(export_path)
+
+    article_path = Path(export_path, "article")
+    if not article_path.exists():
+        article_path.mkdir()
+
+    static_path = Path(export_path, "static")
+    if not static_path.exists():
+        static_path.mkdir()
+
+    media_path = Path(export_path, "media")
+    if not media_path.exists():
+        media_path.mkdir()
+
+    for f in glob.glob(f"{os.getcwd()}\\folio\\static\\*.*"):
+        shutil.copy(f, static_path)
+
+    for m in wiki.media:
+        shutil.copy(m.file_path_, media_path)
+
+    for article in wiki.articles_nondraft_only:
+        article_text = await article_display.__wrapped__(env, wiki, user, article)
+        article_text = article_text.body
+
+        for m in Article.href_re.finditer(article_text):
+            addr = m[2].replace(wiki.link, "..")
+            addr = addr.replace("%", "%25")
+            target = f'{m[1]}href="{addr}.html"{m[3]}'
+            article_text = article_text.replace(m[0], target)
+
+        for m in Article.linkh_re.finditer(article_text):
+            addr = m[2].replace("/static", "../static")
+            addr = addr.replace("%", "%25")
+            target = f'{m[1]}href="{addr}"{m[3]}'
+            article_text = article_text.replace(m[0], target)
+
+        for m in Article.imgtag_re.finditer(article_text):
+            if m[2]=='/static/default_cover.jpg':
+                addr = ".."+m[2]
+            else:
+                addr = m[2].replace(wiki.media_link, "../media")
+            target = f'{m[1]}src="{addr}"{m[3]}'
+            article_text = article_text.replace(m[0], target)
+
+        for m in Article.script_re.finditer(article_text):
+            addr = m[2].replace("/static", "../static")
+            target = f'{m[1]}href="{addr}"{m[3]}'
+            article_text = article_text.replace(m[0], target)
+
+        with open(
+            Path(article_path, wiki.title_to_url(article.title) + ".html"),
+            "w",
+            encoding="utf-8",
+        ) as export_file:
+            export_file.write(article_text)
+
+        # TODO:
+        # we still need to do something about spurious edit links, etc.
+        # maybe just replace those, too?
+        # we may have to fall back on using some kind of master flag
+
+    return simple_response("ok")
 
 
 @route(f"{Wiki.PATH}/edit", RouteType.asnc_local, action=("GET", "POST"))
@@ -471,8 +546,12 @@ async def wiki_replace(env: Request, wiki: Wiki, user: Author):
 
         if replace_query:
 
-            messages = [Message(f"Press [Replace all] to update {article_count} articles.<br>Note that there is no undo for this operation, but every changed article will have a revision saved.")]
-            
+            messages = [
+                Message(
+                    f"Press [Replace all] to update {article_count} articles.<br>Note that there is no undo for this operation, but every changed article will have a revision saved."
+                )
+            ]
+
         if replace_query and env.form.get("replace", ""):
 
             for result in search_results:
@@ -499,7 +578,6 @@ async def wiki_replace(env: Request, wiki: Wiki, user: Author):
             article_count = search_results.count()
             messages = [Message(f"{article_count} articles updated.", "success")]
 
-
     return Response(
         wiki_replace_template.render(
             search_query=search_query,
@@ -509,7 +587,7 @@ async def wiki_replace(env: Request, wiki: Wiki, user: Author):
             wiki=wiki,
             search_results=results,
             messages=messages,
-            result_query = result_query,
+            result_query=result_query,
         ),
         headers=default_headers,
     )

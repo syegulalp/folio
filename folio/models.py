@@ -350,6 +350,10 @@ class Wiki(BaseModel):
         return f"/wiki/{self.title_to_url(self.title)}"
 
     @property
+    def article_root_link(self):
+        return f"{self.link}/article"
+
+    @property
     def delete_key(self):
         h = blake2b(key=b"key1", digest_size=16)
         h.update(bytes(self.title, "utf8"))
@@ -516,6 +520,9 @@ class Article(BaseModel):
 
     # Everything else
     href_re = re.compile(r'(<a .*?)href="([^"]*?)"([^>]*?>)')
+    linkh_re = re.compile(r'(<link .*?)href="([^"]*?)"([^>]*?>)')
+    imgtag_re = re.compile(r'(<img .*?)src="([^"]*?)"([^>]*?>)')
+    script_re = re.compile(r'(<script .*?)src="([^"]*?)"([^>]*?>)')
     literal_clean_re = re.compile(r"[^`]``[^`]")
 
     def make_revision(self):
@@ -705,7 +712,7 @@ class Article(BaseModel):
 
     @property
     def link(self):
-        return f"{self.wiki.link}/article/{self.title_to_url(self.title)}"
+        return f"{self.wiki.article_root_link}/{self.title_to_url(self.title)}"
 
     @property
     def edit_link(self):
@@ -770,7 +777,7 @@ class Article(BaseModel):
         MediaLinks.delete().where(MediaLinks.article == self).execute()
 
     def update_links(self):
-        article_link_path = f"{self.wiki.link}/article/"
+        article_link_path = self.wiki.article_root_link
         self.clear_links()
 
         for _ in self.href_re.finditer(self.formatted):
@@ -814,7 +821,7 @@ class Article(BaseModel):
         return parser.render()
 
     def _article_re(self, matchobj):
-        return f"({self.wiki.link}/article/{matchobj.group(1)})"
+        return f"({self.wiki.article_root_link}/{matchobj.group(1)})"
 
     def _media_re(self, matchobj):
         url = matchobj.group(2)
@@ -832,8 +839,8 @@ class Article(BaseModel):
             link_test = link
             link_class = "wiki-link"
             link_to_render = link
-        elif link.startswith(f"{self.wiki.link}/article/"):
-            link_to_find = link.split(f"{self.wiki.link}/article/")[1]
+        elif link.startswith(f"{self.wiki.article_root_link}/"):
+            link_to_find = link.split(f"{self.wiki.article_root_link}/")[1]
             link_to_render = link
             link_to_find = self.url_to_title(link_to_find)
             link_test = self.wiki.article_exists(link_to_find)
@@ -856,7 +863,7 @@ class Article(BaseModel):
             link_class = "wiki-tag-link"
         else:
             link_to_show = self.title_to_url(link)
-            link_to_render = f"{self.wiki.link}/article/{link_to_show}"
+            link_to_render = f"{self.wiki.article_root_link}/{link_to_show}"
             link_test = self.wiki.article_exists(link)
             link_class = "wiki-link"
 
