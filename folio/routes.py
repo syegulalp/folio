@@ -65,6 +65,7 @@ default_headers = {
     "Cache-Control": "no-cache, no-store, must-revalidate",
 }
 
+blank_wiki = Wiki()
 
 class LocalException(Exception):
     pass
@@ -89,6 +90,8 @@ def transaction(func):
 
 
 def get_wiki(wiki_title):
+    while Wiki.export_mode:
+        asyncio.sleep(.1)
     try:
         wiki = Wiki.get(Wiki.title == Wiki.url_to_title(wiki_title))
     except Wiki.DoesNotExist:
@@ -238,6 +241,7 @@ def home_page_render(messages=[]):
             .limit(25),
             page_title="Folio (Homepage)",
             messages=messages,
+            wiki=blank_wiki,
         ),
         headers=default_headers,
     )
@@ -250,6 +254,7 @@ async def wiki_home(env: Request, wiki: Wiki, user: Author):
 
 
 @route(f"{Wiki.PATH}/export", RouteType.asnc_local)
+@transaction
 @wiki_env
 async def wiki_export(env: Request, wiki: Wiki, user: Author):
 
@@ -277,34 +282,14 @@ async def wiki_export(env: Request, wiki: Wiki, user: Author):
     for m in wiki.media:
         shutil.copy(m.file_path_, media_path)
 
+    # TODO: make a context mgr    
+    Wiki.export_mode = True
+
+    wiki.invalidate_cache()
+
     for article in wiki.articles_nondraft_only:
         article_text = await article_display.__wrapped__(env, wiki, user, article)
         article_text = article_text.body
-
-        for m in Article.href_re.finditer(article_text):
-            addr = m[2].replace(wiki.link, "..")
-            addr = addr.replace("%", "%25")
-            target = f'{m[1]}href="{addr}.html"{m[3]}'
-            article_text = article_text.replace(m[0], target)
-
-        for m in Article.linkh_re.finditer(article_text):
-            addr = m[2].replace("/static", "../static")
-            addr = addr.replace("%", "%25")
-            target = f'{m[1]}href="{addr}"{m[3]}'
-            article_text = article_text.replace(m[0], target)
-
-        for m in Article.imgtag_re.finditer(article_text):
-            if m[2]=='/static/default_cover.jpg':
-                addr = ".."+m[2]
-            else:
-                addr = m[2].replace(wiki.media_link, "../media")
-            target = f'{m[1]}src="{addr}"{m[3]}'
-            article_text = article_text.replace(m[0], target)
-
-        for m in Article.script_re.finditer(article_text):
-            addr = m[2].replace("/static", "../static")
-            target = f'{m[1]}href="{addr}"{m[3]}'
-            article_text = article_text.replace(m[0], target)
 
         with open(
             Path(article_path, wiki.title_to_url(article.title) + ".html"),
@@ -313,11 +298,8 @@ async def wiki_export(env: Request, wiki: Wiki, user: Author):
         ) as export_file:
             export_file.write(article_text)
 
-        # TODO:
-        # we still need to do something about spurious edit links, etc.
-        # maybe just replace those, too?
-        # we may have to fall back on using some kind of master flag
-
+    Wiki.export_mode = False
+    
     return simple_response("ok")
 
 

@@ -234,6 +234,8 @@ class Wiki(BaseModel):
     PATH = "/wiki/<wiki_name>"
     METADATA = "wiki"
 
+    export_mode = False
+
     def delete_(self):
         with db.transaction():
 
@@ -346,11 +348,21 @@ class Wiki(BaseModel):
         pass
 
     @property
+    def static_folder_link(self):
+        if Wiki.export_mode:
+            return f"../static"
+        return "/static"
+
+    @property
     def link(self):
+        if Wiki.export_mode:
+            return f".."
         return f"/wiki/{self.title_to_url(self.title)}"
 
     @property
     def article_root_link(self):
+        if Wiki.export_mode:
+            return "../article"
         return f"{self.link}/article"
 
     @property
@@ -416,7 +428,7 @@ class Wiki(BaseModel):
     def cover_img(self):
         cover_img_id = self.get_metadata("cover_img")
         if not cover_img_id:
-            return f"/static/default_cover.jpg"
+            return f"{self.static_folder_link}/default_cover.jpg"
         return Media.get(Media.id == cover_img_id).link
 
     @property
@@ -712,6 +724,8 @@ class Article(BaseModel):
 
     @property
     def link(self):
+        if Wiki.export_mode:
+            return f"{self.wiki.article_root_link}/{self.title_to_url(self.title)}.html"
         return f"{self.wiki.article_root_link}/{self.title_to_url(self.title)}"
 
     @property
