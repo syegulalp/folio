@@ -551,7 +551,7 @@ class Article(BaseModel):
         revision.update_autogen_metadata()
         revision.copy_metadata_from(self)
         revision.copy_tags_from(self)
-        
+
         return revision
 
     def replace_text(self, re_to_find, new_text):
@@ -725,7 +725,8 @@ class Article(BaseModel):
     @property
     def link(self):
         if Wiki.export_mode:
-            return f"{self.wiki.article_root_link}/{self.title_to_url(self.title)}.html"
+            article_title = self.title_to_url(self.title).replace("%", "%25")
+            return f"{self.wiki.article_root_link}/{article_title}.html"
         return f"{self.wiki.article_root_link}/{self.title_to_url(self.title)}"
 
     @property

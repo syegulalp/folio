@@ -298,6 +298,8 @@ async def wiki_export(env: Request, wiki: Wiki, user: Author):
         ) as export_file:
             export_file.write(article_text)
 
+    wiki.invalidate_cache()
+    
     Wiki.export_mode = False
     
     return simple_response("ok")
