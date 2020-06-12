@@ -194,8 +194,8 @@ class Request:
 
         for _ in split_headers:
             k, v = _.split(b":", 1)
-            k = str(k, "ascii")
-            v = str(v, "ascii")
+            k = str(k, "utf-8")
+            v = str(v, "utf-8")
             k = k.upper().replace("-", "_")
             if k not in ("CONTENT_TYPE", "CONTENT_LENGTH", "CONTENT_DISPOSITION"):
                 k = f"HTTP_{k}"
@@ -206,7 +206,7 @@ class Request:
                 headers["REQUEST_METHOD"],
                 headers["PATH_INFO"],
                 headers["SERVER_PROTOCOL"],
-            ) = str(request_type, "ascii").split(" ")
+            ) = str(request_type, "utf-8").split(" ")
         return headers, body
 
     def _make_subvalues(self, value):
@@ -313,7 +313,7 @@ class Request:
         form = {}
         for _ in form_split:
             __ = _.split(b"=")
-            form[str(__[0], "ascii")] = unquote_plus(str(__[1], "ascii"))
+            form[str(__[0], "utf-8")] = unquote_plus(str(__[1], "utf-8"))
         return form
 
     def _multipart_form(self, headers, body):
@@ -322,7 +322,7 @@ class Request:
 
         header_line = headers["CONTENT_TYPE"].split(";")
         boundary = "--" + (header_line[1].split("=")[1])
-        body_parts = body.split(bytes(boundary, "ascii"))
+        body_parts = body.split(bytes(boundary, "utf-8"))
 
         for _ in body_parts[1:-1]:
             headers, body = self._make_headers(_)
