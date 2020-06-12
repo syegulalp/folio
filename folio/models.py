@@ -847,6 +847,7 @@ class Article(BaseModel):
     def _href_re(self, matchobj):
         link = matchobj.group(2)
         target = ""
+        export_mode_extension = ".html" if Wiki.export_mode else ""
 
         # Article-internal anchors are a special case
         if link.startswith("#"):
@@ -894,7 +895,10 @@ class Article(BaseModel):
             link_to_render = link
             target = ' target="_blank"'
 
-        return f'{matchobj.group(1)}title="{Unsafe(link_title)}" class="{link_class}" href="{link_to_render}"{target}{matchobj.group(3)}'
+        if Wiki.export_mode:
+            link_to_render = link_to_render.replace("%", "%25")
+        
+        return f'{matchobj.group(1)}title="{Unsafe(link_title)}" class="{link_class}" href="{link_to_render}{export_mode_extension}"{target}{matchobj.group(3)}'
 
     def _include_re(self, matchobj):
         replace = matchobj.group(0)
@@ -920,6 +924,7 @@ class Article(BaseModel):
 
     def _link_re(self, matchobj):
         link = matchobj.group(1)
+
         anchor = None
         if "#" in link:
             link, anchor = link.split("#", 1)
@@ -927,7 +932,7 @@ class Article(BaseModel):
             newlink = link
         elif link.startswith("/tag/"):
             link = link.split("/tag/", 1)[1]
-            newlink = f"/tag/{self.title_to_url(link)}"
+            newlink = f"{self.wiki.link}/tag/{self.title_to_url(link)}"
         else:
             newlink = f"{self.wiki.link}/article/{self.title_to_url(link)}"
         if anchor:

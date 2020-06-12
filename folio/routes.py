@@ -474,7 +474,7 @@ async def article_new(env: Request, wiki: Wiki, user: Author):
 
     else:
         counter = 0
-        article_title = Wiki.url_to_title(env.params.get("title", "Untitled"))
+        article_title = Wiki.url_to_title(env.params.get("title", ["Untitled"])[0])
 
         # TODO: move name making into model
 
