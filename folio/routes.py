@@ -302,6 +302,23 @@ async def wiki_export(env: Request, wiki: Wiki, user: Author):
     wiki.invalidate_cache()
     
     Wiki.export_mode = False
+
+    with open(Path(article_path, ".htaccess"),"w") as htf:
+        htf.write("DirectoryIndex Contents.html")
+
+    redirect = '''
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="refresh" content="0; url='article'" />
+  </head>
+  <body>
+    <p>Please follow <a href="article">this link</a>.</p>
+  </body>
+</html>'''
+
+    with open(Path(export_path, 'index.html'), "w") as rdf:
+        rdf.write(redirect)
     
     return simple_response("ok")
 

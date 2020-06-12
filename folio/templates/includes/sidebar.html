@@ -4,13 +4,13 @@
 % else:
 
 <div class="wiki-title">
-    <a href="{{wiki.link}}" title="Start page">{{wiki.title}}</a>
+    <a href="{{wiki.homepage_link}}" title="Start page">{{wiki.title}}</a>
 </div>
 <div class="wiki-description">
     {{wiki.description}}
     % if wiki.cover_img:
     <div class="wiki-cover-img">
-        <a href="{{wiki.link}}"><img class="img img-fluid" src="{{wiki.cover_img}}"></a>
+        <a href="{{wiki.homepage_link}}"><img class="img img-fluid" src="{{wiki.cover_img}}"></a>
     </div>
     % end
 </div>
@@ -19,7 +19,7 @@
 <a id="wiki_search_link" href="{{wiki.search_link}}"><span title="Search this wiki" class="oi oi-magnifying-glass"></span></a>
 <a href="{{wiki.media_link}}"><span title="See wiki media" class="oi oi-image"></span></a>
 <a href="{{wiki.edit_link}}" title="Edit wiki settings"><span class="oi oi-cog"></span></a>
-<a href="/"><span title="Wiki server homepage" class="oi oi-home"></span></a>
+<a href="{{wiki.server_homepage_link}}"><span title="Wiki server homepage" class="oi oi-home"></span></a>
 
 </div>  
 

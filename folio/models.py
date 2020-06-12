@@ -360,6 +360,18 @@ class Wiki(BaseModel):
         return f"/wiki/{self.title_to_url(self.title)}"
 
     @property
+    def homepage_link(self):
+        if Wiki.export_mode:
+            return f"{self.article_root_link}/Contents.html"
+        return self.link
+
+    @property
+    def server_homepage_link(self):
+        if Wiki.export_mode:
+            return f"{self.article_root_link}/Contents.html"
+        return "/"
+
+    @property
     def article_root_link(self):
         if Wiki.export_mode:
             return "../article"
