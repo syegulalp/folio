@@ -956,8 +956,13 @@ class Article(BaseModel):
 
         # if this is a wiki-formatted link:
         if is_wikilink:
+
+            # if not source_link, make one,
+            # then process the rest
+
+
             # if we have a defined name:
-            if source_link:
+            if source_link:                
                 newlink = f"{self.wiki.link}/article/{self.title_to_url(source_link)}"
                 final_link = f"[{source_name}]({newlink})"
             # otherwise, turn the name into the link
@@ -967,7 +972,8 @@ class Article(BaseModel):
                     newlink = source_name
                 # or if this is a tag link, use that
                 elif source_name.startswith("/tag/"):
-                    newlink = f"{self.wiki.link}/tag/{self.title_to_url(source_name)}"
+                    newlink = source_name
+                    source_name = source_name.split('/tag/',1)[1]
                 # otherwise, make an article link
                 else:
                     newlink = (
@@ -1007,7 +1013,7 @@ class Article(BaseModel):
         md_mini = None
         dummy = None
 
-        for _ in content.splitlines():
+        for _ in content.splitlines(True):
             if _.startswith("|"):
                 if not is_table:
                     is_table = True
@@ -1057,7 +1063,7 @@ class Article(BaseModel):
             is_table = False
             table_fmt.append("</tbody></table>")
 
-        content = "\n".join(table_fmt)
+        content = "".join(table_fmt)
 
         return content
 
@@ -1075,10 +1081,10 @@ class Article(BaseModel):
 
         # TODO: precompile
 
-        r1 = r"(^```.*$)"
+        r1 = r"(```)"
         r2 = r"(`)"
 
-        preformat_content = re.split(r1, raw_content, flags=re.MULTILINE)
+        preformat_content = re.split(r1, raw_content)
 
         skip = False
         for index, region in enumerate(preformat_content):
@@ -1087,7 +1093,7 @@ class Article(BaseModel):
             if skip:
                 continue
 
-            inlines = re.split(r2, region, flags=re.MULTILINE)
+            inlines = re.split(r2, region)
             inline_skip = False
 
             for inline_index, inline in enumerate(inlines):
@@ -1117,7 +1123,7 @@ class Article(BaseModel):
 
             preformat_content[index] = region
 
-        raw_content = "\n".join(preformat_content)
+        raw_content = "".join(preformat_content)
 
         ast = parser.parse(raw_content)
         html = renderer.render(ast)
