@@ -859,7 +859,7 @@ class Article(BaseModel):
     def _media_re(self, matchobj):
         url = matchobj.group(2)
         if not url.startswith(("http://", "https://")):
-            url = f"{self.wiki.link}/media/{url}"
+            url = f"{self.wiki.link}/media/{self.wiki.file_to_url(url)}"
         return f"![{matchobj.group(1)}]({url})"
 
     def _href_re(self, matchobj):
