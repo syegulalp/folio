@@ -1,5 +1,6 @@
 import unittest
 from pathlib import Path
+
 # TODO: need image tests
 
 
@@ -28,10 +29,14 @@ class TestRendering(unittest.TestCase):
         self.include_article = self.models.Article(
             wiki=self.wiki,
             title="Include article",
-            content="**Formatted content**",
-            author=self.author
+            content="""$$[Include article with metadata.]$$
+
+**Formatted content.**""",
+            author=self.author,
         )
         self.include_article.save()
+        self.include_article.add_tag("@test")
+        self.include_article.update_autogen_metadata()
 
     def test_article_all_inclusive(self):
         self.maxDiff = None
@@ -62,15 +67,23 @@ class TestRendering(unittest.TestCase):
 
     def test_url_conversions(self):
         base = self.models.BaseModel
-        
-        self.assertEqual(base.title_to_url('"Title with quotes"'), "%22Title_with_quotes%22")
-        
-        self.assertEqual(base.url_to_title("%22Title_with_quotes%22"), '"Title with quotes"')
 
-        self.assertEqual(base.title_to_url('Title_with_underscores'), "Title_with_underscores")
+        self.assertEqual(
+            base.title_to_url('"Title with quotes"'), "%22Title_with_quotes%22"
+        )
 
-        self.assertEqual(base.url_to_title('Title_with_underscores'), "Title with underscores")        
-        
+        self.assertEqual(
+            base.url_to_title("%22Title_with_quotes%22"), '"Title with quotes"'
+        )
+
+        self.assertEqual(
+            base.title_to_url("Title_with_underscores"), "Title_with_underscores"
+        )
+
+        self.assertEqual(
+            base.url_to_title("Title_with_underscores"), "Title with underscores"
+        )
+
         self.assertEqual(
             base.title_to_url("Fall Of The Hammer / Original Version"),
             "Fall_Of_The_Hammer_%2f_Original_Version",
@@ -82,48 +95,45 @@ class TestRendering(unittest.TestCase):
         self.assertEqual(base.file_to_url("myfile_01 ext.jpg"), "myfile_01%20ext.jpg")
         self.assertEqual(base.url_to_file("myfile_01%20ext.jpg"), "myfile_01 ext.jpg")
 
-
     def test_article_exists(self):
-        self.assertTrue(
-            self.wiki.article_exists("Test data article"))
-        self.assertFalse(
-            self.wiki.article_exists("Nonexistent article"))
+        self.assertTrue(self.wiki.article_exists("Test data article"))
+        self.assertFalse(self.wiki.article_exists("Nonexistent article"))
 
     def test_tag_exists(self):
         self.article.add_tag("Foobletzky")
-        self.assertTrue(self.wiki.tag_exists('Foobletzky'))
-        self.assertFalse(self.wiki.tag_exists('Veeblefetzer'))
+        self.assertTrue(self.wiki.tag_exists("Foobletzky"))
+        self.assertFalse(self.wiki.tag_exists("Veeblefetzer"))
         self.article.remove_tag("Foobletzky")
-        self.assertFalse(self.wiki.tag_exists('Foobletzky'))
+        self.assertFalse(self.wiki.tag_exists("Foobletzky"))
 
     def test_wiki_has_name_collision(self):
         new_wiki = self.models.Wiki(title="New test wiki", description="")
         self.assertTrue(new_wiki.has_name_collision())
-        new_wiki.title="Non-colliding test wiki"
+        new_wiki.title = "Non-colliding test wiki"
         self.assertFalse(new_wiki.has_name_collision())
 
     def test_wiki_link(self):
-        self.assertEqual(self.wiki.link,'/wiki/New_test_wiki')
+        self.assertEqual(self.wiki.link, "/wiki/New_test_wiki")
 
     def test_wiki_new_page_link(self):
-        self.assertEqual(self.wiki.new_page_link,'/wiki/New_test_wiki/new')
+        self.assertEqual(self.wiki.new_page_link, "/wiki/New_test_wiki/new")
 
     def test_wiki_edit_link(self):
-        self.assertEqual(self.wiki.edit_link,'/wiki/New_test_wiki/edit')
+        self.assertEqual(self.wiki.edit_link, "/wiki/New_test_wiki/edit")
 
     def test_wiki_search_link(self):
-        self.assertEqual(self.wiki.search_link,'/wiki/New_test_wiki/search')
+        self.assertEqual(self.wiki.search_link, "/wiki/New_test_wiki/search")
 
     def test_wiki_upload_link(self):
-        self.assertEqual(self.wiki.upload_link,'/wiki/New_test_wiki/upload')
+        self.assertEqual(self.wiki.upload_link, "/wiki/New_test_wiki/upload")
 
     def test_wiki_media_link(self):
-        self.assertEqual(self.wiki.media_link,'/wiki/New_test_wiki/media')
+        self.assertEqual(self.wiki.media_link, "/wiki/New_test_wiki/media")
 
     def test_default_wiki(self):
         new_wiki = self.models.Wiki.default()
-        self.assertEqual(new_wiki.title, 'Untitled Wiki')
-        self.assertEqual(new_wiki.description, 'Replace this with your description.')
+        self.assertEqual(new_wiki.title, "Untitled Wiki")
+        self.assertEqual(new_wiki.description, "Replace this with your description.")
 
 
 if __name__ == "__main__":

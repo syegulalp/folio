@@ -6,6 +6,7 @@
 
 ### New features
 
+* We've switched to using the `commonmark` parser for the project. This ensures a greater degree of consistency in the parser, since it uses the CommonMark specification. Any Folio-specific changes we provide to Markdown can be handled more readily this way. The only significant change to the syntax from previous versions is that a named link to a wiki article needs to use double brackets -- e.g., `[[A link to a wiki article]](Wiki article)`, not `[A link to a wiki article](Wiki article)`. (Links to external resources are still the same, though.)
 * You can now paste images from the clipboard directly into the article editor. The image will be uploaded to the wiki, and an image reference will be inserted at the edit point.
 * Images dragged and dropped, or pasted, will have thumbnails show up in a modal on the page.
 * The system metadata entries, `@default` and `@hide-title`, are now fully documented.

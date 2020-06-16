@@ -1,6 +1,10 @@
 import datetime
 import urllib
-import markdown
+
+import commonmark
+
+parser = commonmark.Parser()
+renderer = commonmark.HtmlRenderer()
 
 try:
     import regex as re
@@ -317,7 +321,7 @@ class Wiki(BaseModel):
         Confirm if an article with the same title exists in this wiki.
         """
         try:
-            self.articles.select().where(Article.title == title).get()
+            article = self.articles.select().where(Article.title == title).get()
         except Article.DoesNotExist:
             return False
         return True
@@ -527,11 +531,13 @@ class Article(BaseModel):
 
     # Folio custom functions
     link_re = re.compile(r"\[\[(.*?)\]\]")
+    wikilink_re = re.compile(r"\[\[(.*?)\]\]+(\(([^)]*?)\))?")
+    regularlink_re = re.compile(r"\[(.*?)\](\(([^)]*?)\))")
     literal_include_re = re.compile(r"\{\{\{(.*?)\}\}\}")
     include_re = re.compile(r"\{\{(.*?)\}\}")
     function_re = re.compile(r"\<\<[^>]*?\>\>")
     blurb_re = re.compile(r"\<\<\<(.*?)\>\>\>")
-    media_re = re.compile("!\[([^\]]*?)\]\(([^)]*?)\)")
+    media_re = re.compile(r"!\[([^\]]*?)\]\(([^)]*?)\)")
     metadata_re = re.compile(
         r"(\$\[(.*?)\]\$)+(\(([^)]*?)\))?", re.MULTILINE | re.DOTALL
     )
@@ -867,12 +873,14 @@ class Article(BaseModel):
             link_test = link
             link_class = "wiki-link"
             link_to_render = link
+            valid_title = link
         elif link.startswith(f"{self.wiki.article_root_link}/"):
             link_to_find = link.split(f"{self.wiki.article_root_link}/")[1]
             link_to_render = link
             link_to_find = self.url_to_title(link_to_find)
             link_test = self.wiki.article_exists(link_to_find)
             link_class = "wiki-link"
+            valid_title = link_to_find
         elif link.startswith(f"{self.wiki.link}/new_from_form/"):
             link_to_find = link.split(f"{self.wiki.link}/new_from_form/")[1]
             link_to_render = link
@@ -883,20 +891,23 @@ class Article(BaseModel):
             else:
                 link_to_find = self.url_to_title(link_to_find)
             link_test = self.wiki.article_exists(link_to_find)
+            valid_title = link_to_find
         elif link.startswith(f"/tag/"):
             link_to_find = link.split(f"/tag/")[1]
             link_to_render = f"{self.wiki.link}/tag/{link_to_find}"
             link_to_find = self.url_to_title(link_to_find)
             link_test = self.wiki.tag_exists(link_to_find)
+            valid_title = link_to_find
             link_class = "wiki-tag-link"
         else:
             link_to_show = self.title_to_url(link)
             link_to_render = f"{self.wiki.article_root_link}/{link_to_show}"
             link_test = self.wiki.article_exists(link)
             link_class = "wiki-link"
+            valid_title = link
 
         if link_test:
-            link_title = link
+            link_title = valid_title
         else:
             link_class = "wiki-missing-link"
             link_title = f"{link} (nonexistent article)"
@@ -909,8 +920,10 @@ class Article(BaseModel):
 
         if Wiki.export_mode:
             link_to_render = link_to_render.replace("%", "%25")
+
+        link_title = link_title.replace('"', r'\"')
         
-        return f'{matchobj.group(1)}title="{Unsafe(link_title)}" class="{link_class}" href="{link_to_render}{export_mode_extension}"{target}{matchobj.group(3)}'
+        return f'{matchobj.group(1)}title="{link_title}" class="{link_class}" href="{link_to_render}{export_mode_extension}"{target}{matchobj.group(3)}'
 
     def _include_re(self, matchobj):
         replace = matchobj.group(0)
@@ -934,22 +947,43 @@ class Article(BaseModel):
             )
         return article.content
 
-    def _link_re(self, matchobj):
-        link = matchobj.group(1)
+    def _regularlink_re(self, matchobj):
+        return self._wikilink_re(matchobj, False)
 
-        anchor = None
-        if "#" in link:
-            link, anchor = link.split("#", 1)
-        if link.startswith(("http://", "https://")):
-            newlink = link
-        elif link.startswith("/tag/"):
-            link = link.split("/tag/", 1)[1]
-            newlink = f"{self.wiki.link}/tag/{self.title_to_url(link)}"
+    def _wikilink_re(self, matchobj, is_wikilink=True):
+        source_link = matchobj.group(3)
+        source_name = matchobj.group(1)
+
+        # if this is a wiki-formatted link:
+        if is_wikilink:
+            # if we have a defined name:
+            if source_link:
+                newlink = f"{self.wiki.link}/article/{self.title_to_url(source_link)}"
+                final_link = f"[{source_name}]({newlink})"
+            # otherwise, turn the name into the link
+            else:
+                # if this is a straight url, use it
+                if source_name.startswith(("http://", "https://")):
+                    newlink = source_name
+                # or if this is a tag link, use that
+                elif source_name.startswith("/tag/"):
+                    newlink = f"{self.wiki.link}/tag/{self.title_to_url(source_name)}"
+                # otherwise, make an article link
+                else:
+                    newlink = (
+                        f"{self.wiki.link}/article/{self.title_to_url(source_name)}"
+                    )
+                final_link = f"[{source_name}]({newlink})"
+
+        # if this is a regular-format link:
         else:
-            newlink = f"{self.wiki.link}/article/{self.title_to_url(link)}"
-        if anchor:
-            newlink = newlink + "#" + anchor
-        return f"[{link}]({newlink})"
+            if self.wiki.article_exists(source_link) or " " in source_link:
+                source_link = (
+                    f"{self.wiki.link}/article/{self.title_to_url(source_link)}"
+                )
+            final_link = f"[{source_name}]({source_link})"
+
+        return final_link
 
     def _blurb_re(self, matchobj):
         Wiki.title_to_url
@@ -977,7 +1011,6 @@ class Article(BaseModel):
             if _.startswith("|"):
                 if not is_table:
                     is_table = True
-                    md_mini = markdown.Markdown()
                     dummy = Article(
                         title="", content="", author=self.author, wiki=self.wiki
                     )
@@ -1007,7 +1040,7 @@ class Article(BaseModel):
                 table_line = "".join(
                     ["<tr>"]
                     + [
-                        f"<{col_type}>{dummy._formatted(cell)[3:-4]}</{col_type}>"
+                        f"<{col_type}>{dummy._formatted(cell)[3:-5]}</{col_type}>"
                         for cell in line
                     ]
                     + ["</tr>"]
@@ -1037,80 +1070,62 @@ class Article(BaseModel):
         return matchobj.group(0)[0] + matchobj.group(0)[-1]
 
     def _formatted(self, raw_content):
-        md = markdown.Markdown()
 
         self.autogen_metadata = []
 
-        raw_content = self.metadata_cleared_re.sub(
-            self._metadata_cleared_re, raw_content
-        )
-        raw_content = self.metadata_re.sub(self._metadata_re, raw_content)
+        # TODO: precompile
 
-        raw_content = self.literal_clean_re.sub(self._literal_clean_re, raw_content)
+        r1 = r"(^```.*$)"
+        r2 = r"(`)"
 
-        preformat_content = raw_content.split("```")
-        preformatted = False
-        output = []
+        preformat_content = re.split(r1, raw_content, flags=re.MULTILINE)
 
-        for section in preformat_content:
-            if preformatted:
-                output.append("<code><pre>")
-                lines = section.split("\n")
-                for line in lines:
-                    if line:
-                        line = (
-                            line.replace("<", "&lt;")
-                            .replace('"', "&quot;")
-                            .replace("\\`", "`")
-                        )
-                        output.append(line + "\n")
-                output.append("</pre></code>")
-            else:
-                inline_content = section.split("`")
-                inline_output = []
-                inline_preformat = False
-                for content in inline_content:
-                    if inline_preformat:
-                        content = content.replace("{", r"\{").replace("}", r"\}")
-                        inline_output.append(f"`{content}`")
-                    else:
-                        content = content.replace("\\{", "\\\\{").replace(
-                            "\\}", "\\\\}"
-                        )
+        skip = False
+        for index, region in enumerate(preformat_content):
+            if re.match(r1, region):
+                skip = not skip
+            if skip:
+                continue
 
-                        # Included items come first
-                        content = self.literal_include_re.sub(
-                            self._literal_include_re, content
-                        )
-                        content = self.blurb_re.sub(self._blurb_re, content)
-                        content = self.function_re.sub(self._function_re, content)
+            inlines = re.split(r2, region, flags=re.MULTILINE)
+            inline_skip = False
 
-                        # then local post-processing
-                        content = self._format_table(content)
-                        content = self.strike_re.sub(self._strike_re, content)
-                        content = self.media_re.sub(self._media_re, content)
-                        content = self.link_re.sub(self._link_re, content)
-                        content = self.checkbox_re.sub(self._checkbox_re, content)
+            for inline_index, inline in enumerate(inlines):
+                if re.match(r2, inline):
+                    inline_skip = not inline_skip
+                if inline_skip:
+                    continue
 
-                        inline_output.append(content)
-                    inline_preformat = not inline_preformat
+                inline = self.literal_include_re.sub(self._literal_include_re, inline)
+                inline = self.include_re.sub(self._include_re, inline)
 
-                content = md.convert("".join(inline_output))
+                inline = self.metadata_cleared_re.sub(self._metadata_cleared_re, inline)
+                inline = self.metadata_re.sub(self._metadata_re, inline)
 
-                # Post-rendering processing
-                content = self.href_re.sub(self._href_re, content)
-                content = self.include_re.sub(self._include_re, content)
-                content = content.replace("\\{", "{").replace("\\}", "}")
+                inline = self.blurb_re.sub(self._blurb_re, inline)
+                inline = self.function_re.sub(self._function_re, inline)
+                inline = self._format_table(inline)
+                inline = self.strike_re.sub(self._strike_re, inline)
+                inline = self.media_re.sub(self._media_re, inline)
+                inline = self.wikilink_re.sub(self._wikilink_re, inline)
+                inline = self.regularlink_re.sub(self._regularlink_re, inline)
+                inline = self.checkbox_re.sub(self._checkbox_re, inline)
 
-                # TODO: use proper XML analysis for this
-                content = content.replace("<img ", '<img class="img-fluid" ')
+                inlines[inline_index] = inline
 
-                output.append(content)
+            region = "".join(inlines)
 
-            preformatted = not preformatted
+            preformat_content[index] = region
 
-        result = "".join(output)
-        return result
+        raw_content = "\n".join(preformat_content)
+
+        ast = parser.parse(raw_content)
+        html = renderer.render(ast)
+
+        html = self.href_re.sub(self._href_re, html)
+        html = html.replace("<img ", '<img class="img-fluid" ')
+
+        return html
 
 
 class Metadata(BaseModel):

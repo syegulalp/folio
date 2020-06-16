@@ -109,6 +109,11 @@ blockquote {
     font-style: italic;
 }
 
+.wiki-external-link {
+    font-weight: bold;
+    color: green;
+}
+
 .wiki-recent-date {
     font-weight: bold;
 }
