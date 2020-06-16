@@ -189,20 +189,21 @@ To show curly braces as-is, escape them with slashes: `\{\{` and `\}\}` yields \
 
 To link to a document in the wiki, surround its name with double square brackets.
 
-
 `[[Wiki formatting]]` - [[Wiki formatting]]
 
 To type double or single square brackets as-is, escape them with backslashes.
 
 `\[\[` and `\]\]` yields \[\[ and \]\].
 
-
 # Named links
 
 To make a link but show a different text, use Markdown-style links:
 
+`[Link](Linking)` - [Link](Linking)
 
-`[Link](Link target)` - [Link](Link target)
+Note that if you want to unambiguously generate a named link to a wiki document, rather than an external link, it's best to use the double-bracket format:
+
+`[[Link to "Linking"]](Linking)` - [[Link to "Linking"]](Linking)
 
 # Linking to a tag
 
@@ -214,16 +215,13 @@ To link to a *tag*, use `/tag/tag_name` as your target.
 
 To link to an external URL, just use the full URL you want to link to.
 
-
 `[Le googz](https://google.com)`  - [Le googz](https://google.com)
-
 
 `[[https://google.com]]` - [[https://google.com]]
 
 # Link to document with blurb autogeneration
 
 To link to a document and automatically provide its blurb (if it has one), use triple angle brackets.
-
 
 `<<<Wiki formatting>>>`
 
@@ -235,8 +233,13 @@ This is basically shorthand for:
 
 To link to an image in the wiki's [image manager](Image management), use Markdown's image format, with the name of the image:
 
+`![](picture.jpg)`
 
-`![](picture.jpg)`"""},
+To have a picture serve as a link, just wrap it in the link:
+
+`[![](picture.jpg)](https://link)`
+
+`[[![](picture.jpg)]](Wiki article)`"""},
 "Macros": {
    "tags": ['@template'],
    "content": """$$[ Special in-article commands for extended formatting.]$$
@@ -412,7 +415,6 @@ You can also see a list of tags in the **Tags** tab in the sidebar.
 
 To link to a *tag*, use `/tag/tag_name` as your target.
 
-
 `[[/tag/@template]]` - [[/tag/@template]]
 
 # Special `@` tags
@@ -439,9 +441,11 @@ A wiki provides a better paradigm for holding and organizing freeform data. You 
    "tags": ['@template'],
    "content": """$$[How articles are written and marked up.]$$
 
-This wiki uses the Markdown formatting system, with a few changes. If you're already familiar with Markdown, you should be able to use most of its functionality, but for your convenience here's a rundown of how to add all the formatting supported.
+Folio uses the [CommonMark formatting system](https://spec.commonmark.org/), with a few changes. If you're already familiar with CommonMark or its ancestor Markdown, you should be able to use most of its functionality.
 
-Note that *formatting only applies to article contents.* Article titles cannot be formatted.
+For your convenience, here's a quick rundown of how to add all the formatting supported.
+
+Note that *formatting only applies to article **contents**.* Article *titles* cannot be formatted.
 
 # Inline formatting
 
@@ -479,23 +483,23 @@ Use three backticks to fence off block literals.
 
 Outline-level headers are preceded by one to five `#` symbols:
 
-#Heading 1
+# Heading 1
 
 `# Heading 1`
 
-##Heading 2
+## Heading 2
 
 `## Heading 2`
 
-###Heading 3
+### Heading 3
 
 `### Heading 3`
 
-####Heading 4
+#### Heading 4
 
 `#### Heading 4`
 
-#####Heading 5
+##### Heading 5
 
 `##### Heading 5`
 
