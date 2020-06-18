@@ -25,12 +25,12 @@
         });
     });
 
-    // move focus to main box if Enter in aux field
+    // send events on alt input box to main input box
 
     $("#modal-alt-input").on("keydown", function (e) {
         if (e.originalEvent.key === "Enter") {
             e.preventDefault();
-            $("#modal-search-query").focus();
+            $("#modal-search-query").trigger(e);
         }
     });  
     

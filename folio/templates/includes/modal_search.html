@@ -2,5 +2,18 @@
 
 <script>
 
-    function modalPostEnter() {}
+    function modalPostEnter() {
+        insertLink(
+            $("#modal-search-query").val(),
+            $("#modal-alt-input").val()
+        );
+    }
+
+    function modalPostShiftEnter() {
+        insertLink(
+            $("#modal-search-query").val(),
+            $("#modal-alt-input").val()
+        );
+    }
+
 </script>

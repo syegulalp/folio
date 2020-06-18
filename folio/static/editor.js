@@ -73,7 +73,7 @@ function ajaxSave() {
             setTimeout(function () { $('#flash-message').fadeOut() }, 3000);
             loadPreview();
         },
-        error: function(data){
+        error: function (data) {
             clearDirty();
             $('#flash-message').html('<div class="alert-box alert alert-warning">Error saving document. (Is the app still running?)</div>');
             $('#flash-message').fadeIn();
@@ -84,12 +84,12 @@ function ajaxSave() {
 }
 
 function hasSelection(field) {
-    return field.selectionEnd-field.selectionStart;
+    return field.selectionEnd - field.selectionStart;
 }
 
 
 function wrapText(field, left, right) {
-    
+
     start = field.selectionStart;
     end = field.selectionEnd;
 
@@ -113,7 +113,7 @@ function documentAddItalic() {
     wrapText($("#article_content")[0], '*', '*');
 }
 
-function documentInsert(txt){
+function documentInsert(txt) {
     document.execCommand('insertText', false, txt);
 }
 
@@ -134,23 +134,25 @@ function insertImage(item) {
     document.execCommand("insertText", false, '![](' + $(item).data("url") + ')');
 }
 
-function insertLink(item) {
+function insertLinkFromList(item) {
     linkText = $(item).html();
     linkAltText = $("#modal-alt-input").val();
+    return insertLink(linkText, linkAltText);
+}
 
+function insertLink(linkText, linkAltText) {
     $("#article_content").focus();
     field = $("#article_content")[0];
     if (hasSelection(field)) {
-        wrapText(field, '[', ']('+linkText+')')
+        wrapText(field, '[', '](' + linkText + ')')
     }
-    else    
-    {
+    else {
         if (linkAltText.length == 0) {
-            wrapText(field, '[['+linkText+']]','')
+            wrapText(field, '[[' + linkText + ']]', '')
         }
         else {
-            wrapText(field, '['+linkAltText+']','('+linkText+')')
-        }        
+            wrapText(field, '[' + linkAltText + ']', '(' + linkText + ')')
+        }
     }
     $('#edit-modal').modal('hide');
 }
@@ -185,14 +187,14 @@ function setEnterEvent(item) {
                 }
             }
             else {
-                modalPostEnter();
+                modalPostShiftEnter();
             }
             $("#modal-search-query").val('');
         }
     });
 }
 
-function document_ready(){
+function document_ready() {
     resizeEditor();
     $("#article_content").focus();
 }
@@ -270,21 +272,21 @@ $("#article_content").on("keydown", function (e) {
         if (e.code == 'KeyL') {
             e.preventDefault();
             $('#btn_insert_link').click();
-        }        
+        }
         else if (e.code == 'KeyM') {
             if (e.shiftKey) {
-                e.preventDefault();            
+                e.preventDefault();
                 $('#btn_edit_metadata').click();
             }
             else {
-                e.preventDefault();            
+                e.preventDefault();
                 $('#btn_insert_media').click();
             }
-        }      
+        }
         else if (e.code == 'KeyG') {
             e.preventDefault();
             $('#btn_insert_tag').click();
-        }     
+        }
         else if (e.code == 'KeyP') {
             e.preventDefault();
             $('#btn_toggle_preview').click();
