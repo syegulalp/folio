@@ -17,6 +17,7 @@
 
 * Fixed issues with the paginator and the redirection behavior on deleting an image from the image manager.
 * "Image not found" page in the image manager was not rendering correctly.
+* Fixed a bug where the link inserter in the article editor was no longer working when you pressed Shift-Enter to manually add a link definition.
 
 ## [0.0.5-alpha](https://github.com/syegulalp/folio/releases/tag/0.0.5-alpha)
 
