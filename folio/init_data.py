@@ -178,8 +178,6 @@ To include the rendered contents of one document inside another, place the name 
 
 `{{Pastries}}` would include the contents of the document named `Pastries`.
 
-If you want to include the *literal text* of another document, not its rendered/formatted text, use *triple* curly braces.
-
 To show curly braces as-is, escape them with slashes: `\{\{` and `\}\}` yields \{\{ and \}\}."""},
 "Linking": {
    "tags": ['@template'],
