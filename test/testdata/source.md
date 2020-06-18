@@ -63,8 +63,6 @@ Inline `code [[test]] {{test}} <<<test>>>` inline
 
 {{Include article}}
 
-{{{Include article}}}
-
 <<<Include article>>>
 
 # Level 1
