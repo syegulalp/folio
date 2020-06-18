@@ -68,6 +68,7 @@ default_headers = {
 
 blank_wiki = Wiki()
 
+
 class LocalException(Exception):
     pass
 
@@ -92,7 +93,7 @@ def transaction(func):
 
 def get_wiki(wiki_title):
     while Wiki.export_mode:
-        asyncio.sleep(.1)
+        asyncio.sleep(0.1)
     try:
         wiki = Wiki.get(Wiki.title == Wiki.url_to_title(wiki_title))
     except Wiki.DoesNotExist:
@@ -131,11 +132,13 @@ def media_env(func):
                 Media.file_path == Wiki.url_to_file(media_filename)
             ).get()
         except Media.DoesNotExist:
+            media, pagination = paginator(env, wiki.media_alpha)
             response = Response(
                 wiki_media_template.render(
                     wiki=wiki,
-                    media=wiki.media_alpha,
+                    media=media,
                     messages=[Error(f'Media "{Unsafe(media_filename)}" not found')],
+                    paginator=pagination,
                 ),
                 headers=default_headers,
             )
@@ -283,7 +286,7 @@ async def wiki_export(env: Request, wiki: Wiki, user: Author):
     for m in wiki.media:
         shutil.copy(m.file_path_, media_path)
 
-    # TODO: make a context mgr    
+    # TODO: make a context mgr
     Wiki.export_mode = True
 
     wiki.invalidate_cache()
@@ -300,13 +303,13 @@ async def wiki_export(env: Request, wiki: Wiki, user: Author):
             export_file.write(article_text)
 
     wiki.invalidate_cache()
-    
+
     Wiki.export_mode = False
 
-    with open(Path(article_path, ".htaccess"),"w") as htf:
+    with open(Path(article_path, ".htaccess"), "w") as htf:
         htf.write("DirectoryIndex Contents.html")
 
-    redirect = '''
+    redirect = """
 <!DOCTYPE html>
 <html>
   <head>
@@ -315,11 +318,11 @@ async def wiki_export(env: Request, wiki: Wiki, user: Author):
   <body>
     <p>Please follow <a href="article">this link</a>.</p>
   </body>
-</html>'''
+</html>"""
 
-    with open(Path(export_path, 'index.html'), "w") as rdf:
+    with open(Path(export_path, "index.html"), "w") as rdf:
         rdf.write(redirect)
-    
+
     return simple_response("ok")
 
 
@@ -702,8 +705,6 @@ async def tags_all(env: Request, wiki: Wiki, user: Author):
 @wiki_env
 async def upload_to_wiki(env: Request, wiki: Wiki, user: Author):
 
-    # FIXME: this SHOULD only be one file
-
     for file_name, file_data in env.files.values():
         rename = 1
         dest_file_name = file_name
@@ -721,6 +722,8 @@ async def upload_to_wiki(env: Request, wiki: Wiki, user: Author):
 
         new_img = Media(wiki=wiki, file_path=dest_file_name)
         new_img.save()
+
+    # TODO: return multiple file links for multiple uploads
 
     return simple_response(f"{new_img.link}\n{new_img.edit_link}\n{new_img.file_path}")
 
@@ -813,9 +816,10 @@ async def article_display(env: Request, wiki: Wiki, user: Author, article: Artic
         articles=[article], page_title=f"{article.title} ({wiki.title})", wiki=wiki
     )
 
-    Wiki.article_cache[article.id] = result
+    if article.id:
+        Wiki.article_cache[article.id] = result
 
-    return Response(result, headers=default_headers,)
+    return Response(result, headers=default_headers)
 
 
 @route(f"{Wiki.PATH}/new_from_form/<form>", RouteType.asnc_local)
@@ -1324,21 +1328,18 @@ async def modal_edit_metadata_post(
 
 
 def link_search(wiki, search):
-    if search is None or search == "":
-        search_results = (
-            wiki.articles.select().order_by(SQL("title COLLATE NOCASE")).limit(10)
-        )
-    else:
-        search_results = (
-            wiki.articles.select()
-            .where(Article.title.contains(search))
-            .order_by(SQL("title COLLATE NOCASE"))
-            .limit(10)
-        )
+    search_results = wiki.articles.select().where(
+        Article.draft_of.is_null(), Article.revision_of.is_null()
+    )
+
+    if search:
+        search_results = search_results.where(Article.title.contains(search))
+
+    search_results = search_results.order_by(SQL("title COLLATE NOCASE")).limit(10)
 
     results = ['<ul class="list-unstyled">']
     for result in search_results:
-        link = f'<li><a onclick="insertLink(this);" href="#">{result.title}</a></li>'
+        link = f'<li><a onclick="insertLinkFromList(this);" href="#">{result.title}</a></li>'
         results.append(link)
 
     return "".join(results)
