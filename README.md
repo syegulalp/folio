@@ -56,7 +56,7 @@ Folio is available under the terms of the MIT License.
 This project relies on the following third-party packages:
 
 * [Open Iconic](https://github.com/iconic/open-iconic) (SIL Open Font License / MIT License)
-* [Python-Markdown](https://github.com/Python-Markdown/markdown/) (BSD-like license)
+* [Commonmark.py](https://github.com/readthedocs/commonmark.py/) (MIT license)
 * [Peewee](https://github.com/coleifer/peewee/) (MIT license)
 * [Bootstrap](https://getbootstrap.com/docs/4.0/about/license/) (MIT license)
 * [jQuery](https://jquery.org/license/) (MIT license)
