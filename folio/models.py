@@ -934,18 +934,8 @@ class Article(BaseModel):
             return (
                 f"<inline-error>[No such article to include: {include}]</inline-error>"
             )
-        return article.formatted
-
-    def _literal_include_re(self, matchobj):
-        replace = matchobj.group(0)
-        include = matchobj.group(1)
-        try:
-            article = Article.get(Article.title == include, Article.wiki == self.wiki)
-        except Article.DoesNotExist:
-            return (
-                f"<inline-error>[No such article to include: {include}]</inline-error>"
-            )
         return article.content
+
 
     def _regularlink_re(self, matchobj):
         return self._wikilink_re(matchobj, False)
@@ -1102,15 +1092,13 @@ class Article(BaseModel):
                 if inline_skip:
                     continue
 
-                inline = self.literal_include_re.sub(self._literal_include_re, inline)
                 inline = self.include_re.sub(self._include_re, inline)
-
                 inline = self.metadata_cleared_re.sub(self._metadata_cleared_re, inline)
                 inline = self.metadata_re.sub(self._metadata_re, inline)
-
                 inline = self.blurb_re.sub(self._blurb_re, inline)
                 inline = self.function_re.sub(self._function_re, inline)
                 inline = self._format_table(inline)
+                
                 inline = self.strike_re.sub(self._strike_re, inline)
                 inline = self.media_re.sub(self._media_re, inline)
                 inline = self.wikilink_re.sub(self._wikilink_re, inline)
