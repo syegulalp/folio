@@ -11,10 +11,12 @@
 * Images dragged and dropped, or pasted, will have thumbnails show up in a modal on the page.
 * The system metadata entries, `@default` and `@hide-title`, are now fully documented.
 * Wikis now have a rudimentary search-and-replace functionality. It is not yet exposed through a menu option, but it's available by going to a wiki's search page and replacing `/search` with `/replace` in the address bar. You can perform case-sensitive search-and-replace operations on article texts. Altered articles automatically have a revision saved. It does not work on any other content, such as article titles, tags, image names, etc. **This is an experimental feature which can result in data loss, so use it with caution.**
+* The literal-include feature, which used triple curly braces to include the source of a document, has been removed. Its behavior essentially overlapped with the regular include feature anyway.
 
 ### Bugfixes
 
 * Fixed issues with the paginator and the redirection behavior on deleting an image from the image manager.
+* "Image not found" page in the image manager was not rendering correctly.
 
 ## [0.0.5-alpha](https://github.com/syegulalp/folio/releases/tag/0.0.5-alpha)
 
