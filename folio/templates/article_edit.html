@@ -24,7 +24,7 @@
                         data-original="{{article_title if article.id is not None else ''}}" value="{{article_title}}">
                 </div>
 
-                % if article_title != article.draft_of.title:
+                % if article.draft_of and article_title != article.draft_of.title:
 
                 <div id="editor-rename-checkbox-div" class="form-group form-check">
                     <input type="checkbox" class="form-check-input" id="rename-links" name="rename-links" checked>

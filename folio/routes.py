@@ -1002,7 +1002,7 @@ async def article_edit(
         renamed = False
 
         if article.new_title is None:
-            if article_title != article.title:
+            if article_title != article.draft_of.title:
                 article.new_title = article_title
                 renamed = True
         else:
