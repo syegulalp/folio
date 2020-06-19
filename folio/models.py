@@ -537,9 +537,7 @@ class Article(BaseModel):
 
     # Folio custom functions
     link_re = re.compile(r"\[\[(.*?)\]\]")
-    wikilink_a_re = re.compile(r"\[\[(.*?)\]\]\(([^)]*?)\)")
-    wikilink_b_re = re.compile(r"\[\[(.*?)\]\]")
-    regularlink_re = re.compile(r"[^!]??\[(.*?)\](\(([^)]*?)\))")
+    wikilink_re = re.compile(r"\[\[(.*?)\]\](?:\((.*?)\))?")    
     literal_include_re = re.compile(r"\{\{\{(.*?)\}\}\}")
     include_re = re.compile(r"\{\{(.*?)\}\}")
     function_re = re.compile(r"\<\<[^>]*?\>\>")
@@ -946,13 +944,16 @@ class Article(BaseModel):
     def _wikilink_bare_re(self, matchobj):
         return self._wikilink_re(matchobj, False)
 
-    def _wikilink_re(self, matchobj, has_name=True):
+    def _wikilink_re(self, matchobj, use_name=True):
         source_name = matchobj.group(1)
-        if has_name:
-            source_link = matchobj.group(2)
-        else:
-            source_link = matchobj.group(1)
+        source_link = matchobj.group(2)
         
+        if not source_link:
+            if use_name:
+                return matchobj[0]
+            else:
+                source_link = matchobj.group(1)
+            
         if source_link.startswith("/tag/"):
             newlink = source_link.split("/tag/",1)[1]
             newlink = f"{self.wiki.tag_root_link}/{self.title_to_url(newlink)}"
@@ -1089,10 +1090,10 @@ class Article(BaseModel):
         inline = self.blurb_re.sub(self._blurb_re, inline)
         inline = self.function_re.sub(self._function_re, inline)
         inline = self._format_table(inline)
+        inline = self.wikilink_re.sub(self._wikilink_re, inline)
+        inline = self.wikilink_re.sub(self._wikilink_bare_re, inline)
+        inline = self.media_re.sub(self._media_re, inline)
         inline = self.strike_re.sub(self._strike_re, inline)
-        inline = self.media_re.sub(self._media_re, inline)        
-        inline = self.wikilink_a_re.sub(self._wikilink_re, inline)
-        inline = self.wikilink_b_re.sub(self._wikilink_bare_re, inline)
         inline = self.checkbox_re.sub(self._checkbox_re, inline)
         return inline
 
