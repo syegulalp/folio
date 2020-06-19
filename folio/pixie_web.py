@@ -446,9 +446,6 @@ class Template:
     _braces = re.compile(r"(\{\{!*.+?\}\})")
     _lit_braces = re.compile(r"(\{\{!(.*?)\}\})")
 
-    # braces = re.compile(r"(\{\{\{\{(.*?)\}\}\}\})")
-    # lit_braces = re.compile(r"(\{\{\{\{!(.*?)\}\}\}\})")
-
     def _indent(self):
         return " " * 4 * self.indent_level
 
