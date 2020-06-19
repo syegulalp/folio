@@ -1001,18 +1001,12 @@ async def article_edit(
 
         renamed = False
 
-        # if this draft does not already have a new name:
-        if not article.new_title:
-            # and the name from the form is not the same as the original name:
+        if article.new_title is None:
             if article_title != article.title:
-                # set the new name to match
                 article.new_title = article_title
                 renamed = True
-        # if this draft has a new name:
         else:
-            # and the submitted name is different:
             if article_title != article.new_title:
-                # set the new name to match
                 article.new_title = article_title
                 renamed = True
 
@@ -1021,9 +1015,6 @@ async def article_edit(
                 error = Error(
                     f'An article named "{Unsafe(article_title)}" already exists. Choose another name for this article.'
                 )
-            else:
-                if action is None:
-                    action = "save"
 
         if error is None:
             article.save()
