@@ -999,11 +999,24 @@ async def article_edit(
             article.content = article_content
             article.last_edited = datetime.datetime.now()
 
-        if (
-            article_title != article.draft_of.title
-            and article_title != article.new_title
-        ):
-            article.new_title = article_title
+        renamed = False
+
+        # if this draft does not already have a new name:
+        if not article.new_title:
+            # and the name from the form is not the same as the original name:
+            if article_title != article.title:
+                # set the new name to match
+                article.new_title = article_title
+                renamed = True
+        # if this draft has a new name:
+        else:
+            # and the submitted name is different:
+            if article_title != article.new_title:
+                # set the new name to match
+                article.new_title = article_title
+                renamed = True
+
+        if renamed:
             if article.has_new_name_collision():
                 error = Error(
                     f'An article named "{Unsafe(article_title)}" already exists. Choose another name for this article.'
@@ -1032,6 +1045,7 @@ async def article_edit(
 
                 if article.new_title:
                     new_article.title = article.new_title
+                    # Check for rename options here
 
                 new_article.content = article.content
                 new_article.last_edited = article.last_edited
@@ -1547,6 +1561,8 @@ async def media_file_edit_post(env: Request, wiki: Wiki, user: Author, media: Me
 
             media.file_path = new_filename
             media.save()
+
+            # TODO: don't replace if we don't pass the option
 
             replacement_src = re.compile(
                 r"!\[([^\]]*?)\]\((" + re.escape(old_filename) + r")\)"

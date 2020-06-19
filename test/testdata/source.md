@@ -77,23 +77,21 @@ Inline `code [[test]] {{test}} <<<test>>>` inline
 
 [Named external link](https://google.com)
 
-Direct external link: [[https://google.com]]
-
 Direct article link: [[Test data article]]
 
 [[Named article link]](Test data article)
 
 [[Nonexistent link]]
 
-[[AnotherNonexistentLink]]
+[[Nonexistent named link]](Nonexistent link)
 
-[Nonexistent named link](Nonexistent link)
+Link to tag: [[/tag/@test]]
 
-[Other nonexistent named link](Nope)
+Named link to tag: [[@test]](/tag/@test)
 
-Link to tag: [@test](/tag/@test)
+Link to nonexistent tag: [[/tag/nonmeta]]
 
-Link to nonexistent tag: [nonmeta](/tag/nonmeta)
+Named link to nonexistent tag: [[tag:nonmeta]](/tag/nonmeta)
 
 [ ] Unselected checkbox  
 [x] Selected checkbox

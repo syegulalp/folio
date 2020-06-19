@@ -6,7 +6,8 @@
 
 ### New features
 
-* We've switched to using the `commonmark` parser for the project. This ensures a greater degree of consistency in the parser, since it uses the CommonMark specification. Any Folio-specific changes we provide to Markdown can be handled more readily this way. The only significant change to the syntax from previous versions is that a named link to a wiki article needs to use double brackets -- e.g., `[[A link to a wiki article]](Wiki article)`, not `[A link to a wiki article](Wiki article)`. (Links to external resources are still the same, though.)
+* We've switched to using the `commonmark` parser for the project. This ensures a greater degree of consistency in the parser, since it uses the CommonMark specification. Any Folio-specific changes we provide to Markdown can be handled more readily this way.
+* Because we changed to `commonmark`, there's been one significant change to the syntax from previous versions. You *must* use double bracket links (`[[Link text]](Article name)`) to create links to wiki articles (as opposed to external URLs). You *can* use single bracket links (`[Link text](Article name)`) to refer to local wiki articles, but *only* if the article name is a *single word*. Therefore, to avoid any ambiguities, use the double-bracket link format for wiki articles, and the single-bracket link format for external URLs.
 * You can now paste images from the clipboard directly into the article editor. The image will be uploaded to the wiki, and an image reference will be inserted at the edit point.
 * Images dragged and dropped, or pasted, will have thumbnails show up in a modal on the page.
 * The system metadata entries, `@default` and `@hide-title`, are now fully documented.
@@ -18,6 +19,10 @@
 * Fixed issues with the paginator and the redirection behavior on deleting an image from the image manager.
 * "Image not found" page in the image manager was not rendering correctly.
 * Fixed a bug where the link inserter in the article editor was no longer working when you pressed Shift-Enter to manually add a link definition.
+  
+### Known bugs
+
+* If a multiple drag-and-drop image upload batch fails, it only displays an error message and no details about which uploads specifically failed.
 
 ## [0.0.5-alpha](https://github.com/syegulalp/folio/releases/tag/0.0.5-alpha)
 

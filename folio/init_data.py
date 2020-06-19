@@ -1,13 +1,11 @@
 wiki_init = {
 "Contents": {
    "tags": ['@template'],
-   "content": """$$[Welcome to Folio!]$$
-
-# Welcome to Folio!
+   "content": """# $[Welcome to Folio!]$
 
 This wiki has been automatically generated with your new Folio install. It contains some basic details about how to use Folio.
 
-If you just want to jump in, the [quickstart](Quick Start) article has basic instructions.
+If you just want to jump in, the [[Quick Start]] article has basic instructions.
 
 * <<<What's a wiki?>>>
 * <<<Editor>>>
@@ -37,8 +35,6 @@ If you click <button type="button" class="btn btn-sm btn-warning">Quit creating 
 
 To edit an existing article, click the <span class="oi oi-pencil"></span> icon at the top right of the article. This opens the article for editing.
 
-
-
 * [Learn how to insert formatting into articles with the Markdown format.](Wiki formatting)
 
 When you open an existing article for editing, or save a newly created one for editing, you'll be editing a *draft copy* of the article -- a clone of the original.
@@ -52,6 +48,8 @@ When you hit <button type="button" class="btn btn-sm btn-primary">Publish</butto
 If you click <button type="button" class="btn btn-sm btn-info">Save and exit</button> , the changes to the draft are saved, and you'll leave the editor, but the changes from the draft won't be published. The draft will still be available for editing later.
 
 If you want to publish a draft to an article but keep a "snapshot" of its state before the draft, click <button type="button" class="btn btn-sm btn-dark">Version</button> instead of <button type="button" class="btn btn-sm btn-primary">Publish</button>. This will save a copy of the article's state to its history, which you can then browse by way of the <span class="oi oi-calendar"></span> icon at the top of the article.
+
+If you change the name of a draft article, you *must* save changes to the draft before doing anything else, including publishing the article.
 
 # The toolbar
 
@@ -195,13 +193,17 @@ To type double or single square brackets as-is, escape them with backslashes.
 
 # Named links
 
-To make a link but show a different text, use Markdown-style links:
+To link to an article but show a different text in the link, use Markdown-style links with a double bracket.
 
-`[Link](Linking)` - [Link](Linking)
+`[[Link to "Linking"]](Linking)` - [Link to "Linking"](Linking)
 
-Note that if you want to unambiguously generate a named link to a wiki document, rather than an external link, it's best to use the double-bracket format:
+# Linking to an external URL
 
-`[[Link to "Linking"]](Linking)` - [[Link to "Linking"]](Linking)
+To link to an external URL, use the link format but with *single* brackets (basically, the original Markdown link format):
+
+`[Link to Google](https://google.com)` - [Link to Google](https://google.com)
+
+> **Note:** If you use an external URL link to reference a local article, the link *may* work as expected, but only if the link is a *single word*. E.g., `[Link to "Linking"](Linking)` will work, but `[Link to "Image management"](Image management)` will not. So in general, use `[[]]` to *unambiguously* link to articles.
 
 # Linking to a tag
 
@@ -209,13 +211,9 @@ To link to a *tag*, use `/tag/tag_name` as your target.
 
 `[[/tag/@template]]` - [[/tag/@template]]
 
-# Linking to an external URL
+You can also use the named link format on a tag link:
 
-To link to an external URL, just use the full URL you want to link to.
-
-`[Le googz](https://google.com)`  - [Le googz](https://google.com)
-
-`[[https://google.com]]` - [[https://google.com]]
+`[[@template tag]](/tag/@template)` - [[@template tag]](/tag/@template)
 
 # Link to document with blurb autogeneration
 
@@ -229,13 +227,13 @@ This is basically shorthand for:
 
 # Linking to an image
 
-To link to an image in the wiki's [image manager](Image management), use Markdown's image format, with the name of the image:
+To link to an image in the wiki's [[image manager]](Image management), use Markdown's image format, with the name of the image:
 
 `![](picture.jpg)`
 
 To have a picture serve as a link, just wrap it in the link:
 
-`[![](picture.jpg)](https://link)`
+`[![](picture.jpg)](https://link.to)`
 
 `[[![](picture.jpg)]](Wiki article)`"""},
 "Macros": {

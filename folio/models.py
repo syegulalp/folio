@@ -382,6 +382,12 @@ class Wiki(BaseModel):
         return f"{self.link}/article"
 
     @property
+    def tag_root_link(self):
+        if Wiki.export_mode:
+            return "../tag"
+        return f"{self.link}/tag"        
+
+    @property
     def delete_key(self):
         h = blake2b(key=b"key1", digest_size=16)
         h.update(bytes(self.title, "utf8"))
@@ -531,8 +537,9 @@ class Article(BaseModel):
 
     # Folio custom functions
     link_re = re.compile(r"\[\[(.*?)\]\]")
-    wikilink_re = re.compile(r"\[\[(.*?)\]\]+(\(([^)]*?)\))?")
-    regularlink_re = re.compile(r"\[(.*?)\](\(([^)]*?)\))")
+    wikilink_a_re = re.compile(r"\[\[(.*?)\]\]\(([^)]*?)\)")
+    wikilink_b_re = re.compile(r"\[\[(.*?)\]\]")
+    regularlink_re = re.compile(r"[^!]??\[(.*?)\](\(([^)]*?)\))")
     literal_include_re = re.compile(r"\{\{\{(.*?)\}\}\}")
     include_re = re.compile(r"\{\{(.*?)\}\}")
     function_re = re.compile(r"\<\<[^>]*?\>\>")
@@ -892,9 +899,9 @@ class Article(BaseModel):
                 link_to_find = self.url_to_title(link_to_find)
             link_test = self.wiki.article_exists(link_to_find)
             valid_title = link_to_find
-        elif link.startswith(f"/tag/"):
+        elif link.startswith(f"{self.wiki.tag_root_link}"):
             link_to_find = link.split(f"/tag/")[1]
-            link_to_render = f"{self.wiki.link}/tag/{link_to_find}"
+            link_to_render = f"{self.wiki.tag_root_link}/{link_to_find}"
             link_to_find = self.url_to_title(link_to_find)
             link_test = self.wiki.tag_exists(link_to_find)
             valid_title = link_to_find
@@ -921,8 +928,8 @@ class Article(BaseModel):
         if Wiki.export_mode:
             link_to_render = link_to_render.replace("%", "%25")
 
-        link_title = link_title.replace('"', r'\"')
-        
+        link_title = link_title.replace('"', r"\"")
+
         return f'{matchobj.group(1)}title="{link_title}" class="{link_class}" href="{link_to_render}{export_mode_extension}"{target}{matchobj.group(3)}'
 
     def _include_re(self, matchobj):
@@ -936,50 +943,26 @@ class Article(BaseModel):
             )
         return article.content
 
-
-    def _regularlink_re(self, matchobj):
+    def _wikilink_bare_re(self, matchobj):
         return self._wikilink_re(matchobj, False)
 
-    def _wikilink_re(self, matchobj, is_wikilink=True):
-        source_link = matchobj.group(3)
+    def _wikilink_re(self, matchobj, has_name=True):
         source_name = matchobj.group(1)
-
-        # if this is a wiki-formatted link:
-        if is_wikilink:
-
-            # if not source_link, make one,
-            # then process the rest
-
-
-            # if we have a defined name:
-            if source_link:                
-                newlink = f"{self.wiki.link}/article/{self.title_to_url(source_link)}"
-                final_link = f"[{source_name}]({newlink})"
-            # otherwise, turn the name into the link
-            else:
-                # if this is a straight url, use it
-                if source_name.startswith(("http://", "https://")):
-                    newlink = source_name
-                # or if this is a tag link, use that
-                elif source_name.startswith("/tag/"):
-                    newlink = source_name
-                    source_name = source_name.split('/tag/',1)[1]
-                # otherwise, make an article link
-                else:
-                    newlink = (
-                        f"{self.wiki.link}/article/{self.title_to_url(source_name)}"
-                    )
-                final_link = f"[{source_name}]({newlink})"
-
-        # if this is a regular-format link:
+        if has_name:
+            source_link = matchobj.group(2)
         else:
-            if self.wiki.article_exists(source_link) or " " in source_link:
-                source_link = (
-                    f"{self.wiki.link}/article/{self.title_to_url(source_link)}"
-                )
-            final_link = f"[{source_name}]({source_link})"
+            source_link = matchobj.group(1)
+        
+        if source_link.startswith("/tag/"):
+            newlink = source_link.split("/tag/",1)[1]
+            newlink = f"{self.wiki.tag_root_link}/{self.title_to_url(newlink)}"
+        else:
+            newlink = f"{self.wiki.article_root_link}/{self.title_to_url(source_link)}"
+
+        final_link = f"[{source_name}]({newlink})"
 
         return final_link
+        
 
     def _blurb_re(self, matchobj):
         Wiki.title_to_url
@@ -1065,12 +1048,7 @@ class Article(BaseModel):
     def _literal_clean_re(self, matchobj):
         return matchobj.group(0)[0] + matchobj.group(0)[-1]
 
-    def _formatted(self, raw_content):
-
-        self.autogen_metadata = []
-
-        # TODO: precompile
-
+    def _content_regions(self, raw_content, fn):
         r1 = r"(```)"
         r2 = r"(`)"
 
@@ -1092,18 +1070,7 @@ class Article(BaseModel):
                 if inline_skip:
                     continue
 
-                inline = self.include_re.sub(self._include_re, inline)
-                inline = self.metadata_cleared_re.sub(self._metadata_cleared_re, inline)
-                inline = self.metadata_re.sub(self._metadata_re, inline)
-                inline = self.blurb_re.sub(self._blurb_re, inline)
-                inline = self.function_re.sub(self._function_re, inline)
-                inline = self._format_table(inline)
-                
-                inline = self.strike_re.sub(self._strike_re, inline)
-                inline = self.media_re.sub(self._media_re, inline)
-                inline = self.wikilink_re.sub(self._wikilink_re, inline)
-                inline = self.regularlink_re.sub(self._regularlink_re, inline)
-                inline = self.checkbox_re.sub(self._checkbox_re, inline)
+                inline = fn(inline)
 
                 inlines[inline_index] = inline
 
@@ -1113,6 +1080,28 @@ class Article(BaseModel):
 
         raw_content = "".join(preformat_content)
 
+        return raw_content
+
+    def _inline_format(self, inline):
+        inline = self.include_re.sub(self._include_re, inline)
+        inline = self.metadata_cleared_re.sub(self._metadata_cleared_re, inline)
+        inline = self.metadata_re.sub(self._metadata_re, inline)
+        inline = self.blurb_re.sub(self._blurb_re, inline)
+        inline = self.function_re.sub(self._function_re, inline)
+        inline = self._format_table(inline)
+        inline = self.strike_re.sub(self._strike_re, inline)
+        inline = self.media_re.sub(self._media_re, inline)        
+        inline = self.wikilink_a_re.sub(self._wikilink_re, inline)
+        inline = self.wikilink_b_re.sub(self._wikilink_bare_re, inline)
+        inline = self.checkbox_re.sub(self._checkbox_re, inline)
+        return inline
+
+    def _formatted(self, raw_content):
+
+        self.autogen_metadata = []
+
+        raw_content = self._content_regions(raw_content, self._inline_format)
+
         ast = parser.parse(raw_content)
         html = renderer.render(ast)
 
@@ -1120,6 +1109,13 @@ class Article(BaseModel):
         html = html.replace("<img ", '<img class="img-fluid" ')
 
         return html
+
+    def rename_inbound_links(self, old_name, new_name):
+        """
+        - get all articles that link to this one
+        - iterate through each's regions
+        - replace matching links
+        """
 
 
 class Metadata(BaseModel):
@@ -1136,7 +1132,7 @@ class Tag(BaseModel):
 
     @property
     def link(self):
-        return f"{self.wiki.link}/tag/{self.title}"
+        return f"{self.wiki.tag_root_link}/{self.title}"
 
     @property
     def as_article(self):
@@ -1217,6 +1213,12 @@ class Media(BaseModel):
         os.remove(self.file_path_)
         self.delete_instance()
 
+    def rename_inbound_links(self, old_name, new_name):
+        """
+        - get all articles that link to this
+        - iterate through each's regions
+        - replace matching links
+        """
 
 class MediaLinks(BaseModel):
     media = ForeignKeyField(Media, backref="article_refs")

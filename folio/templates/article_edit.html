@@ -24,22 +24,34 @@
                         data-original="{{article_title if article.id is not None else ''}}" value="{{article_title}}">
                 </div>
 
+                % if article_title != article.draft_of.title:
+
+                <div id="editor-rename-checkbox-div" class="form-group form-check">
+                    <input type="checkbox" class="form-check-input" id="rename-links" name="rename-links" checked>
+                    <label class="form-check-label" for="rename-links">Update all links to this article</label>
+                </div>
+
+                % end
+
                 <div id="editor-controls" class="form-group">
 
                     % if article.id is not None:
 
                     <a href="#" id="btn_toggle_preview" title="Toggle preview (Ctrl+P)"><span
                             class="oi button-oi oi-eye"></span></a>
-                    <a href="#" id="btn_toggle_bold" title="Bold selection (Ctrl+B)"><span class="oi button-oi oi-bold"></span></a>
-                    <a href="#" id="btn_toggle_ital" title="Italicize selection (Ctrl+I)"><span class="oi button-oi oi-italic"></span></a>
-                    
+                    <a href="#" id="btn_toggle_bold" title="Bold selection (Ctrl+B)"><span
+                            class="oi button-oi oi-bold"></span></a>
+                    <a href="#" id="btn_toggle_ital" title="Italicize selection (Ctrl+I)"><span
+                            class="oi button-oi oi-italic"></span></a>
+
                     <a href="#" id="btn_insert_link" title="Insert article link (Ctrl+L)"><span
                             class="oi button-oi oi-link-intact"></span></a>
                     <!-- <a href="#" title="Insert external link (Ctrl+K)"><span
                             class="oi button-oi oi-external-link"></span></a> -->
                     <a href="#" id="btn_insert_media" title="Insert media (Ctrl+M)"><span
                             class="oi button-oi oi-image"></span></a>
-                    <a href="#" id="btn_edit_metadata" title="Edit article metadata (Ctrl-Shift-M)"><span class="oi button-oi oi-info"></span></a>
+                    <a href="#" id="btn_edit_metadata" title="Edit article metadata (Ctrl-Shift-M)"><span
+                            class="oi button-oi oi-info"></span></a>
                     <a href="#" id="btn_insert_tag" title="Edit article tags (Ctrl-G)"><span
                             class="oi button-oi oi-tags"></span></a>
 
@@ -56,8 +68,8 @@
                     <div class="row">
                         <div class="col-6">
                             % if article.id is not None:
-                            <button type="button" title="Save draft and continue editing (retain edit lock) (Ctrl-S)" name="save"
-                                id="save-button" value="save" class="btn btn-sm btn-success">Save</button>
+                            <button type="button" title="Save draft and continue editing (retain edit lock) (Ctrl-S)"
+                                name="save" id="save-button" value="save" class="btn btn-sm btn-success">Save</button>
                             % end
                             % else:
                             <button type="submit" title="Save and create article" name="save" id="save-button"

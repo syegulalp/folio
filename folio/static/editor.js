@@ -18,8 +18,7 @@ function resizeEditor() {
         - $('#editor-text')[0].offsetTop
         - $('#editor-buttons')[0].clientHeight
         - 32
-    )
-        ;
+    );
 }
 function togglePreview() {
     $('#mid-col').toggle();
@@ -143,15 +142,19 @@ function insertLinkFromList(item) {
 function insertLink(linkText, linkAltText) {
     $("#article_content").focus();
     field = $("#article_content")[0];
+    
+    // todo: test for http:/https:
+    // and modify brackets appropriately
+
     if (hasSelection(field)) {
-        wrapText(field, '[', '](' + linkText + ')')
+        wrapText(field, '[[', ']](' + linkText + ')')
     }
     else {
         if (linkAltText.length == 0) {
             wrapText(field, '[[' + linkText + ']]', '')
         }
         else {
-            wrapText(field, '[' + linkAltText + ']', '(' + linkText + ')')
+            wrapText(field, '[[' + linkAltText + ']]', '(' + linkText + ')')
         }
     }
     $('#edit-modal').modal('hide');
@@ -224,19 +227,23 @@ $("#article_title").on("change", function (e) {
     setDirty();
 });
 
-$("#article_title").on("keypress", function (e) {
-
+$("#article_title").on("keyup", function (e) {
     btn = $("#save-button");
     title = $("#article_title");
 
     if (title.data("original") != title.val()) {
         btn.prop("type", "submit");
+        resizeEditor();
     }
     else {
+        resizeEditor();
         if (!hasError) {
             btn.prop("type", "button");
         }
     }
+});
+
+$("#article_title").on("keypress", function (e) {
 
     if (e.originalEvent.keyCode === 13) {
         e.preventDefault();
