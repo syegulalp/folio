@@ -88,7 +88,7 @@ blockquote {
 }
 
 .wiki-cover-img {
-    margin-top: 16px;
+    margin-bottom: 16px;
 }
 
 .wiki-link {
@@ -191,6 +191,11 @@ Everything after this will eventually become a shadow article
 
 */
 
+#article-row {
+    max-width: 1024px;
+    margin: auto;
+}
+
 img-sidebar {
     right: 16px;
     float: right;
@@ -214,4 +219,8 @@ img-banner .wiki-link {
 
 img-banner-wide img {
     width: 100%;
+}
+
+img-banner p {
+    margin: 0;
 }

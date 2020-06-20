@@ -3,16 +3,17 @@
 % end
 % else:
 
+% if wiki.cover_img:
+<div class="wiki-cover-img">
+    <a href="{{wiki.homepage_link}}"><img class="img img-fluid" src="{{wiki.cover_img}}"></a>
+</div>
+% end
+
 <div class="wiki-title">
     <a href="{{wiki.homepage_link}}" title="Start page">{{wiki.title}}</a>
 </div>
 <div class="wiki-description">
     {{wiki.description}}
-    % if wiki.cover_img:
-    <div class="wiki-cover-img">
-        <a href="{{wiki.homepage_link}}"><img class="img img-fluid" src="{{wiki.cover_img}}"></a>
-    </div>
-    % end
 </div>
 <div class="wiki-icons">
 <a href="{{wiki.new_page_link}}" title="Create new wiki entry"><span class="oi oi-file"></span></a>
