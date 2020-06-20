@@ -10,7 +10,7 @@ MAX_REQUEST_SIZE = 1024 * 1024 * 4
 try:
     import regex as re
 except ImportError:
-    import re
+    import re # type: ignore
 import pickle
 
 pickle.DEFAULT_PROTOCOL = pickle.HIGHEST_PROTOCOL
