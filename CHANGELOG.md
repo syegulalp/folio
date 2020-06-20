@@ -13,6 +13,7 @@
 * The system metadata entries, `@default` and `@hide-title`, are now fully documented.
 * Wikis now have a rudimentary search-and-replace functionality. It is not yet exposed through a menu option, but it's available by going to a wiki's search page and replacing `/search` with `/replace` in the address bar. You can perform case-sensitive search-and-replace operations on article texts. Altered articles automatically have a revision saved. It does not work on any other content, such as article titles, tags, image names, etc. **This is an experimental feature which can result in data loss, so use it with caution.**
 * The literal-include feature, which used triple curly braces to include the source of a document, has been removed. Its behavior essentially overlapped with the regular include feature anyway.
+* Layout tweaks. The maximum width for the main display is 1024px.
 
 ### Bugfixes
 
