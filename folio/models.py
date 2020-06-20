@@ -558,7 +558,9 @@ class Article(BaseModel):
     linkh_re = re.compile(r'(<link .*?)href="([^"]*?)"([^>]*?>)')
     imgtag_re = re.compile(r'(<img .*?)src="([^"]*?)"([^>]*?>)')
     script_re = re.compile(r'(<script .*?)src="([^"]*?)"([^>]*?>)')
-    literal_clean_re = re.compile(r"[^`]``[^`]")
+
+    literal_block_re = re.compile(r"(```)")
+    literal_inline_re = re.compile(r"(`)")
 
     def make_revision(self):
         revision = Article(
@@ -1046,27 +1048,21 @@ class Article(BaseModel):
             return '<input type="checkbox" disabled checked />'
         return '<input type="checkbox" disabled/>'
 
-    def _literal_clean_re(self, matchobj):
-        return matchobj.group(0)[0] + matchobj.group(0)[-1]
-
     def _content_regions(self, raw_content, fn):
-        r1 = r"(```)"
-        r2 = r"(`)"
-
-        preformat_content = re.split(r1, raw_content)
-
+        preformat_content = self.literal_block_re.split(raw_content)
         skip = False
+
         for index, region in enumerate(preformat_content):
-            if re.match(r1, region):
+            if self.literal_block_re.match(region):
                 skip = not skip
             if skip:
                 continue
 
-            inlines = re.split(r2, region)
+            inlines = self.literal_inline_re.split(region)
             inline_skip = False
 
             for inline_index, inline in enumerate(inlines):
-                if re.match(r2, inline):
+                if self.literal_inline_re.match(inline):
                     inline_skip = not inline_skip
                 if inline_skip:
                     continue
