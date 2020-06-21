@@ -1,11 +1,12 @@
 % article_text = article.formatted
+% article_title = article.new_title if article.new_title else article.title
 % if article.get_metadata('@hide-title') is None:
 <h1>
   % if not article.id:
-  {{article.title}}
+  {{article_title}}
   % end
   % else:
-  <a href="{{article.link}}">{{article.title}}</a>
+  <a href="{{article.link}}">{{article_title}}</a>
   % end
   <span class="float-right" style="font-size: .5em; margin-top: 1em">
     <a title="See article revision history" href="{{article.history_link}}"><span class="oi oi-calendar"></span></a>
