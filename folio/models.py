@@ -535,7 +535,7 @@ class Article(BaseModel):
     checkbox_re = re.compile(r"\[([xX_ ])\]")
     strike_re = re.compile(r"\~\~(.*?)\~\~")
 
-    # Folio custom functions
+    # Folio custom functions: inline
     link_re = re.compile(r"\[\[(.*?)\]\]")
     wikilink_re = re.compile(r"\[\[(.*?)\]\](?:\((.*?)\))?")    
     literal_include_re = re.compile(r"\{\{\{(.*?)\}\}\}")
@@ -543,6 +543,8 @@ class Article(BaseModel):
     function_re = re.compile(r"\<\<[^>]*?\>\>")
     blurb_re = re.compile(r"\<\<\<(.*?)\>\>\>")
     media_re = re.compile(r"!\[([^\]]*?)\]\(([^)]*?)\)")
+    
+    # Folio custom functions: block
     metadata_re = re.compile(
         r"(\$\[(.*?)\]\$)+(\(([^)]*?)\))?", re.MULTILINE | re.DOTALL
     )
@@ -555,9 +557,11 @@ class Article(BaseModel):
 
     # Everything else
     href_re = re.compile(r'(<a .*?)href="([^"]*?)"([^>]*?>)')
-    linkh_re = re.compile(r'(<link .*?)href="([^"]*?)"([^>]*?>)')
-    imgtag_re = re.compile(r'(<img .*?)src="([^"]*?)"([^>]*?>)')
-    script_re = re.compile(r'(<script .*?)src="([^"]*?)"([^>]*?>)')
+    
+    # Not deleting these yet as they may be useful later
+    # linkh_re = re.compile(r'(<link .*?)href="([^"]*?)"([^>]*?>)')
+    # imgtag_re = re.compile(r'(<img .*?)src="([^"]*?)"([^>]*?>)')
+    # script_re = re.compile(r'(<script .*?)src="([^"]*?)"([^>]*?>)')
 
     literal_block_re = re.compile(r"(```)")
     literal_inline_re = re.compile(r"(`)")

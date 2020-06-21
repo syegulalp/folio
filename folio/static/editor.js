@@ -261,8 +261,22 @@ $("#article_content").on("paste", handleImagePaste);
 
 $("#article_content").on("keydown", function (e) {
     if (e.code == 'Tab') {
-        e.preventDefault();
-        wrapText(this, '    ', '');
+        if (e.shiftKey) {
+            e.preventDefault();
+            // go back to the previous linebreak
+            // string.lastIndexOf(searchvalue, start)
+            // delete up to four spaces
+        }
+        else {
+            e.preventDefault();
+            // what to do about indenting selections?
+            // if nothing selected:
+            // go back to the beginning of the line, insert
+            // else:
+            // go back to the last linebreak from the start point
+            // for each linebreak, add 4 spaces until we hit the end
+            wrapText(this, '    ', '');
+        }
     }
     if (e.altKey) {
         if (e.shiftKey) {
