@@ -210,7 +210,7 @@ img-sidebar img {
 
 img-banner img {
     width: 19%;
-    margin-bottom: 8px;
+    margin-bottom: 4px;
 }
 
 img-banner .wiki-link {
@@ -223,4 +223,9 @@ img-banner-wide img {
 
 img-banner p {
     margin: 0;
+}
+
+img-banner {
+    display: block;
+    margin-bottom: 8px;
 }
