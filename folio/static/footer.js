@@ -4,6 +4,7 @@ function reset_msg() {
     clearTimeout(drop_timeout);
     d = $("#drop-message")
     d.stop().animate({ opacity: '100' });
+    d.text("");
     d.hide();
 }
 
