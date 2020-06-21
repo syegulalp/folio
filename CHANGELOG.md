@@ -17,9 +17,11 @@
 
 ### Bugfixes
 
-* Fixed issues with the paginator and the redirection behavior on deleting an image from the image manager.
-* "Image not found" page in the image manager was not rendering correctly.
-* Fixed a bug where the link inserter in the article editor was no longer working when you pressed Shift-Enter to manually add a link definition.
+* Paginator and redirection behavior on deleting an image from the image manager previously failed under certain circumstances.
+* "Image not found" page in the image manager now renders correctly.
+* The link inserter in the article editor now works properly once again when you press Shift-Enter to manually add a link definition.
+* The drag-and-drop message popup now clears its contents properly.
+* When viewing a draft of an article with a different title from the original, the changed name is now seen.
   
 ### Known bugs
 
