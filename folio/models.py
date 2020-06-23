@@ -1013,7 +1013,7 @@ class Article(BaseModel):
             else:
                 if is_table:
                     is_table = False
-                    table_fmt.append("</tbody></table>")
+                    table_fmt.append("</tbody></table>\n\n")
                 table_fmt.append(_)
                 continue
 
@@ -1041,7 +1041,7 @@ class Article(BaseModel):
 
         if is_table:
             is_table = False
-            table_fmt.append("</tbody></table>")
+            table_fmt.append("</tbody></table>\n\n")
 
         content = "".join(table_fmt)
 
