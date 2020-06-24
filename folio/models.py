@@ -46,6 +46,10 @@ from html.parser import HTMLParser
 ARTICLE_TIME_FORMAT = r"%Y-%m-%d %H:%m:%S"
 
 
+class TagException(Exception):
+    pass
+
+
 class DocTagParser(HTMLParser):
     """
     Handles parsing for macro tags in documents.
@@ -58,79 +62,78 @@ class DocTagParser(HTMLParser):
         self.article = article
 
     def handle_starttag(self, tag, attrs):
-        error = None
-        if tag in ("documents", "articles", "items"):
-            for k, v in attrs:
-                if k == "tag":
-                    try:
-                        # TODO: this kind of construction happens often enough that we should probably make a special constructor
-                        self.query = (
-                            self.article.wiki.articles_tagged_with(v)
-                            .where(
-                                Article.draft_of.is_null(),
-                                Article.revision_of.is_null(),
-                            )
-                            .order_by(SQL("title COLLATE NOCASE"))
-                        )
-                    except Exception:
-                        error = v
-
-            if not self.query:
-                self.results.append(
-                    f"<inline-error>[No such tag: {error}]</inline-error>"
-                )
-                return
-
-            for __ in self.query:
-                __.formatted
-                blurb = __.get_metadata("@blurb")
-                blurb = f" -- {blurb}" if blurb else ""
-                self.results.append(f"* [[{__.title}]]{blurb}")
-
-        elif tag == "meta":
-            for k, v in attrs:
-                v = Wiki.html_keysafe_to_title(v)
-                if k in ("doc", "article", "item"):
-                    try:
-                        self.query = self.article.wiki.articles.where(
-                            Article.title == v,
-                            Article.draft_of.is_null(),
-                            Article.revision_of.is_null(),
-                        ).get()
-                    except Article.DoesNotExist:
-                        error = v
-                        self.query = None
-                elif k in ("key", "key_opt") and not error:
-                    if not self.query:
-                        self.query = self.article
-                    try:
-                        self.query = self.query.get_metadata(v)
-                    except KeyError:
-                        self.query = []
-                        if k == "key":
-                            error = v
-                elif k == "pre":
-                    if self.query:
-                        self.query = v + self.query
-                elif k == "post":
-                    if self.query:
-                        self.query += v
-
-            if not self.query:
-                if error:
-                    self.results.append(
-                        f"<inline-error>[No such document or tag: {error}]</inline-error>"
-                    )
-                return
-
-            self.results.append(self.query)
-
-        else:
-            self.results.append(f"<inline-error>[No such macro: {tag}]</inline-error>")
-            return
+        # TODO: flag dupes?
+        attrs = dict((k, v) for k, v in attrs)
+        try:
+            if tag in {"documents", "articles", "items"}:
+                self._handle_articles(attrs)
+            elif tag == "meta":
+                self._handle_meta(attrs)
+            else:
+                raise TagException(f"No such macro: {tag}")
+        except TagException as e:
+            self.results.append(f"<inline-error>[{e}]</inline-error>")
+            # TODO: move error format to class?
 
     def render(self):
         return "\n".join(self.results)
+
+    def _handle_articles(self, attrs):
+        if "tag" in attrs:
+            tag = attrs["tag"]
+            try:
+                # TODO: this kind of construction happens often enough that we should probably make a special constructor
+                self.query = (
+                    self.article.wiki.articles_tagged_with(tag)
+                    .where(Article.draft_of.is_null(), Article.revision_of.is_null(),)
+                    .order_by(SQL("title COLLATE NOCASE"))
+                )
+            except Exception:
+                raise TagException(f"No such tag: {tag}")
+
+        if not self.query:
+            raise TagException(f"Articles meta needs tag or other filter")
+
+        # TODO: convert below to common format?
+
+        for __ in self.query:
+            __.formatted
+            blurb = __.get_metadata("@blurb")
+            blurb = f" -- {blurb}" if blurb else ""
+            self.results.append(f"* [[{__.title}]]{blurb}")
+
+    def _handle_meta(self, attrs):
+        article = None
+        for x in {"doc", "article", "item"}:
+            if x in attrs:
+                article = attrs[x]
+                try:
+                    self.query = self.article.wiki.articles.where(
+                        Article.title == article,
+                        Article.draft_of.is_null(),
+                        Article.revision_of.is_null(),
+                    ).get()
+                except Article.DoesNotExist:
+                    raise TagException(f"No such article: {article}")
+
+        key = None
+        for x in {"key", "key_opt"}:
+            if x in attrs:
+                key = attrs[x]
+                if not self.query:
+                    self.query = self.article
+                try:
+                    self.query = self.query.get_metadata(key)
+                except KeyError:
+                    if x == "key":
+                        raise TagException(f"No such key: {key}")
+
+        if self.query:
+            if "pre" in attrs:
+                self.query = attrs["pre"] + self.query
+            if "post" in attrs:
+                self.query += attrs["post"]
+            self.results.append(self.query)
 
 
 class BaseModel(Model):
@@ -385,7 +388,7 @@ class Wiki(BaseModel):
     def tag_root_link(self):
         if Wiki.export_mode:
             return "../tag"
-        return f"{self.link}/tag"        
+        return f"{self.link}/tag"
 
     @property
     def delete_key(self):
@@ -537,13 +540,13 @@ class Article(BaseModel):
 
     # Folio custom functions: inline
     link_re = re.compile(r"\[\[(.*?)\]\]")
-    wikilink_re = re.compile(r"\[\[(.*?)\]\](?:\((.*?)\))?")    
+    wikilink_re = re.compile(r"\[\[(.*?)\]\](?:\((.*?)\))?")
     literal_include_re = re.compile(r"\{\{\{(.*?)\}\}\}")
     include_re = re.compile(r"\{\{(.*?)\}\}")
     function_re = re.compile(r"\<\<[^>]*?\>\>")
     blurb_re = re.compile(r"\<\<\<(.*?)\>\>\>")
     media_re = re.compile(r"!\[([^\]]*?)\]\(([^)]*?)\)")
-    
+
     # Folio custom functions: block
     metadata_re = re.compile(
         r"(\$\[(.*?)\]\$)+(\(([^)]*?)\))?", re.MULTILINE | re.DOTALL
@@ -557,7 +560,7 @@ class Article(BaseModel):
 
     # Everything else
     href_re = re.compile(r'(<a .*?)href="([^"]*?)"([^>]*?>)')
-    
+
     # Not deleting these yet as they may be useful later
     # linkh_re = re.compile(r'(<link .*?)href="([^"]*?)"([^>]*?>)')
     # imgtag_re = re.compile(r'(<img .*?)src="([^"]*?)"([^>]*?>)')
@@ -615,7 +618,7 @@ class Article(BaseModel):
         new_form_article.save()
 
         for tag in self.tags:
-            if tag.tag.title not in ("@form", "@template"):
+            if tag.tag.title not in {"@form", "@template"}:
                 new_form_article.add_tag(tag.tag.title)
 
         for metadata in self.metadata_not_autogen:
@@ -953,15 +956,15 @@ class Article(BaseModel):
     def _wikilink_re(self, matchobj, use_name=True):
         source_name = matchobj.group(1)
         source_link = matchobj.group(2)
-        
+
         if not source_link:
             if use_name:
                 return matchobj[0]
             else:
                 source_link = matchobj.group(1)
-            
+
         if source_link.startswith("/tag/"):
-            newlink = source_link.split("/tag/",1)[1]
+            newlink = source_link.split("/tag/", 1)[1]
             newlink = f"{self.wiki.tag_root_link}/{self.title_to_url(newlink)}"
         else:
             newlink = f"{self.wiki.article_root_link}/{self.title_to_url(source_link)}"
@@ -969,7 +972,6 @@ class Article(BaseModel):
         final_link = f"[{source_name}]({newlink})"
 
         return final_link
-        
 
     def _blurb_re(self, matchobj):
         Wiki.title_to_url
@@ -1172,6 +1174,10 @@ class Media(BaseModel):
     description = TextField(null=True)
     date_uploaded = DateTimeField(default=datetime.datetime.now)
 
+    @property
+    def uploaded_on(self):
+        return self.date_uploaded.strftime(ARTICLE_TIME_FORMAT)
+
     @classmethod
     def exists(cls, file_path, wiki):
         try:
@@ -1220,6 +1226,7 @@ class Media(BaseModel):
         - iterate through each's regions
         - replace matching links
         """
+
 
 class MediaLinks(BaseModel):
     media = ForeignKeyField(Media, backref="article_refs")
