@@ -10,7 +10,7 @@ MAX_REQUEST_SIZE = 1024 * 1024 * 4
 try:
     import regex as re
 except ImportError:
-    import re # type: ignore
+    import re  # type: ignore
 import pickle
 
 pickle.DEFAULT_PROTOCOL = pickle.HIGHEST_PROTOCOL
@@ -52,9 +52,11 @@ import os
 class ParentProcessConnectionAborted(ConnectionAbortedError):
     pass
 
+
 class WebException(Exception):
     def __init__(self, response):
         self.response = response
+
 
 class ProcessType(Enum):
     """
@@ -197,7 +199,7 @@ class Request:
             k = str(k, "utf-8")
             v = str(v, "utf-8")
             k = k.upper().replace("-", "_")
-            if k not in ("CONTENT_TYPE", "CONTENT_LENGTH", "CONTENT_DISPOSITION"):
+            if k not in {"CONTENT_TYPE", "CONTENT_LENGTH", "CONTENT_DISPOSITION"}:
                 k = f"HTTP_{k}"
             headers[k] = v.strip()
 
@@ -513,6 +515,8 @@ class Template:
             if not s_line.startswith("%"):
                 t = re.split(self._braces, _)
                 for x, n in enumerate(t):
+                    # TODO: if there's an f-string in this,
+                    # we need to handle it separately
                     if n.startswith("{{!"):
                         n = "{" + n[3:-2] + "}"
                     elif n.startswith("{{"):
@@ -955,17 +959,13 @@ class Server:
             return [response.body.encode("utf-8")]
 
         try:
-            if route_type in (RouteType.sync, RouteType.pool):
+            if route_type == RouteType.asnc_local or route_type == RouteType.asnc:
+                result = asyncio.run(handler(Request(environ), *parameters))
+
+            elif route_type == RouteType.sync or route_type == RouteType.pool:
                 result: Union[bytes, Response, str] = handler(
                     Request(environ), *parameters
                 )
-
-            elif route_type in (RouteType.asnc_local,):
-                result = asyncio.run(handler(Request(environ), *parameters))
-
-            elif route_type in (RouteType.asnc,):
-                # TODO: farm out to threadpool
-                result = asyncio.run(handler(Request(environ), *parameters))
 
             else:
                 raise NotImplementedError(f"{route_type} not implemented for WSGI")
@@ -1003,7 +1003,6 @@ class Server:
             start_response(*response.start_response())
             return [result]
         else:
-            print(result)
             start_response("500 Error", [("Content-Type", "text/plain")])
             return [
                 b"Iterable not yet supported for WSGI; use Response or SimpleResponse"
@@ -1045,7 +1044,7 @@ class Server:
                 else:
                     raw_data.extend(_)
 
-                if _ in (b"\r\n", b"\n"):
+                if _ in {b"\r\n", b"\n"}:
                     break
 
                 if _.decode("utf-8").lower().startswith("content-length:"):
@@ -1076,7 +1075,7 @@ class Server:
                 handler, route_type = self.static_routes[path][verb]
             except KeyError:
                 route_match = None
-                for route in self.dynamic_routes:                    
+                for route in self.dynamic_routes:
                     if verb != route[1]:
                         continue
                     route_match = route[0].fullmatch(path)
@@ -1198,15 +1197,15 @@ class Server:
             except Exception as e:
                 result = self.error_500(Request(raw_data), format_err(e))
 
-            try:
-                if result is None:
-                    write(simple_response(b""))
-                elif isinstance(result, Response):
-                    write(result.as_bytes())
-                elif isinstance(result, SimpleResponse):
+            try:                
+                if isinstance(result, SimpleResponse):
                     write(result)
+                elif isinstance(result, Response):
+                    write(result.as_bytes())                
                 elif isinstance(result, bytes):
                     write(result)
+                elif result is None:
+                    write(simple_response(b""))
                 else:
                     for _ in result:
                         write(_)

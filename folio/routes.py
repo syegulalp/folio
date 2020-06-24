@@ -182,6 +182,22 @@ def error_404(env: Request):
 server.error_404 = error_404  # type: ignore
 
 
+def home_page_render(messages=[]):
+    return Response(
+        home_template.render(
+            wikis=Wiki.select().order_by(Wiki.title.asc()),
+            articles=Article.select()
+            .where(Article.draft_of.is_null(), Article.revision_of.is_null(),)
+            .order_by(Article.last_edited.desc())
+            .limit(25),
+            page_title="Folio (Homepage)",
+            messages=messages,
+            wiki=blank_wiki,
+        ),
+        headers=default_headers,
+    )
+
+
 @route("/", RouteType.asnc_local)
 async def main_route(env: Request):
     return home_page_render()
@@ -233,22 +249,6 @@ async def new_wiki_save(env: Request):
 ######################################################################
 # Wiki paths
 ######################################################################
-
-
-def home_page_render(messages=[]):
-    return Response(
-        home_template.render(
-            wikis=Wiki.select().order_by(Wiki.title.asc()),
-            articles=Article.select()
-            .where(Article.draft_of.is_null(), Article.revision_of.is_null(),)
-            .order_by(Article.last_edited.desc())
-            .limit(25),
-            page_title="Folio (Homepage)",
-            messages=messages,
-            wiki=blank_wiki,
-        ),
-        headers=default_headers,
-    )
 
 
 @route(f"{Wiki.PATH}", RouteType.asnc_local)
@@ -1028,7 +1028,7 @@ async def article_edit(
                 article.save()
                 return redirect(article.link)
 
-            elif action in ("publish", "revise"):
+            elif action in {"publish", "revise"}:
                 new_article = article.draft_of
 
                 if action == "revise":
