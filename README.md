@@ -44,6 +44,10 @@ Quite a lot, but mainly:
 * Export and import
 * More sophisticated and configurable page styling options
 
+## Want to contribute?
+
+Please! Pull requests welcome. Please bear in mind our [Code of Conduct](CODE_OF_CONDUCT.md).
+
 ## Later
 
 * Plugins
