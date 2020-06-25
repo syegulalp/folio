@@ -32,12 +32,15 @@
 
 <div class="wiki-tags">
   % if article.exists_as_tag:
-  <a title="See all articles with this tag" href="{{article.exists_as_tag.link}}"><span class="badge badge-secondary">{{article.exists_as_tag.title}}</span></a>
+  <a title="This page is also a tag; see all articles with this tag" href="{{article.exists_as_tag.link}}"><span class="badge badge-secondary">{{article.exists_as_tag.title}}</span></a>
   % end
   % for tag_ref in article.tags_alpha:
   % tag_article = tag_ref.article_exists
   % if tag_article:
-  <a title="See article that also has this tag name" href="{{tag_article.link}}"><span class="badge badge-success">{{tag_article.title}}</span></a>
+  <a title="See article with this tag name" href="{{tag_article.link}}"><span class="badge badge-success">{{tag_article.title}}</span></a>
+  % end
+  % elif tag_ref.is_system_tag:
+  <a title="See all articles with this system tag" href="{{tag_ref.link}}"><span class="badge badge-danger">{{tag_ref.title}}</span></a>
   % end
   % else:
   <a title="See all articles with this tag" href="{{tag_ref.link}}"><span class="badge badge-primary">{{tag_ref.title}}</span></a>
