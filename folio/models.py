@@ -257,7 +257,6 @@ class Wiki(BaseModel):
                 media.delete_()
 
             try:
-                # os.remove(os.path.join(self.data_path, "cover.jpg"))
                 Path(self.data_path, "cover.jpg").unlink()
             except:
                 pass
@@ -1155,6 +1154,10 @@ class Tag(BaseModel):
         return cls.select().where(
             cls.id.not_in(TagAssociation.select(TagAssociation.tag))
         )
+
+    @property
+    def is_system_tag(self):
+        return self.title.startswith('@')
 
 
 class TagAssociation(BaseModel):
