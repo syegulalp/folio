@@ -73,8 +73,9 @@ class RouteType(Enum):
     `sync`: Synchronous route.
     `sync_thread`: Sync route using thread pool.
     `asnc`: Async route.
+    `asnc_local`: Async route that always runs in the default thread.
     `pool`: Multiprocessing-pooled route.
-    `stream`: Multiprocessing-pooled route that yields results incrementally (and therefore may block quite a bit).
+    `stream`: Multiprocessing-pooled route that yields results incrementally (and therefore may block).
     """
 
     sync = 0
@@ -504,7 +505,7 @@ class Template:
 
         self.code_lines: list = []
         self.indent_level = 0
-        self.code_lines.append(self._indent() + "output = []")
+        self.code_lines.append("output = []")
 
         template_lines = self._include(template_str, self._path)
 
@@ -1197,11 +1198,11 @@ class Server:
             except Exception as e:
                 result = self.error_500(Request(raw_data), format_err(e))
 
-            try:                
+            try:
                 if isinstance(result, SimpleResponse):
                     write(result)
                 elif isinstance(result, Response):
-                    write(result.as_bytes())                
+                    write(result.as_bytes())
                 elif isinstance(result, bytes):
                     write(result)
                 elif result is None:
