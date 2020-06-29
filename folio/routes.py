@@ -782,13 +782,18 @@ async def article_display(env: Request, wiki: Wiki, user: Author, article: Artic
 
     if article.id is None:
         try:
+            # TODO: replace with common search object
+            # articles_tagged_with
+            # article searches need to be composable entities
+            # something for a later revision
+
             form_tag = Tag.select(Tag.id).where(Tag.wiki == wiki, Tag.title == "@form")
 
             tagged_as_form = TagAssociation.select(TagAssociation.article).where(
                 TagAssociation.tag << form_tag
             )
 
-            forms = wiki.articles_alpha.select().where(Article.id << tagged_as_form)
+            forms = wiki.articles_alpha.select().where(Article.id << tagged_as_form, Article.draft_of.is_null(), Article.revision_of.is_null())
 
         except (
             Tag.DoesNotExist,
