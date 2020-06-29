@@ -368,7 +368,7 @@ async def wiki_settings_edit(env: Request, wiki: Wiki, user: Author):
         wiki_edit_template.render(
             wiki=wiki,
             user=user,
-            page_title=f"Edit settings ({wiki.title})",
+            page_title=f"Edit wiki settings ({wiki.title})",
             messages=[error] if error else None,
             original_wiki=original_wiki,
         ),
