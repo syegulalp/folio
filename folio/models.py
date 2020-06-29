@@ -79,6 +79,7 @@ class DocTagParser(HTMLParser):
         return "\n".join(self.results)
 
     def _handle_articles(self, attrs):
+        tag = None
         if "tag" in attrs:
             tag = attrs["tag"]
             try:
@@ -91,10 +92,12 @@ class DocTagParser(HTMLParser):
             except Exception:
                 raise TagException(f"No such tag: {tag}")
 
-        if not self.query:
+        if not tag:
             raise TagException(f"Articles meta needs tag or other filter")
 
-        # TODO: convert below to common format?
+        if self.query.count() > 0 and "sort" in attrs:
+            sort_key = attrs["sort"]
+            self.query = sorted(self.query, key=lambda x: x.get_metadata(sort_key))
 
         for __ in self.query:
             __.formatted
@@ -116,6 +119,9 @@ class DocTagParser(HTMLParser):
                 except Article.DoesNotExist:
                     raise TagException(f"No such article: {article}")
 
+        if not article:
+            raise TagException(f"No article specified")
+
         key = None
         for x in {"key", "key_opt"}:
             if x in attrs:
@@ -127,6 +133,9 @@ class DocTagParser(HTMLParser):
                 except KeyError:
                     if x == "key":
                         raise TagException(f"No such key: {key}")
+
+        if not key:
+            raise TagException(f"No key specified for article: {article}")
 
         if self.query:
             if "pre" in attrs:
@@ -286,6 +295,8 @@ class Wiki(BaseModel):
 
         new_wiki = cls(title=title, description=description)
         new_wiki.save()
+
+        # TODO: if directory already exists, what?
 
         Path(cls._config.DATA_PATH, str(new_wiki.id)).mkdir()
 
@@ -466,7 +477,7 @@ class Wiki(BaseModel):
                 TagAssociation.tag == tag_q
             )
             return self.articles.where(Article.id << tag_assoc).order_by(
-                Article.title.asc()
+                SQL("title COLLATE NOCASE")
             )
         except Tag.DoesNotExist:
             return []
@@ -1157,7 +1168,7 @@ class Tag(BaseModel):
 
     @property
     def is_system_tag(self):
-        return self.title.startswith('@')
+        return self.title.startswith("@")
 
 
 class TagAssociation(BaseModel):

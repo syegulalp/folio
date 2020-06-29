@@ -247,9 +247,10 @@ To have a picture serve as a link, just wrap it in the link:
 Use `documents` (`articles` and `items` are synonyms) to generate a list of all articles in the wiki that match certain parameters.
 
 
-`<<documents|articles|items tag="tagname">>`
+`<<documents|articles|items tag="tagname" sort="sortkey">>`
 
 * `tag`: Match any articles that have the following tag. Use multiple `tag` items to match against multiple tags.  `<<items tag="Fiction">>` would insert a list of all articles with the tag `Fiction`.
+* `sort`: Sort the matched items by way of a specified metadata key. For instance, `sort="alphakey"` would look for metadata on each article under the name `alphakey`, and sort the articles using the value under that key.
 
 # `meta`
 
