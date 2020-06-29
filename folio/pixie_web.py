@@ -691,10 +691,6 @@ path_re = re.compile(path_re_str)
 path_replace = ".[]"
 
 
-def dummy():
-    pass
-
-
 def redirect(location: str):
     return simple_response("", code=302, headers={"Location": location})
 
@@ -914,7 +910,7 @@ class Server:
         from concurrent.futures.process import BrokenProcessPool
 
         try:
-            self.pool.submit(dummy).result()
+            self.pool.submit(lambda: None).result() # type: ignore
         except (OSError, RuntimeError, BrokenProcessPool):
             _e(
                 "'run()' function must be invoked from within 'if __name__ == \"__main__\"' block to invoke multiprocessing. Defaulting to single-process pool."
@@ -1028,6 +1024,9 @@ class Server:
 
         while True:
 
+            # TODO: use stream limit in reader
+            # split at first \n\n, assume rest is content
+
             action = raw_data = signal = content_length = None
 
             while True:
@@ -1048,14 +1047,14 @@ class Server:
                 if _ in {b"\r\n", b"\n"}:
                     break
 
-                if _.decode("utf-8").lower().startswith("content-length:"):
+                if content_length is None and _.decode("utf-8").lower().startswith("content-length:"):
                     content_length = int(_.decode("utf-8").split(":")[1])
 
                 if len(raw_data) > MAX_REQUEST_SIZE:
-                    write(simple_response(b"\n", code="413 Request too large"))
-                    writer.close()
-                    return
+                    content_length = MAX_REQUEST_SIZE+1
+                    break
 
+           
             if content_length:
                 if content_length > MAX_REQUEST_SIZE:
                     write(simple_response(b"\n", code="413 Request too large"))
