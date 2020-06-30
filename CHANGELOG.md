@@ -1,5 +1,16 @@
 # Changelog
 
+## HEAD
+
+### New features
+
+None yet.
+
+### Bugfixes
+
+* Some templates that were supposed to display at fixed width were not; this has been corrected.
+* Javascript and CSS now load with hints that indicate the version number, so that upgrades across versions do not cause cached resources to be loaded.
+
 ## [0.0.6-alpha](https://github.com/syegulalp/folio/releases/tag/0.0.6-alpha)
 
 **This is the last pre-alpha release.** The next release will be a proper beta, with all changes to the database schema tracked and versioned to allow proper migrations between schemas.
