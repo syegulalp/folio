@@ -1,6 +1,6 @@
 # Changelog
 
-## HEAD
+## [0.0.6-alpha](https://github.com/syegulalp/folio/releases/tag/0.0.6-alpha)
 
 **This is the last pre-alpha release.** The next release will be a proper beta, with all changes to the database schema tracked and versioned to allow proper migrations between schemas.
 
