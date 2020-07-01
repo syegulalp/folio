@@ -21,7 +21,7 @@ import time, datetime
 import traceback
 
 try:
-    import uvloop
+    import uvloop # type: ignore
 
     asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 except ImportError:
@@ -938,6 +938,8 @@ class Server:
 
         parameters = []
         handler = result = None
+        route_type = None
+
         try:
             handler, route_type = self.static_routes[path][verb]
         except KeyError:
@@ -1027,7 +1029,7 @@ class Server:
             # TODO: use stream limit in reader
             # split at first \n\n, assume rest is content
 
-            action = raw_data = signal = content_length = None
+            action = raw_data = signal = content_length = route_type = result = None
 
             while True:
                 # TODO: use .readuntil(sep)
