@@ -16,7 +16,7 @@ function show_msg(text, css_class, timeout = 3000, html = false) {
     else {
         d.text(text)
     }
-    d.prop("class", "alert alert-" + css_class)
+    d.prop("class", "drop-message alert alert-" + css_class)
     d.show();
     clearTimeout(drop_timeout);
     if (timeout > 0) {
@@ -119,19 +119,12 @@ $("#drop-target").on('drop', function (e) {
 
         if (files.length > 0) {
 
-            var status = true;
+            show_msg('<div class="progress upload-progress"><div id="upload_progess" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div>'+
+            '<div id="upload_report"></div>', "success", timeout=0, html=true);
+            report = $("#upload_report");
 
-            var filesList = [];
-
-            $(document).ajaxStop(function() {
-
-                if (status) {
-                    show_msg(filesList.join('')+"<hr>"+ files.length + " files uploaded successfully.", "success", timeout=0, html=true)
-                }
-                else {
-                    show_msg("Some files did not upload.", "danger")
-                }
-            });
+            file_counter = 0;
+            progress_bar = $("#upload_progess");
 
             for (var i = 0; i < files.length; i++) {
                 file = files[i];
@@ -151,13 +144,19 @@ $("#drop-target").on('drop', function (e) {
                     contentType: false
                 })
                     .done(function (data) {
-                        txt = data.split('\n');
-                        filesList.push("<div class='media'><a target='_blank' href='"+txt[1]+"'><img src='"+txt[0]+"'></a><div class='media-body'>"+txt[2]+"</div></div>");
+                        txt = data.split('\n');                        
+                        report.html(report.html() + "<div class='media'><a target='_blank' href='"+txt[1]+"'><img src='"+txt[0]+"'></a><div class='media-body'>"+txt[2]+"</div></div>");
                     })
                     .fail(function () {
-                        status = false
+                        report.html(report.html() + "<div>File " + file.name +" did not upload; may be too big or wrong type</div>");
                     })
-                    .always(function () { });
+                    .always(function () {
+                        file_counter++;
+                        total_progress = (file_counter/files.length)*100;
+                        progress_bar.prop("aria-valuenow", total_progress);
+                        progress_bar.css("width", total_progress+'%');
+                        progress_bar.text(total_progress+'%');
+                    });
 
             }
 

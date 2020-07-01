@@ -1,4 +1,5 @@
 import datetime
+from typing import Optional, Union
 import urllib
 
 import commonmark
@@ -11,7 +12,7 @@ try:
 except ImportError:
     import re  # type: ignore
 import datetime
-import config
+import config # type: ignore
 import os
 from hashlib import blake2b
 
@@ -57,7 +58,7 @@ class DocTagParser(HTMLParser):
 
     def __init__(self, article):
         super().__init__()
-        self.query = []
+        self.query: Union(list, list[Article]) = []
         self.results = []
         self.article = article
 

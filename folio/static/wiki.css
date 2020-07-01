@@ -185,6 +185,15 @@ inline-error {
     background-color:pink
 }
 
+.drop-message {
+    max-height: 95vh;
+    overflow-y: scroll;
+}
+
+.upload-progress {
+    margin-bottom: 16px;
+}
+
 /*
 
 Everything after this will eventually become a shadow article

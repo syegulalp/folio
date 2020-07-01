@@ -37,7 +37,7 @@ from __main__ import config
 from utils import Message, Error
 from peewee import fn, SQL
 from pathlib import Path
-from typing import Union
+from typing import Any, Union
 from urllib.parse import urlencode
 
 home_template = Template(file="home.html")
@@ -530,6 +530,8 @@ async def wiki_replace(env: Request, wiki: Wiki, user: Author):
     result_query = ""
     results = []
     messages = []
+    search_results: Any = []
+    article_count: int = 0
 
     if env.verb == "POST":
         search_query = env.form.get("search_query", "")
@@ -554,7 +556,7 @@ async def wiki_replace(env: Request, wiki: Wiki, user: Author):
             messages = [
                 Message(
                     f"Press [Replace all] to update {article_count} articles.<br>Note that there is no undo for this operation, but every changed article will have a revision saved."
-                )
+                ) 
             ]
 
         if replace_query and env.form.get("replace", ""):
@@ -705,25 +707,24 @@ async def tags_all(env: Request, wiki: Wiki, user: Author):
 @wiki_env
 async def upload_to_wiki(env: Request, wiki: Wiki, user: Author):
 
-    for file_name, file_data in env.files.values():
-        rename = 1
-        dest_file_name = file_name
-        while True:
-            file_path = Path(wiki.data_path, dest_file_name)
-            if file_path.exists():
-                fn = file_name.rsplit(".", 1)
-                dest_file_name = f"{fn[0]}_{rename}.{fn[1]}"
-                rename += 1
-            else:
-                break
+    file_name, file_data = env.files['file']
 
-        with open(file_path, "wb") as f:
-            f.write(file_data)
+    rename = 1
+    dest_file_name = file_name
+    while True:
+        file_path = Path(wiki.data_path, dest_file_name)
+        if file_path.exists():
+            fn = file_name.rsplit(".", 1)
+            dest_file_name = f"{fn[0]}_{rename}.{fn[1]}"
+            rename += 1
+        else:
+            break
 
-        new_img = Media(wiki=wiki, file_path=dest_file_name)
-        new_img.save()
+    with open(file_path, "wb") as f:
+        f.write(file_data)
 
-    # TODO: return multiple file links for multiple uploads
+    new_img = Media(wiki=wiki, file_path=dest_file_name)
+    new_img.save()
 
     return simple_response(f"{new_img.link}\n{new_img.edit_link}\n{new_img.file_path}")
 
