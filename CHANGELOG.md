@@ -4,12 +4,13 @@
 
 ### New features
 
-None yet.
+* The drag-and-drop file uploader now has a progress report for batch uploads, and shows all uploaded files.
 
 ### Bugfixes
 
 * Some templates that were supposed to display at fixed width were not; this has been corrected.
 * Javascript and CSS now load with hints that indicate the version number, so that upgrades across versions do not cause cached resources to be loaded.
+* The drag-and-drop uploader now reports back errors on multiple file uploads.
 
 ## [0.0.6-alpha](https://github.com/syegulalp/folio/releases/tag/0.0.6-alpha)
 
