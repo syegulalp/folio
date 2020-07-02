@@ -43,6 +43,7 @@ from urllib.parse import urlencode
 home_template = Template(file="home.html")
 blank_template = Template(file="blank.html")
 article_template = Template(file="article.html")
+wiki_new_template = Template(file="wiki_new.html")
 wiki_edit_template = Template(file="wiki_edit.html")
 wiki_clone_template = Template(file="wiki_clone.html")
 article_edit_template = Template(file="article_edit.html")
@@ -211,7 +212,7 @@ async def new_wiki(env: Request):
     user = Author.get(Author.name == "Admin")
     wiki = Wiki(title="", description="",)
     return Response(
-        wiki_edit_template.render(wiki=wiki, user=user, page_title=f"Create new wiki")
+        wiki_new_template.render(wiki=wiki, user=user, page_title=f"Create new wiki")
     )
 
 
@@ -234,7 +235,7 @@ async def new_wiki_save(env: Request):
 
     if error:
         return Response(
-            wiki_edit_template.render(
+            wiki_new_template.render(
                 wiki=wiki,
                 author=author,
                 page_title=f"Create new wiki",
