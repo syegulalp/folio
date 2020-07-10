@@ -557,7 +557,7 @@ async def wiki_replace(env: Request, wiki: Wiki, user: Author):
             messages = [
                 Message(
                     f"Press [Replace all] to update {article_count} articles.<br>Note that there is no undo for this operation, but every changed article will have a revision saved."
-                ) 
+                )
             ]
 
         if replace_query and env.form.get("replace", ""):
@@ -708,7 +708,7 @@ async def tags_all(env: Request, wiki: Wiki, user: Author):
 @wiki_env
 async def upload_to_wiki(env: Request, wiki: Wiki, user: Author):
 
-    file_name, file_data = env.files['file']
+    file_name, file_data = env.files["file"]
 
     rename = 1
     dest_file_name = file_name
@@ -782,6 +782,15 @@ async def article_display(env: Request, wiki: Wiki, user: Author, article: Artic
     except KeyError:
         pass
 
+    redirect_article = article.get_metadata("@redirect")
+    if redirect_article:
+        try:
+            article = Article.get(Article.title == redirect_article, Article.wiki == wiki)
+        except Article.DoesNotExist:
+            pass
+        else:
+            return redirect(article.link)
+
     if article.id is None:
         try:
             # TODO: replace with common search object
@@ -795,7 +804,11 @@ async def article_display(env: Request, wiki: Wiki, user: Author, article: Artic
                 TagAssociation.tag << form_tag
             )
 
-            forms = wiki.articles_alpha.select().where(Article.id << tagged_as_form, Article.draft_of.is_null(), Article.revision_of.is_null())
+            forms = wiki.articles_alpha.select().where(
+                Article.id << tagged_as_form,
+                Article.draft_of.is_null(),
+                Article.revision_of.is_null(),
+            )
 
         except (
             Tag.DoesNotExist,
