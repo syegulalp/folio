@@ -447,7 +447,7 @@ class Template:
         r"(if|elif|for|while|try|except|else|finally|with|def|class)\b"
     )
     _braces = re.compile(r"(\{\{!*.+?\}\})")
-    _lit_braces = re.compile(r"(\{\{!(.*?)\}\})")
+    std_dict = {"Unsafe": Unsafe}
 
     def _indent(self):
         return " " * 4 * self.indent_level
@@ -516,6 +516,7 @@ class Template:
             if not s_line.startswith("%"):
                 t = re.split(self._braces, _)
                 for x, n in enumerate(t):
+
                     # TODO: if there's an f-string in this,
                     # we need to handle it separately
                     if n.startswith("{{!"):
@@ -525,6 +526,7 @@ class Template:
                     else:
                         n = n.replace("{", "{{").replace("}", "}}")
                     t[x] = n
+
                 string_line = "".join(t)
                 current_string.append(string_line)
                 continue
@@ -562,7 +564,7 @@ class Template:
     def render(self, **ka):
         if DEBUG:
             self._compile()
-        ka.update({"Unsafe": Unsafe})
+        ka.update(self.std_dict)
         exec(self.code_obj, None, ka)
         return ka["__result__"]
 
