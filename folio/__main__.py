@@ -5,7 +5,8 @@ import sys, os
 sys.path.insert(0, "folio")
 
 import bottle
-bottle.TEMPLATE_PATH.insert(0,'folio/templates')
+
+bottle.TEMPLATE_PATH.insert(0, "folio/templates")
 
 config_path = "data"
 
@@ -84,7 +85,11 @@ if __name__ == "__main__":
 
         for alias, img_path in img_paths:
 
-            @routes.route(f"{routes.Wiki.PATH}/media/{alias}/<file_name>", routes.RouteType.sync_nothread, action='GET')
+            @routes.route(
+                f"{routes.Wiki.PATH}/media/{alias}/<file_name>",
+                routes.RouteType.sync_nothread,
+                action="GET",
+            )
             def media_files(env, wiki, file_name):
                 return routes.static_file(
                     routes.Wiki.url_to_file(file_name),
@@ -92,15 +97,15 @@ if __name__ == "__main__":
                     last_modified=env.headers.get("HTTP_IF_MODIFIED_SINCE", None),
                 )
 
-    if launch_browser:
-        import webbrowser
-
-        webbrowser.open(f"http://localhost:{port}")
-
     import settings
-
     from wsgiref.simple_server import make_server
 
-    with make_server('0.0.0.0', port, routes.app) as httpd:
-        print(f"{settings.PRODUCT} running on port {port}\nNavigate to \"/quit\" in browser to shut down")
+    with make_server("", port, routes.app) as httpd:
+        if launch_browser:
+            import webbrowser
+
+            webbrowser.open(f"http://localhost:{port}")
+        print(
+            f'{settings.PRODUCT} running on port {port}\nNavigate to "/quit" in browser to shut down'
+        )
         httpd.serve_forever()
