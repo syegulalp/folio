@@ -1,4 +1,4 @@
-% include includes/header.html
+% include('includes/header.tpl')
 
 <main role="main" class="container-wiki">
 
@@ -14,7 +14,6 @@
       <ul class="list-unstyled">
         % if media.count()==0:
         [<i>No media in this wiki. Drag images anywhere onto this page to upload media.</i>]
-        % end
         % else:
         % for media_item in media:
         <li class="media">
@@ -31,13 +30,13 @@
       <hr />
     </div>
     <div id="sidebar" class="sidebar-col">
-      % include includes/sidebar.html
+      % include('includes/sidebar.tpl')
     </div>
   </div>
 
 </main>
 
-% include includes/footer.html
+% include('includes/footer.tpl')
 
 <script>
   var mediaPaste = "{{wiki.media_paste_link}}";

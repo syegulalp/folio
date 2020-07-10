@@ -1,3 +1,4 @@
 commonmark==0.9.1
 peewee==3.13.3
 regex==2020.6.8
+bottle==0.12.18

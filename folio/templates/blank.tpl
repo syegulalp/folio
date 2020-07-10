@@ -1,18 +1,18 @@
-% include includes/header.html
+% include('includes/header.tpl')
 
 <main role="main" class="container-wiki">
 
-  % include includes/messages.html
+  % include('includes/messages.tpl')
 
   <div class="row">
     <div class="col">
 
     </div>
     <div id="sidebar" class="sidebar-col">
-      % include includes/sidebar.html
+      % include includes/sidebar.tpl
     </div>
   </div>
 
 </main>
 
-% include includes/footer.html
+% include('includes/footer.tpl')

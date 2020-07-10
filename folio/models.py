@@ -40,7 +40,7 @@ from playhouse.sqlite_ext import (
     IntegerField,
 )
 
-from pixie_web import Unsafe
+from utils import Unsafe
 
 from html.parser import HTMLParser
 
@@ -248,7 +248,7 @@ class Wiki(BaseModel):
     _sidebar_cache: dict = {}
     article_cache: dict = {}
 
-    PATH = "/wiki/<wiki_name>"
+    PATH = "/wiki/<wiki_title>"
     METADATA = "wiki"
 
     export_mode = False
@@ -543,7 +543,7 @@ class Article(BaseModel):
     revision_of = ForeignKeyField("self", null=True, backref="revisions")
     new_title = TextField(null=True)
 
-    PATH = "/article/<title>"
+    PATH = "/article/<article_title>"
 
     # HTML not handled by Markdown directly
     checkbox_re = re.compile(r"\[([xX_ ])\]")

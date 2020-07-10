@@ -1,8 +1,8 @@
-% include includes/header.html
+% include('includes/header.tpl')
 
 <main role="main" class="container-wiki">
 
-    % include includes/messages.html
+    % include('includes/messages.tpl')
 
     <h1>Create a new wiki from <b>{{wiki.title}}</b></h1>
 
@@ -35,7 +35,6 @@
 
     <hr />
 
-    % end
     % else:
 
     <hr/>
@@ -53,4 +52,4 @@
 
 </main>
 
-% include includes/footer.html
+% include('includes/footer.tpl')

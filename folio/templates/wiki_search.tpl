@@ -1,11 +1,11 @@
-% include includes/header.html
+% include('includes/header.tpl')
 
 <main role="main" class="container-wiki">
 
     <div id="article-row" class="row">
         <div id="article-col" class="col">
 
-            % include includes/messages.html
+            % include('includes/messages.tpl')
 
             <h1>Search {{wiki.title}}</h1>
 
@@ -39,7 +39,6 @@
                     <h2>{{result_description}}:</h2>
                     % if not result_set.count():
                         No results found.
-                    % end
                     % else:
                         % if result_description == "Article contents":
                             % for result in result_set:
@@ -53,7 +52,6 @@
                                     href="{{result.link}}">{{search_query}}</a></b>{{result.content[extract_position_end:min(content_length, extract_position_end+30)]}} ...
                                 </p>
                             % end
-                        % end
                         % else:
                             % for result in result_set:
                                 {{!result_type.format(result=result)}}
@@ -66,10 +64,10 @@
 
         </div>
         <div id="sidebar" class="sidebar-col">
-            % include includes/sidebar.html
+            % include('includes/sidebar.tpl')
         </div>
     </div>
 
 </main>
 
-% include includes/footer.html
+% include('includes/footer.tpl')

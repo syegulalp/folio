@@ -1,4 +1,4 @@
-% include includes/modal_search_core.html
+% include('includes/modal_search_core.tpl')
 
 <script>
 

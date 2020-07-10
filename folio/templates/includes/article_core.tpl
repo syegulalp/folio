@@ -4,7 +4,6 @@
 <h1>
   % if not article.id:
   {{article_title}}
-  % end
   % else:
   <a href="{{article.link}}">{{article_title}}</a>
   % end
@@ -14,8 +13,8 @@
     <a id="article-edit-link" title="Edit article (Ctrl-E)" href="{{article.edit_link}}"><span class="oi oi-pencil"></span></a>
     % end
   </span>
-
 </h1>
+
 
 % if article.revision_of:
 <div class="wiki-revisions">
@@ -35,31 +34,31 @@
   <a title="This page is also a tag; see all articles with this tag" href="{{article.exists_as_tag.link}}"><span class="badge badge-secondary">{{article.exists_as_tag.title}}</span></a>
   % end
   % for tag_ref in article.tags_alpha:
-  % tag_article = tag_ref.article_exists
-  % if tag_article:
-  <a title="See article with this tag name" href="{{tag_article.link}}"><span class="badge badge-success">{{tag_article.title}}</span></a>
-  % end
-  % elif tag_ref.is_system_tag:
-  <a title="See all articles with this system tag" href="{{tag_ref.link}}"><span class="badge badge-danger">{{tag_ref.title}}</span></a>
-  % end
-  % else:
-  <a title="See all articles with this tag" href="{{tag_ref.link}}"><span class="badge badge-primary">{{tag_ref.title}}</span></a>
-  % end
+    % tag_article = tag_ref.article_exists
+    % if tag_article:
+    <a title="See article with this tag name" href="{{tag_article.link}}"><span class="badge badge-success">{{tag_article.title}}</span></a>
+    % elif tag_ref.is_system_tag:
+    <a title="See all articles with this system tag" href="{{tag_ref.link}}"><span class="badge badge-danger">{{tag_ref.title}}</span></a>
+    % else:
+    <a title="See all articles with this tag" href="{{tag_ref.link}}"><span class="badge badge-primary">{{tag_ref.title}}</span></a>
+    % end
   % end
 </div>
 <small><b>{{article.author.name if article.author else ''}}</b> {{article.formatted_date}}</small>
 <hr />
-% end
+
 % if article.has_tag('@form'):
 % new_article = article.__class__(title='Untitled',wiki=article.wiki, author=article.author)
 <div class="wiki-create-from-template">
 <a href="{{new_article.form_creation_link(article)}}"><button type="button" class="btn btn-sm btn-success">Create new article from this form article</button></a><hr/>
 </div>
 % end
+
+% end
+
 <div class="wiki-article-container">
   % if article_text:
   {{!article_text}}
-  % end
   % else:
   [<i>This article is blank.</i>]
   % end

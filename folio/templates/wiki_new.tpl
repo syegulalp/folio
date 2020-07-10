@@ -1,10 +1,10 @@
-% include includes/header.html
+% include('includes/header.tpl')
 
 <main role="main" class="container-wiki">
 
     <div id="article-row" class="row">
         <div id="article-col" class="col">
-            % include includes/messages.html
+            % include('includes/messages.html')
             <h1>Create your new wiki</h1>
             <form method="POST">
 
@@ -37,4 +37,4 @@
 
 </main>
 
-% include includes/footer.html
+% include('includes/footer.tpl')

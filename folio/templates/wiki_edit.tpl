@@ -1,12 +1,14 @@
-% include includes/header.html
+% include('includes/header.tpl')
 
 <main role="main" class="container-wiki">
 
+
+
     <div id="article-row" class="row">
         <div id="article-col" class="col">
+            % include('includes/messages.tpl')
             % if not wiki.id:
             <h1>Create your new wiki</h1>
-            % end
             % else:
             <h1>Edit wiki settings</h1>
             % end
@@ -33,7 +35,6 @@
                             <button type="button" class="btn btn-sm btn-warning">Quit editing</button>
                         </a>
                     </span>
-                    % end
                     % else:
                     <span class="float-right">
                         <a href="/">
@@ -68,11 +69,11 @@
         </div>
         % if wiki.id:
         <div id="sidebar" class="sidebar-col">
-            % include includes/sidebar.html
+            % include('includes/sidebar.tpl')
         </div>
         % end
     </div>
 
 </main>
 
-% include includes/footer.html
+% include('includes/footer.tpl')

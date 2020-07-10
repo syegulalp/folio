@@ -1,4 +1,4 @@
-% include includes/header.html
+% include('includes/header.tpl')
 
 <main role="main" class="container-wiki">
 
@@ -8,7 +8,6 @@
       <hr/>
       % if article.revisions.count()==0:
       <h3>[No revisions saved for this article]</h3>
-      % end
       % else:
       <ul class="list">
         % for revision in article.revisions_chrono:
@@ -19,10 +18,10 @@
       <hr/>
     </div>
     <div id="sidebar" class="sidebar-col">
-      % include includes/sidebar.html
+      % include('includes/sidebar.tpl')
     </div>
   </div>
 
 </main>
 
-% include includes/footer.html
+% include('includes/footer.tpl')

@@ -4,6 +4,9 @@ import sys, os
 
 sys.path.insert(0, "folio")
 
+import bottle
+bottle.TEMPLATE_PATH.insert(0,'folio/templates')
+
 config_path = "data"
 
 INIT = False
@@ -64,10 +67,7 @@ config.DATA_PATH = config_path
 
 port = getattr(config, "PORT", 6171)
 
-import pixie_web
-
-pixie_web.DEBUG = debug
-pixie_web.TEMPLATE_PATH = "folio/templates"
+bottle.DEBUG = debug
 
 
 if __name__ == "__main__":
@@ -98,6 +98,9 @@ if __name__ == "__main__":
         webbrowser.open(f"http://localhost:{port}")
 
     import settings
-    print(f"{settings.PRODUCT} running on port {port}\nNavigate to \"/quit\" in browser to shut down")
-    
-    routes.run(host="0.0.0.0", port=port, workers=None)
+
+    from wsgiref.simple_server import make_server
+
+    with make_server('0.0.0.0', port, routes.app) as httpd:
+        print(f"{settings.PRODUCT} running on port {port}\nNavigate to \"/quit\" in browser to shut down")
+        httpd.serve_forever()

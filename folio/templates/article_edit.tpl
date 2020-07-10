@@ -1,20 +1,19 @@
-% include includes/header.html
+% include('includes/header.tpl')
 
 <main role="main" class="container-wiki">
 
     <div class="row">
         <div id="left-col" class="col">
 
-            % include includes/messages.html
+            % include('includes/messages.tpl')
 
             % article_title = article.title
             % if article.new_title:
-            % article_title = article.new_title
-            % end
+                % article_title = article.new_title
             % else:
-            % if article.draft_of:
-            % article_title = article.draft_of.title
-            % end
+                % if article.draft_of:
+                % article_title = article.draft_of.title
+                % end
             % end
 
             <form method="POST" data-dirty="false" id="save-form" class="form-compact">
@@ -59,7 +58,6 @@
                     <a href="#" id="btn_insert_tag" title="Edit article tags (Ctrl-G)"><span
                             class="oi button-oi oi-tags"></span></a>
 
-                    % end
                     % else:
                     <p></p>
                     % end
@@ -74,7 +72,6 @@
                             % if article.id is not None:
                             <button type="button" title="Save draft and continue editing (retain edit lock) (Ctrl-S)"
                                 name="save" id="save-button" value="save" class="btn btn-sm btn-success">Save</button>
-                            % end
                             % else:
                             <button type="submit" title="Save and create article" name="save" id="save-button"
                                 onclick="clearDirty();" value="save" class="btn btn-sm btn-success">Save and create
@@ -106,7 +103,6 @@
                             <button type="submit" name="save" value="quit"
                                 title="Close editor and release edit lock. Discards unsaved changes to the draft."
                                 class="btn btn-sm btn-warning">Quit editing</button>
-                            % end
                             % else:
                             <a href="{{article.wiki.link}}"><button type="button" name="save" value="quit"
                                     title="Leave article creation." class="btn btn-sm btn-warning">Quit creating
@@ -122,7 +118,7 @@
         <div style="display:none; overflow-y:scroll; height: 95vh; margin-bottom: 16px; margin-right: 15px;"
             id="mid-col"></div>
         <div id="sidebar" class="sidebar-col">
-            % include includes/sidebar.html
+            % include('includes/sidebar.tpl')
         </div>
     </div>
 
@@ -131,7 +127,7 @@
 <div class="modal" id="edit-modal" tabindex="-1" role="dialog">
 </div>
 
-% include includes/footer.html
+% include('includes/footer.tpl')
 <script>
     articleTarget = "{{article.link}}";
     saveTarget = articleTarget + "/save";

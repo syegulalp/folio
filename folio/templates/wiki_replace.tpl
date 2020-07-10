@@ -1,11 +1,11 @@
-% include includes/header.html
+% include('includes/header.tpl')
 
 <main role="main" class="container-wiki">
 
     <div id="article-row" class="row">
         <div id="article-col" class="col">
 
-            % include includes/messages.html
+            % include('includes/messages.tpl')
 
             <h1>Search {{wiki.title}}</h1>
 
@@ -39,7 +39,6 @@
 
                     <button type="submit" name="search" value="search" class="btn btn-sm btn-success">Search again</button>
 
-                    % end
                     % else:
 
                     <button type="submit" name="search" value="search" class="btn btn-sm btn-success">Search</button>
@@ -71,10 +70,10 @@
 
         </div>
         <div id="sidebar" class="sidebar-col">
-            % include includes/sidebar.html
+            % include('includes/sidebar.tpl')
         </div>
     </div>
 
 </main>
 
-% include includes/footer.html
+% include('includes/footer.tpl')

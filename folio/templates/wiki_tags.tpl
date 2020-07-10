@@ -1,10 +1,10 @@
-% include includes/header.html
+% include('includes/header.tpl')
 
 <main role="main" class="container-wiki">
 
   <div id="article-row" class="row">
     <div id="article-col" class="col">
-      % include includes/messages.html
+      % include('includes/messages.tpl')
       <h2>List of all tags in this wiki</h2>
       <ul>
         % for tag in tags:
@@ -15,11 +15,11 @@
     </div>
 
     <div id="sidebar" class="sidebar-col">
-      % include includes/sidebar.html
+      % include('includes/sidebar.tpl')
       <hr />
     </div>
   </div>
 
 </main>
 
-% include includes/footer.html
+% include('includes/footer.tpl')

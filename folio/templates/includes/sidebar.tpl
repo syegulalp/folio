@@ -1,6 +1,5 @@
 % if wiki.sidebar_cache:
 {{!wiki.sidebar_cache}}
-% end
 % else:
 
 % if wiki.cover_img:
@@ -44,7 +43,7 @@
     <div class="tab-content">
         <div class="tab-pane active" id="history" role="tabpanel" aria-labelledby="tab_history">
             <div class="wiki-recent-list">
-                % include includes/recent_article_list.html
+                % include('includes/recent_article_list.tpl')
             </div>
         </div>
         <div class="tab-pane" id="articles" role="tabpanel" aria-labelledby="tab_articles">
@@ -60,12 +59,12 @@
             <div class="tab-content">
                 <div class="tab-pane active" id="all-articles" role="tabpanel" aria-labelledby="all-articles">
                     <div class="wiki-all-articles">
-                        % include includes/all_article_list.html
+                        % include('includes/all_article_list.tpl')
                     </div>
                 </div>
                 <div class="tab-pane" id="articles-drafts" role="tabpanel" aria-labelledby="articles-drafts">
                     <div class="wiki-draft-articles">
-                        % include includes/draft_article_list.html
+                        % include('includes/draft_article_list.tpl')
                     </div>                    
                 </div>
             </div>
@@ -73,7 +72,7 @@
         </div>
         <div class="tab-pane" id="tags" role="tabpanel" aria-labelledby="tag_tags">
             <div class="wiki-tag-items">
-                % include includes/wiki_tag_list.html
+                % include('includes/wiki_tag_list.tpl')
             </div>
         </div>
     </div>

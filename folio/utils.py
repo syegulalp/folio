@@ -1,3 +1,5 @@
+import html
+
 class Message:
     def __init__(self, message, color=None, **ka):
         self.message = message
@@ -35,3 +37,9 @@ def export():
         [shortcuts.model_to_dict(_, recurse=False) for _ in Article.select()]
     )
 
+class Unsafe:
+    def __init__(self, data: str):
+        self.data = str(data)
+
+    def __str__(self):
+        return html.escape(self.data, True)

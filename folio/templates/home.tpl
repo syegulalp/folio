@@ -1,10 +1,10 @@
-% include includes/header.html
+% include('includes/header.tpl')
 
 <main role="main" class="container-wiki">
 
   <div class="container">
 
-    % include includes/messages.html
+    % include('includes/messages.tpl')
     
     <h1>Your Wikis</h1>
     <hr />
@@ -49,4 +49,4 @@
 
 </main>
 
-% include includes/footer.html
+% include('includes/footer.tpl')
