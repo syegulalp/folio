@@ -83,29 +83,21 @@ if __name__ == "__main__":
     img_paths = getattr(config, "IMG_PATHS", None)
     if img_paths:
 
+        from bottle import static_file, route
+
         for alias, img_path in img_paths:
 
-            @routes.route(
-                f"{routes.Wiki.PATH}/media/{alias}/<file_name>",
-                routes.RouteType.sync_nothread,
-                action="GET",
-            )
-            def media_files(env, wiki, file_name):
-                return routes.static_file(
-                    routes.Wiki.url_to_file(file_name),
-                    path=img_path,
-                    last_modified=env.headers.get("HTTP_IF_MODIFIED_SINCE", None),
-                )
+            @route(f"{routes.Wiki.PATH}/media/{alias}/<file_name>",)
+            def media_files(wiki_title, file_name):
+                return static_file(routes.Wiki.url_to_file(file_name), root=img_path)
 
     import settings
-    from wsgiref.simple_server import make_server
 
-    with make_server("", port, routes.app) as httpd:
-        if launch_browser:
-            import webbrowser
+    if launch_browser:
+        import webbrowser
 
-            webbrowser.open(f"http://localhost:{port}")
+        webbrowser.open(f"http://localhost:{port}")
         print(
             f'{settings.PRODUCT} running on port {port}\nNavigate to "/quit" in browser to shut down'
         )
-        httpd.serve_forever()
+    bottle.run(host="0.0.0.0", port=port)
