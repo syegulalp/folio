@@ -4,6 +4,7 @@
 
 ### New features
 
+* We have switched to using [Bottle](https://bottlepy.org) as our web framework. This was a major rip-and-replace operation, but it was worth it: maintaining our own little web framework was too much hassle for too little payoff.
 * The drag-and-drop file uploader now has a progress report for batch uploads, and shows all uploaded files.
 
 ### Bugfixes
