@@ -35,7 +35,7 @@ If you click <button type="button" class="btn btn-sm btn-warning">Quit creating 
 
 To edit an existing article, click the <span class="oi oi-pencil"></span> icon at the top right of the article. This opens the article for editing.
 
-* [Learn how to insert formatting into articles with the Markdown format.](Wiki formatting)
+* [[Learn how to insert formatting into articles with the Markdown format.]](Wiki formatting)
 
 When you open an existing article for editing, or save a newly created one for editing, you'll be editing a *draft copy* of the article -- a clone of the original.
 
@@ -89,7 +89,7 @@ To upload media to the wiki -- generally, an image file -- simply drag and drop 
 
 You can then insert the image in the editor by clicking the **Insert media** button <span class="oi button-oi oi-image"></span> in the editor toolbar. Type the name of a file to search for it, and either click the name of the image or press Enter to select the topmost item displayed.
 
-* [Learn more about managing images in Folio.](Image management)
+* [[Learn more about managing images in Folio.]](Image management)
 
 ## Add/edit metadata
 
