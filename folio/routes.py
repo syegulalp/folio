@@ -188,8 +188,8 @@ def new_wiki(user: Author):
 @user_env
 def new_wiki_save(user: Author):
 
-    wiki_title = request.forms.get("wiki_title", "")
-    wiki_description = request.forms.get("wiki_description", "")
+    wiki_title = request.forms.wiki_title
+    wiki_description = request.forms.wiki_description
     wiki = Wiki(title=wiki_title, description=wiki_description)
 
     error = None
@@ -303,8 +303,8 @@ def wiki_settings_edit(wiki: Wiki, user: Author):
 
     if request.method == "POST":
 
-        wiki_new_title = request.forms.get("wiki_title", "")
-        wiki_new_description = request.forms.get("wiki_description", "")
+        wiki_new_title = request.forms.wiki_title
+        wiki_new_description = request.forms.wiki_description
 
         if wiki_new_title == "":
             error = Error("Wiki title cannot be blank.")
@@ -319,7 +319,7 @@ def wiki_settings_edit(wiki: Wiki, user: Author):
         if wiki_new_description != wiki.description:
             wiki.description = wiki_new_description
 
-        action = request.forms.get("save", None)
+        action = f.save
 
         if error is None:
             wiki.save()
@@ -438,8 +438,8 @@ def article_new(wiki: Wiki, user: Author):
     wiki.invalidate_cache()
 
     if request.method == "POST":
-        article_content = request.forms.get("article_content", None)
-        article_title = request.forms.get("article_title", None)
+        article_content = request.forms.article_content
+        article_title = request.forms.article_title
         new_article = Article(
             title=article_title, content=article_content, author=user, wiki=wiki
         )
@@ -493,8 +493,9 @@ def wiki_replace(wiki: Wiki, user: Author):
     article_count: int = 0
 
     if request.method == "POST":
-        search_query = request.forms.get("search_query", "")
-        replace_query = request.forms.get("replace_query", "")
+        
+        search_query = request.forms.search_query
+        replace_query = request.forms.replace_query
 
         if search_query:
 
@@ -566,7 +567,7 @@ def wiki_search(wiki: Wiki, user: Author):
 
     if request.method == "POST":
 
-        search_query = request.forms.get("search_query", "")
+        search_query = request.forms.search_query
         if search_query != "":
             search_query_wildcard = search_query
 
@@ -846,8 +847,8 @@ def article_preview(wiki: Wiki, user: Author, article: Article):
 
     if request.method == "POST":
         article = Article(
-            title=request.forms.get("article_title", None),
-            content=request.forms.get("article_content", None),
+            title=request.forms.article_title,
+            content=request.forms.article_content,
         )
 
     if article.id is None:
@@ -940,8 +941,8 @@ def article_edit(wiki: Wiki, user: Author, article: Article, ajax=False):
             wiki.invalidate_cache()
             return redirect(article.discard_draft_link)
 
-        article_content = request.forms.get("article_content", None)
-        article_title = request.forms.get("article_title", None)
+        article_content = request.forms.article_content
+        article_title = request.forms.article_title
 
         if article_content != article.content:
             article.content = article_content
@@ -1143,7 +1144,7 @@ def modal_insert_image(wiki: Wiki, user: Author, article: Article):
 @article_env
 def modal_insert_image_search(wiki: Wiki, user: Author, article: Article):
 
-    search = request.forms.get("search_query", None)
+    search = request.forms.search_query
     return image_search(wiki, search)
 
 
@@ -1199,14 +1200,14 @@ def modal_tags(wiki: Wiki, user: Author, article: Article):
 @route(f"{Wiki.PATH}{Article.PATH}/insert-tag", method="POST")
 @article_env
 def modal_tags_search(wiki: Wiki, user: Author, article: Article):
-    search = request.forms.get("search_query", None)
+    search = request.forms.search_query
     return search_results(wiki, search)
 
 
 @route(f"{Wiki.PATH}{Article.PATH}/add-tag", method="POST")
 @article_env
 def modal_add_tag(wiki: Wiki, user: Author, article: Article):
-    tag = request.forms.get("tag", None)
+    tag = request.forms.tag
     article.add_tag(tag)
     wiki.invalidate_cache()
     return existing_tags(article)
@@ -1215,7 +1216,7 @@ def modal_add_tag(wiki: Wiki, user: Author, article: Article):
 @route(f"{Wiki.PATH}{Article.PATH}/remove-tag", action="POST")
 @article_env
 def modal_remove_tag(wiki: Wiki, user: Author, article: Article):
-    tag = request.forms.get("tag", None)
+    tag = request.forms.tag
     article.remove_tag(tag)
     wiki.invalidate_cache()
     return existing_tags(article)
@@ -1240,12 +1241,12 @@ def modal_edit_metadata(wiki: Wiki, user: Author, article: Article):
 @article_env
 def modal_edit_metadata_post(wiki: Wiki, user: Author, article: Article):
 
-    key = request.forms.get("key", None)
+    key = request.forms.key
     if key:
-        value = request.forms.get("value", None)
+        value = request.forms.value
         article.set_metadata(key, value)
 
-    delete = request.forms.get("delete", None)
+    delete = request.forms.delete
     if delete:
         try:
             delete_instance = article.metadata.where(Metadata.id == delete).get()
@@ -1299,7 +1300,7 @@ def modal_insert_link_search(wiki: Wiki, user: Author, article: Article):
 @article_env
 def modal_insert_link_search_post(wiki: Wiki, user: Author, article: Article):
 
-    search = request.forms.get("search_query", None)
+    search = request.forms.search_query
     return link_search(wiki, search)
 
 
