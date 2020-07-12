@@ -493,8 +493,8 @@ def wiki_replace(wiki: Wiki, user: Author):
     article_count: int = 0
 
     if request.method == "POST":
-        search_query = request.form.get("search_query", "")
-        replace_query = request.form.get("replace_query", "")
+        search_query = request.forms.get("search_query", "")
+        replace_query = request.forms.get("replace_query", "")
 
         if search_query:
 
@@ -518,7 +518,7 @@ def wiki_replace(wiki: Wiki, user: Author):
                 )
             ]
 
-        if replace_query and request.form.get("replace", ""):
+        if replace_query and request.forms.get("replace", ""):
 
             for result in search_results:
                 result.make_revision()
@@ -566,7 +566,7 @@ def wiki_search(wiki: Wiki, user: Author):
 
     if request.method == "POST":
 
-        search_query = request.form.get("search_query", "")
+        search_query = request.forms.get("search_query", "")
         if search_query != "":
             search_query_wildcard = search_query
 
@@ -1431,13 +1431,13 @@ def media_file_edit_post(wiki: Wiki, user: Author, media: Media):
     note: Union[Error, Message, None] = None
 
     filename_body, filename_ext = media.file_path.rsplit(".", 1)
-    new_filename_body = request.form.get("media-filename")
+    new_filename_body = request.forms.get("media-filename")
 
-    if request.form.get("select", None):
+    if request.forms.get("select", None):
         wiki.set_metadata("cover_img", media.id)
         wiki.invalidate_cache()
 
-    elif request.form.get("save", None) and new_filename_body != filename_body:
+    elif request.forms.get("save", None) and new_filename_body != filename_body:
 
         new_filename = new_filename_body + "." + filename_ext
 
