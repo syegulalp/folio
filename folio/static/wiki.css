@@ -107,6 +107,7 @@ blockquote {
 
 .wiki-missing-link {
     font-style: italic;
+    font-weight: lighter;
 }
 
 .wiki-external-link {
