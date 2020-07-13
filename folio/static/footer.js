@@ -146,6 +146,9 @@ $("#drop-target").on('drop', function (e) {
                     .done(function (data) {
                         txt = data.split('\n');                        
                         report.html(report.html() + "<div class='media'><a target='_blank' href='"+txt[1]+"'><img src='"+txt[0]+"'></a><div class='media-body'>"+txt[2]+"</div></div>");
+                        if (documentInsert!=undefined){
+                            documentInsert(`![](${txt[2]})`);
+                        }
                     })
                     .fail(function () {
                         report.html(report.html() + "<div>File " + file.name +" did not upload; may be too big or wrong type</div>");

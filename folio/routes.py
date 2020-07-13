@@ -1132,8 +1132,8 @@ def modal_insert_image(wiki: Wiki, user: Author, article: Article):
         "includes/modal.tpl",
         title="Insert image into article",
         body=template(
-            "modal_search.tpl",
-            url=f"{article.link}/insert-image/",
+            "includes/modal_search.tpl",
+            url=f"{article.link}/insert-image",
             search_results=image_search(wiki, None),
         ),
         footer="",
@@ -1288,7 +1288,7 @@ def modal_insert_link_search(wiki: Wiki, user: Author, article: Article):
         title="Insert link into article",
         body=template(
             "includes/modal_search.tpl",
-            url=f"{article.link}/insert-link/",
+            url=f"{article.link}/insert-link",
             search_results=link_search(wiki, None),
             alt_input=("Text for link", "link_text"),
         ),
@@ -1328,13 +1328,15 @@ def static_content(filename: str):
 
 
 def paginator(media: Media):
-    search = request.params.get("search", [None])[0]
+    search = request.params.get("search")
+    if search == "":
+        search = None
     if search:
         media = media.where(Media.file_path.contains(search))
     else:
         search = ""
 
-    page = int(request.params.get("p", [1])[0])
+    page = int(request.params.get("p", 0))
 
     last = ceil(media.count() / 5)
 
@@ -1385,11 +1387,11 @@ def wiki_media(wiki: Wiki, user: Author):
 @wiki_env
 def wiki_media_paste(wiki: Wiki, user: Author):
 
-    paste_file = request.files.get("file")
-    if not paste_file:
+    file_data = request.files['file']
+
+    if not file_data:
         return HTTPError(500)
 
-    file_data = paste_file[1]
     file_id = 0
 
     while True:
@@ -1398,8 +1400,7 @@ def wiki_media_paste(wiki: Wiki, user: Author):
             break
         file_id += 1
 
-    with open(Path(wiki.data_path, filename), "wb") as f:
-        f.write(file_data)
+    file_data.save(str(Path(wiki.data_path, filename)))
 
     new_image = Media(wiki=wiki, file_path=filename,)
     new_image.save()
