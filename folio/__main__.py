@@ -62,7 +62,7 @@ sys.path.insert(0, config_path)
 
 import config
 
-debug = getattr(config, "DEBUG", None) or args.debug
+debug = getattr(config, "DEBUG", False) or args.debug
 launch_browser = getattr(config, "LAUNCH_BROWSER", None) or args.browser
 config.DATA_PATH = config_path
 
@@ -97,7 +97,17 @@ if __name__ == "__main__":
         import webbrowser
 
         webbrowser.open(f"http://localhost:{port}")
-        print(
-            f'{settings.PRODUCT} running on port {port}\nNavigate to "/quit" in browser to shut down'
-        )
-    bottle.run(host="0.0.0.0", port=port)
+    print(
+        f'{settings.PRODUCT} running on port {port}\nNavigate to "/quit" in browser to shut down'
+    )
+    
+    # bottle.run(host="0.0.0.0", port=port)
+    
+    from wsgiref.simple_server import make_server, WSGIServer
+    from socketserver import ThreadingMixIn
+
+    class ThreadingWSGIServer(ThreadingMixIn, WSGIServer): 
+        pass
+
+    with make_server('0.0.0.0', 6171, routes.app, ThreadingWSGIServer) as httpd:
+        httpd.serve_forever()
