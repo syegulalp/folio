@@ -56,15 +56,12 @@ function updatePreview(data) {
 }
 
 function ajaxSave() {
-    var form = $('#save-form')[0];
-    var data = new FormData(form);
-
+    form = $('#save-form').serialize();
+    
     $.ajax({
         type: "POST",
         url: saveTarget,
-        data: data,
-        contentType: false,
-        processData: false,
+        data: form,
         success: function (data) {
             clearDirty();
             $('#flash-message').html(data);

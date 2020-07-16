@@ -926,7 +926,7 @@ def article_edit(wiki: Wiki, user: Author, article: Article, ajax=False):
 
     if request.method == "POST" or ajax is True:
 
-        action = request.forms.get("save", None)
+        action = request.forms.save
 
         if action == "quit":
             article.opened_by = None
