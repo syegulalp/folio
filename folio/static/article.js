@@ -12,3 +12,20 @@ $(window).on("keydown", function (e) {
         }
     }
 });
+
+
+$('.jsnavlink').on('click', function(e) {
+    e.preventDefault();
+    href = this.href
+    $.ajax({
+        type: "GET",
+        url: href,
+        success: function(data){
+            window.history.pushState({}, null, href);
+            new_ = $(data).find("#article-col")[0];
+            $("#article-col").replaceWith(new_);
+            console.log($(data).filter("title"));
+            document.title = $(data).filter("title").text();
+        }
+    });   
+});
