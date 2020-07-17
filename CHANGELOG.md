@@ -6,6 +6,8 @@
 
 * We have switched to using [Bottle](https://bottlepy.org) as our web framework. This was a major rip-and-replace operation, but it was worth it: maintaining our own little web framework was too much hassle for too little payoff.
 * The drag-and-drop file uploader now has a progress report for batch uploads, and shows all uploaded files.
+* Dragging and dropping a file into an open editor will insert a reference to the file at the cursor point.
+* An experimental new feature allows you to navigate from the sidebar without forcing a reload of the page. This way you can quickly flick through multiple entries in the sidebar withotu distraction.
 
 ### Bugfixes
 
