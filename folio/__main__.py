@@ -101,13 +101,14 @@ if __name__ == "__main__":
         f'{settings.PRODUCT} running on port {port}\nNavigate to "/quit" in browser to shut down'
     )
     
-    # bottle.run(host="0.0.0.0", port=port)
-    
     from wsgiref.simple_server import make_server, WSGIServer
     from socketserver import ThreadingMixIn
 
     class ThreadingWSGIServer(ThreadingMixIn, WSGIServer): 
         pass
 
-    with make_server('0.0.0.0', 6171, routes.app, ThreadingWSGIServer) as httpd:
+    import utils    
+
+    with make_server('0.0.0.0', port, routes.app, ThreadingWSGIServer) as httpd:
+        utils.server = httpd
         httpd.serve_forever()

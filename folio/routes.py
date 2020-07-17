@@ -319,7 +319,7 @@ def wiki_settings_edit(wiki: Wiki, user: Author):
         if wiki_new_description != wiki.description:
             wiki.description = wiki_new_description
 
-        action = f.save
+        action = request.forms.save
 
         if error is None:
             wiki.save()
@@ -1309,12 +1309,10 @@ def quit(*a):
     yield "You may now close this browser."
     from models import db
 
-    db.commit()
     db.close()
 
-    import sys
-
-    sys.stderr.close()
+    from utils import server
+    server.shutdown()
 
 
 # ######################################################################
@@ -1336,7 +1334,7 @@ def paginator(media: Media):
     else:
         search = ""
 
-    page = int(request.params.get("p", 0))
+    page = int(request.params.get("p", 1))
 
     last = ceil(media.count() / 5)
 
