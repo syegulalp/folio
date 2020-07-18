@@ -4,7 +4,7 @@
 
     <div id="article-row" class="row">
         <div id="article-col" class="col">
-            % include('includes/messages.html')
+            % include('includes/messages.tpl')
             <h1>Create your new wiki</h1>
             <form method="POST">
 
