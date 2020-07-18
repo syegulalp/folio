@@ -9,6 +9,7 @@
 * Dragging and dropping a file into an open editor will insert a reference to the file at the cursor point.
 * An experimental new feature allows you to navigate from the sidebar without forcing a reload of the page. This way you can quickly flick through multiple entries in the sidebar withotu distraction.
 * The internal webserver is now multithreaded.
+* When unsaved changes are present in a page, the page's Save button will glow red.
 
 ### Bugfixes
 

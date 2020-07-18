@@ -258,8 +258,17 @@ $("#article_content").on("change", function (e) {
 
 $("#article_content").on("paste", handleImagePaste);
 
-$("#article_content").on("keydown", function (e) {
+
+var oldContent;
+
+$("#article_content").on("keyup", function (e) {
+    if (oldContent != $("#article_content").val()) {
     setDirty();
+}});
+
+$("#article_content").on("keydown", function (e) {
+    oldContent = $("#article_content").val();
+
     if (e.code == 'Tab') {
         if (e.shiftKey) {
             e.preventDefault();
@@ -330,7 +339,7 @@ $("#article_content").on("keydown", function (e) {
             documentAddBold();
         }
     }
-    
+
 });
 
 $(window).on("beforeunload", function () {
