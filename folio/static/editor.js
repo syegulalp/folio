@@ -2,10 +2,12 @@ var keyTimer;
 
 function setDirty() {
     $('#save-form').data("dirty", "true");
+    $('#save-button').css('box-shadow','0 0 5px 0.5px red');
 }
 
 function clearDirty() {
     $('#save-form').data("dirty", "false");
+    $('#save-button').css('box-shadow','');
 }
 
 function resizeEditor() {
@@ -257,6 +259,7 @@ $("#article_content").on("change", function (e) {
 $("#article_content").on("paste", handleImagePaste);
 
 $("#article_content").on("keydown", function (e) {
+    setDirty();
     if (e.code == 'Tab') {
         if (e.shiftKey) {
             e.preventDefault();
@@ -327,6 +330,7 @@ $("#article_content").on("keydown", function (e) {
             documentAddBold();
         }
     }
+    
 });
 
 $(window).on("beforeunload", function () {
