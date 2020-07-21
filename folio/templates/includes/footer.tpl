@@ -7,4 +7,4 @@
     upload_path = "{{wiki.upload_link}}";
     media_path = "{{wiki.media_link}}"
 </script>
-<script src="{{wiki.static_folder_link}}/footer.js?0.0.6"></script>
+<script src="{{wiki.static_folder_link}}/footer.js?{{wiki.settings.PRODUCT_VERSION}}"></script>

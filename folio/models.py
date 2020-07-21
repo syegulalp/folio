@@ -19,7 +19,7 @@ from hashlib import blake2b
 from playhouse.sqlite_ext import SqliteExtDatabase, FTSModel, RowIDField, SearchField
 from peewee import SQL
 
-from settings import defaults
+import settings
 
 from pathlib import Path
 
@@ -252,6 +252,8 @@ class Wiki(BaseModel):
     METADATA = "wiki"
 
     export_mode = False
+
+    settings = settings
 
     def delete_(self):
         with db.transaction():
