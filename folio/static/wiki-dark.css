@@ -14,18 +14,21 @@ body {
     line-height: 1.6rem;
 }
 
+
 *::-webkit-scrollbar {
-    width: 1.05rem;
+    width: 1.1rem;
 }
+
 
 *::-webkit-scrollbar-track {
     background: rgb(72, 72, 72);
 }
 
+
 *::-webkit-scrollbar-thumb {
     background-color: rgb(192, 192, 192);
-    border-radius: 2px;
-    border: 3px solid rgb(34, 34, 34);
+    border-radius: 1px;
+    border: 1px solid rgb(34, 34, 34);
 }
 
 a {
