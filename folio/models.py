@@ -245,6 +245,8 @@ class Wiki(BaseModel):
     title = TextField(index=True)
     description = TextField()
 
+    config = config
+
     _sidebar_cache: dict = {}
     article_cache: dict = {}
 
