@@ -1,7 +1,6 @@
 from bottle import (
     template,
     route,
-    default_app,
     redirect,
     request,
 )
@@ -15,7 +14,7 @@ from models import (
     Media,
 )
 
-from .decorators import *
+from .decorators import wiki_env, article_display, home_page_render
 
 from __main__ import config
 from utils import Message, Error, Unsafe
@@ -63,29 +62,29 @@ def wiki_export(wiki: Wiki, user: Author):
         shutil.copy(m.file_path_, media_path)
 
     # TODO: make a context mgr
-    Wiki.export_mode = True
-
+    
     wiki.invalidate_cache()
+    
+    Wiki.export_mode = True
 
     for article in wiki.articles_nondraft_only:
         article_text = article_display(wiki, user, article)
-        article_text = article_text.body
 
         with open(
-            Path(article_path, wiki.title_to_url(article.title) + ".html"),
+            Path(article_path, f"{wiki.title_to_url(article.title)}.html"),
             "w",
             encoding="utf-8",
         ) as export_file:
             export_file.write(article_text)
 
+    Wiki.export_mode = False
+    
     wiki.invalidate_cache()
 
-    Wiki.export_mode = False
-
-    with open(Path(article_path, ".htaccess"), "w") as htf:
+    with open(Path(article_path, ".htaccess"), "w", encoding="utf8") as htf:
         htf.write("DirectoryIndex Contents.html")
 
-    redirect = """
+    redirect_txt = """
 <!DOCTYPE html>
 <html>
   <head>
@@ -96,8 +95,8 @@ def wiki_export(wiki: Wiki, user: Author):
   </body>
 </html>"""
 
-    with open(Path(export_path, "index.html"), "w") as rdf:
-        rdf.write(redirect)
+    with open(Path(export_path, "index.html"), "w", encoding="utf8") as rdf:
+        rdf.write(redirect_txt)
 
     return "ok"
 

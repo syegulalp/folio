@@ -180,7 +180,8 @@ def article_display(wiki: Wiki, user: Author, article: Article):
         except Article.DoesNotExist:
             pass
         else:
-            return redirect(article.link)
+            if not Wiki.export_mode:
+                return redirect(article.link)
 
     if article.id is None:
         try:
