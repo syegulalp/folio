@@ -8,13 +8,14 @@
   <div id="article-row" class="row">
     <div id="article-col" class="col">
 
-      <h2>{{media.file_path}}</h2>
-      <hr />
       <div class="row">
         <div class="col-6">
           <img class="img-fluid" src="{{media.link}}">
         </div>
         <div class="col-6">
+          <h2>{{media.file_path}}</h2>
+          <hr />
+   
           <form method="POST">
 
             <label for="media-filename">Filename (edit to change):</label>
