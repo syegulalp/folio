@@ -62,3 +62,7 @@ a:hover {
     padding: 8px;
     background-color: rgb(61 57 57);
 }
+
+blockquote {
+    background-color: rgb(0 0 0 / 0.3);
+}
