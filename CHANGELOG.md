@@ -10,6 +10,7 @@
 * An experimental new feature allows you to navigate from the sidebar without forcing a reload of the page. This way you can quickly flick through multiple entries in the sidebar withotu distraction.
 * The internal webserver is now multithreaded.
 * When unsaved changes are present in a page, the page's Save button will glow red.
+* There is now an experimental "dark mode" available, part of a more general feature to allow custom CSS. To enable it, edit the `config.py` file in your Folio installation's `data` directory and add the line `CSS = ["wiki-dark.css"]`. (It will eventually be possible to further customize CSS on a wiki-level basis by way of configuration articles inside the database.)
 
 ### Bugfixes
 
