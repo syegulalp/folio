@@ -54,3 +54,11 @@ a:hover {
     background-color: #495057;
     opacity: 1;
 }
+
+.button-oi {
+    /* border: 1px solid #ced4da; */
+    border: 0;
+    border-radius: .3rem;
+    padding: 8px;
+    background-color: rgb(61 57 57);
+}
