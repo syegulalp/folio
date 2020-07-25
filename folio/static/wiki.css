@@ -131,11 +131,12 @@ blockquote {
 }
 
 .wiki-recent-list {
-    font-size: 1.1em;
+    /* font-size: 1.1em;*/
 }
 
 .wiki-sidebar-controls {
-    font-size: .75em;
+    font-size: .85rem;
+    line-height: 1.5em;
 }
 
 .wiki-sidebar-controls a {

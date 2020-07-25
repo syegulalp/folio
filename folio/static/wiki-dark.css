@@ -1,0 +1,56 @@
+body {
+    background-color: rgb(34, 34, 34);
+    color: rgb(192, 192, 192);
+    line-height: 1.6rem;
+}
+
+.form-group input, .form-group input:focus {
+    color: rgb(240, 240, 240);
+}
+
+.form-control, .form-control:focus {
+    background-color: rgb(34, 34, 34);
+    color: rgb(192, 192, 192);
+    line-height: 1.6rem;
+}
+
+*::-webkit-scrollbar {
+    width: 1.05rem;
+}
+
+*::-webkit-scrollbar-track {
+    background: rgb(72, 72, 72);
+}
+
+*::-webkit-scrollbar-thumb {
+    background-color: rgb(192, 192, 192);
+    border-radius: 2px;
+    border: 3px solid rgb(34, 34, 34);
+}
+
+a {
+    color: rgb(122, 158, 229);
+}
+
+.wiki-link {
+    background-color: rgb(24, 24, 24);
+}
+
+a:hover {
+    color: rgb(192, 160, 255);
+}
+
+.nav-tabs .nav-link.active {
+    background-color: #495057;
+    color: #fff;
+}
+
+.wiki-sidebar-controls {
+    /*line-height: 1.5em;*/
+}
+
+.form-control:disabled, .form-control[readonly] {
+    /*background-color: #e9ecef;*/
+    background-color: #495057;
+    opacity: 1;
+}

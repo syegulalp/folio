@@ -8,6 +8,9 @@
   <link href="{{ wiki.static_folder_link }}/open-iconic-bootstrap.css" rel="stylesheet">
       <link href="{{ wiki.static_folder_link }}/wiki.css?{{wiki.settings.PRODUCT_VERSION}}" rel="stylesheet">
     <title>{{page_title if "page_title" in locals() else wiki.title}}</title>
+    % for css in getattr(wiki.config, "CSS",[]):
+    <link href="{{ wiki.static_folder_link }}/{{css}}?{{wiki.settings.PRODUCT_VERSION}}" rel="stylesheet">
+    % end
 </head>
 
 <body>

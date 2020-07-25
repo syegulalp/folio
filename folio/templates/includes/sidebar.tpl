@@ -2,6 +2,8 @@
 {{!wiki.sidebar_cache}}
 % else:
 
+% jsnavlink = 'class="jsnavlink"' if wiki.export_mode else ''
+
 % if wiki.cover_img:
 <div class="wiki-cover-img">
     <a href="{{wiki.homepage_link}}"><img class="img img-fluid" src="{{wiki.cover_img}}"></a>
