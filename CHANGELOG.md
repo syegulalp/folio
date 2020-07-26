@@ -19,6 +19,10 @@
 * Javascript and CSS now load with hints that indicate the version number, so that upgrades across versions do not cause cached resources to be loaded.
 * The drag-and-drop uploader now reports back errors on multiple file uploads.
 
+### Known bugs
+
+* Parens in the name of an identifier for a link break the link. E.g., if you have an article named `My Story (So Far)`, the link `[[the story]](My Story (So Far))` will not work.
+
 ## [0.0.6-alpha](https://github.com/syegulalp/folio/releases/tag/0.0.6-alpha)
 
 **This is the last pre-alpha release.** The next release will be a proper beta, with all changes to the database schema tracked and versioned to allow proper migrations between schemas.
