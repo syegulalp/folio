@@ -240,3 +240,17 @@ img-banner {
     display: block;
     margin-bottom: 8px;
 }
+
+/* Softer colors */
+
+body {
+    background-color: #f6f6f6;
+}
+
+.form-control {
+    background-color: #f8f8f8;
+}
+
+.form-control:focus {
+    background-color: #fafafa;
+}
