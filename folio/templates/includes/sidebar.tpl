@@ -2,7 +2,7 @@
 {{!wiki.sidebar_cache}}
 % else:
 
-% jsnavlink = 'class="jsnavlink"' if wiki.export_mode else ''
+% jsnavlink = '' if wiki.export_mode else 'class="jsnavlink"'
 
 % if wiki.cover_img:
 <div class="wiki-cover-img">
