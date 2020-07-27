@@ -213,6 +213,11 @@ img-sidebar {
     width: 33%;
     margin-bottom: 16px;
     margin-left: 16px;
+    clear: both;
+    text-align: center;
+    font-size: .85rem;
+    line-height: 1.75rem;
+    font-weight: bold;    
 }
 
 img-sidebar img {
