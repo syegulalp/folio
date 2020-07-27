@@ -1,6 +1,6 @@
 # Changelog
 
-## HEAD
+## [0.0.7-alpha](https://github.com/syegulalp/folio/releases/tag/0.0.7-alpha)
 
 ### New features
 
