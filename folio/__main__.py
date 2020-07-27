@@ -4,9 +4,14 @@ import sys, os
 
 sys.path.insert(0, "folio")
 
-import bottle
+import regex as re
 
+import bottle
 bottle.TEMPLATE_PATH.insert(0, "folio/templates")
+bottle.re = re
+
+import peewee
+peewee.re = re
 
 config_path = "data"
 
