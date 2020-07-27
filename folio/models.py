@@ -12,7 +12,7 @@ try:
 except ImportError:
     import re  # type: ignore
 import datetime
-import config # type: ignore
+import config  # type: ignore
 import os
 from hashlib import blake2b
 
@@ -951,6 +951,9 @@ class Article(BaseModel):
             link_to_render = link_to_render.replace("%", "%25")
 
         link_title = link_title.replace('"', r"\"")
+
+        if not self.wiki.export_mode:
+            link_class += " jsnavlink"
 
         return f'{matchobj.group(1)}title="{link_title}" class="{link_class}" href="{link_to_render}{export_mode_extension}"{target}{matchobj.group(3)}'
 

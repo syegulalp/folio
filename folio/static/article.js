@@ -13,6 +13,12 @@ $(window).on("keydown", function (e) {
     }
 });
 
+function setArticle(data){
+    new_ = $(data).find("#article-col")[0];
+    $("#article-col").replaceWith(new_);
+    console.log($(data).filter("title"));
+    document.title = $(data).filter("title").text();
+}
 
 $('.jsnavlink').on('click', function(e) {
     e.preventDefault();
@@ -21,11 +27,26 @@ $('.jsnavlink').on('click', function(e) {
         type: "GET",
         url: href,
         success: function(data){
-            window.history.pushState({}, null, href);
-            new_ = $(data).find("#article-col")[0];
-            $("#article-col").replaceWith(new_);
-            console.log($(data).filter("title"));
-            document.title = $(data).filter("title").text();
+            window.history.pushState({url: window.href}, null, href);
+            setArticle(data);    
         }
     });   
+});
+
+window.addEventListener("popstate", function(e) {
+    console.log(e.state);
+    if (e.state != null) {
+        e.preventDefault();
+        href = e.state.url;
+        $.ajax({
+            type: "GET",
+            url: href,
+            success: function(data){
+                setArticle(data);    
+            }
+        });    
+    } else
+    {
+        window.location.href = window.location.href;
+    }
 });
