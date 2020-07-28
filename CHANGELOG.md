@@ -18,6 +18,7 @@
 * Some templates that were supposed to display at fixed width were not; this has been corrected.
 * Javascript and CSS now load with hints that indicate the version number, so that upgrades across versions do not cause cached resources to be loaded.
 * The drag-and-drop uploader now reports back errors on multiple file uploads.
+* * Obsolete information about the use of backticks to fence off literals has been removed from the included docs.
 
 ### Known bugs
 
