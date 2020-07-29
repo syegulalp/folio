@@ -555,7 +555,7 @@ class Article(BaseModel):
 
     # Folio custom functions: inline
     link_re = re.compile(r"\[\[(.*?)\]\]")
-    wikilink_re = re.compile(r"\[\[(.*?)\]\](?:\((.*?)\))?")
+    wikilink_re = re.compile(r"\[\[(.*?)\]\](?:\((.*?[^\\])\))?")
     literal_include_re = re.compile(r"\{\{\{(.*?)\}\}\}")
     include_re = re.compile(r"\{\{(.*?)\}\}")
     function_re = re.compile(r"\<\<[^>]*?\>\>")
@@ -980,6 +980,8 @@ class Article(BaseModel):
                 return matchobj[0]
             else:
                 source_link = matchobj.group(1)
+
+        source_link = source_link.replace(r'\(', '(').replace(r'\)',')')
 
         if source_link.startswith("/tag/"):
             newlink = source_link.split("/tag/", 1)[1]
