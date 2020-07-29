@@ -1,5 +1,16 @@
 # Changelog
 
+## HEAD
+
+### New features
+
+* We're now using Python 3.8 to build the standalone version of the app.
+* Slight tweaks to dark mode color theme. The default light mode has also been softened further.
+
+### Bugfixes
+
+* If you have parentheses in an article link, you must escape them with backslashes. E.g., if you have an article named `My Story (So Far)`, the link `[[the story]](My Story (So Far))` will not work. But you can use `[[the story]](My Story \(So Far\))`. We've also added a note about this to the included documentation.
+
 ## [0.0.7-alpha](https://github.com/syegulalp/folio/releases/tag/0.0.7-alpha)
 
 ### New features
