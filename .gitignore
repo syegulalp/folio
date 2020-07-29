@@ -1,5 +1,5 @@
 wiki.db*
-venv
+venv*
 data*
 .vscode
 **/.mypy_cache
