@@ -1,5 +1,5 @@
 body {
-    background-color: rgb(34, 34, 34);
+    background-color: rgb(48, 48, 48);
     color: rgb(192, 192, 192);
     line-height: 1.6rem;
 }
@@ -9,7 +9,7 @@ body {
 }
 
 .form-control, .form-control:focus {
-    background-color: rgb(34, 34, 34);
+    background-color: rgb(40, 40, 40);
     color: rgb(192, 192, 192);
     line-height: 1.6rem;
 }
@@ -26,7 +26,7 @@ body {
 
 
 *::-webkit-scrollbar-thumb {
-    background-color: rgb(192, 192, 192);
+    background-color: rgb(128, 128, 128);
     border-radius: 1px;
     border: 1px solid rgb(34, 34, 34);
 }
@@ -36,7 +36,7 @@ a {
 }
 
 .wiki-link {
-    background-color: rgb(24, 24, 24);
+    background-color: rgb(40, 40, 40);
 }
 
 a:hover {
