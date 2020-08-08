@@ -65,7 +65,7 @@ if not os.path.exists(config_path):
 
 sys.path.insert(0, config_path)
 
-import config
+import config # type: ignore
 
 debug = getattr(config, "DEBUG", False) or args.debug
 launch_browser = getattr(config, "LAUNCH_BROWSER", None) or args.browser

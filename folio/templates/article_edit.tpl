@@ -117,7 +117,7 @@
         </div>
         <div style="display:none; overflow-y:scroll; height: 95vh; margin-bottom: 16px; margin-right: 15px;"
             id="mid-col"></div>
-        <div id="sidebar" class="sidebar-col">
+        <div id="sidebar" class="sidebar-col sidebar-scroll">
             % include('includes/sidebar.tpl')
         </div>
     </div>
