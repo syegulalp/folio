@@ -454,7 +454,7 @@ def modal_add_tag(wiki: Wiki, user: Author, article: Article):
     return existing_tags(article)
 
 
-@route(f"{Wiki.PATH}{Article.PATH}/remove-tag", action="POST")
+@route(f"{Wiki.PATH}{Article.PATH}/remove-tag", method="POST")
 @article_env
 def modal_remove_tag(wiki: Wiki, user: Author, article: Article):
     tag = request.forms.tag
