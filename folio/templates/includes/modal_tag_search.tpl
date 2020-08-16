@@ -14,4 +14,8 @@
         }
     }
 
+    function modalPostShiftEnter() {
+        modalPostEnter();
+    }    
+
 </script>
