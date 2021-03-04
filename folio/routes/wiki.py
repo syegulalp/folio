@@ -25,6 +25,7 @@ from pathlib import Path
 from typing import Any
 
 import datetime
+import json
 
 
 @route(f"{Wiki.PATH}")
@@ -62,9 +63,9 @@ def wiki_export(wiki: Wiki, user: Author):
         shutil.copy(m.file_path_, media_path)
 
     # TODO: make a context mgr
-    
+
     wiki.invalidate_cache()
-    
+
     Wiki.export_mode = True
 
     for article in wiki.articles_nondraft_only:
@@ -78,7 +79,7 @@ def wiki_export(wiki: Wiki, user: Author):
             export_file.write(article_text)
 
     Wiki.export_mode = False
-    
+
     wiki.invalidate_cache()
 
     with open(Path(article_path, ".htaccess"), "w", encoding="utf8") as htf:
@@ -263,7 +264,7 @@ def article_new(wiki: Wiki, user: Author):
     else:
         counter = 0
 
-        article_title = Wiki.url_to_title(request.params.get("title", ["Untitled"])[0])
+        article_title = Wiki.url_to_title(request.params.get("title", "Untitled"))
 
         # TODO: move name making into model
 
@@ -483,7 +484,13 @@ def upload_to_wiki(wiki: Wiki, user: Author):
     new_img = Media(wiki=wiki, file_path=dest_file_name)
     new_img.save()
 
-    return f"{new_img.link}\n{new_img.edit_link}\n{new_img.file_path}"
+    result = {
+        "link": new_img.edit_link,
+        "url": new_img.link,
+        "filename": new_img.file_path,
+    }
+
+    return json.dumps(result)
 
 
 @route(f"{Wiki.PATH}/tag/<tag_name>")
