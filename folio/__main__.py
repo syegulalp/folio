@@ -7,10 +7,12 @@ sys.path.insert(0, "folio")
 import regex as re
 
 import bottle
+
 bottle.TEMPLATE_PATH.insert(0, "folio/templates")
 bottle.re = re
 
 import peewee
+
 peewee.re = re
 
 config_path = "data"
@@ -65,7 +67,7 @@ if not os.path.exists(config_path):
 
 sys.path.insert(0, config_path)
 
-import config # type: ignore
+import config  # type: ignore
 
 debug = getattr(config, "DEBUG", False) or args.debug
 launch_browser = getattr(config, "LAUNCH_BROWSER", None) or args.browser
@@ -90,11 +92,14 @@ if __name__ == "__main__":
 
         from bottle import static_file, route
 
-        for alias, img_path in img_paths:
+        # for alias, img_path in img_paths:
 
-            @route(f"{routes.Wiki.PATH}/media/{alias}/<file_name>",)
-            def media_files(wiki_title, file_name):
-                return static_file(routes.Wiki.url_to_file(file_name), root=img_path)
+        aliases = {alias: img_path for alias, img_path in img_paths}
+
+        @route(f"{routes.Wiki.PATH}/media/<alias>/<file_name>")
+        def media_files(wiki_title, alias, file_name):
+            a = aliases[alias]
+            return static_file(routes.Wiki.url_to_file(file_name), root=a)
 
     import settings
 
@@ -105,15 +110,15 @@ if __name__ == "__main__":
     print(
         f'{settings.PRODUCT} running on port {port}\nNavigate to "/quit" in browser to shut down'
     )
-    
+
     from wsgiref.simple_server import make_server, WSGIServer
     from socketserver import ThreadingMixIn
 
-    class ThreadingWSGIServer(ThreadingMixIn, WSGIServer): 
+    class ThreadingWSGIServer(ThreadingMixIn, WSGIServer):
         pass
 
-    import utils    
+    import utils
 
-    with make_server('0.0.0.0', port, routes.app, ThreadingWSGIServer) as httpd:
+    with make_server("0.0.0.0", port, routes.app, ThreadingWSGIServer) as httpd:
         utils.server = httpd
         httpd.serve_forever()
