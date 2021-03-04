@@ -8,7 +8,7 @@ function reset_msg() {
     d.hide();
 }
 
-function show_msg(text, css_class, timeout = 3000, html = false) {    
+function show_msg(text, css_class, timeout = 3000, html = false) {
     d = $("#drop-message");
     if (html) {
         d.html(text);
@@ -36,32 +36,34 @@ function handleImagePaste(e) {
     var items = cd.items;
     item = items[0];
     valid = false;
-    if (item!=undefined && item.kind === 'file'){
+    if (item != undefined && item.kind === 'file') {
         e.preventDefault();
         valid = true;
         var blob = item.getAsFile();
         console.log(blob);
-        
+
         var reader = new FileReader();
         reader.readAsDataURL(blob);
-        
+
         var formData = new FormData();
         formData.append("file", blob, blob.name)
-        
+
         console.log(formData);
         $.ajax({
-          type: "POST",
-          url: mediaPaste,
-          data: formData,
-          contentType: false,
-          processData: false,
-          success: function(data) {
-            txt = data.split('\n')            
-            show_msg("<div class='media'><a target='_blank' href='"+txt[1]+"'><img src='"+txt[0]+"'></a><div class='media-body'><p>Pasted image of " + blob.size + " bytes.<br/><a target='_blank' href='"+txt[1]+"'>Click here</a> to see the uploaded image.</p></div></div>", "alert alert-success", timeout = 0, html = true);
-            if (documentInsert!=undefined){
-                documentInsert(txt[2]);
+            type: "POST",
+            url: mediaPaste,
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function (data) {
+                var img_data = JSON.parse(data);
+                show_msg(
+                    `<div class='media'><a target='_blank' href='${img_data.link}'><img src='${img_data.url}'></a><div class='media-body'><p>Pasted image of ${blob.size} bytes.<br/><a target='_blank' href='${img_data.link}'>Click here</a> to see the uploaded image.</p></div></div>`,
+                    "alert alert-success", timeout = 0, html = true);
+                if (documentInsert != undefined) {
+                    documentInsert(txt[2]);
+                }
             }
-          }
         }
         );
     }
@@ -119,20 +121,24 @@ $("#drop-target").on('drop', function (e) {
 
         if (files.length > 0) {
 
-            show_msg('<div class="progress upload-progress"><div id="upload_progess" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div>'+
-            '<div id="upload_report"></div>', "success", timeout=0, html=true);
+            show_msg('<div class="progress upload-progress"><div id="upload_progess" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div><div id="upload_report"></div>', "success", timeout = 0, html = true);
             report = $("#upload_report");
 
-            file_counter = 0;
             progress_bar = $("#upload_progess");
 
             for (var i = 0; i < files.length; i++) {
+
                 file = files[i];
                 console.log(file);
 
                 var fd = new FormData();
                 fd.append('file', file);
                 fd.append('filename', file.name);
+
+                let media_id = `media_progress_${i}`
+                let media_ref = `#${media_id}`
+
+                report.html(report.html() + `<div class='media' id='${media_id}'>Uploading ${file.name}...</div>`);
 
                 d = $("#drop-message");
 
@@ -144,21 +150,17 @@ $("#drop-target").on('drop', function (e) {
                     contentType: false
                 })
                     .done(function (data) {
-                        txt = data.split('\n');                        
-                        report.html(report.html() + "<div class='media'><a target='_blank' href='"+txt[1]+"'><img src='"+txt[0]+"'></a><div class='media-body'>"+txt[2]+"</div></div>");
-                        if (documentInsert!=undefined){
-                            documentInsert(`![](${txt[2]})`);
-                        }
+                        var img_data = JSON.parse(data);
+                        $(media_ref).html(`<a target='_blank' href='${img_data.link}'><img class='mr-3' src='${img_data.url}'></a><div class='media-body'>${img_data.filename}</div>`)
                     })
                     .fail(function () {
-                        report.html(report.html() + "<div>File " + file.name +" did not upload; may be too big or wrong type</div>");
+                        $(media_ref).html(`File ${file.name} did not upload; may be too big or wrong type.`);
                     })
                     .always(function () {
-                        file_counter++;
-                        total_progress = (file_counter/files.length)*100;
+                        total_progress = (i / files.length) * 100;
                         progress_bar.prop("aria-valuenow", total_progress);
-                        progress_bar.css("width", total_progress+'%');
-                        progress_bar.text(total_progress+'%');
+                        progress_bar.css("width", total_progress + '%');
+                        progress_bar.text(total_progress + '%');
                     });
 
             }
@@ -167,4 +169,3 @@ $("#drop-target").on('drop', function (e) {
 
     }
 });
-
