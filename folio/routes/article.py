@@ -115,7 +115,7 @@ def article_edit(wiki: Wiki, user: Author, article: Article, ajax=False):
     # Redirect to article creation if we try to edit a nonexistent article
 
     if article.id is None:
-        return redirect(f"{wiki.link}/new/?title={Wiki.title_to_url(article.title)}")
+        return redirect(f"{wiki.link}/new?title={Wiki.title_to_url(article.title)}")
 
     # Redirect to edit link if we visit the draft of the article
 
