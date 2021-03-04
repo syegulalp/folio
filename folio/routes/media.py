@@ -24,6 +24,8 @@ from peewee import SQL
 from pathlib import Path
 from typing import Union
 
+import json
+
 
 @route("/static/<filename>")
 def static_content(filename: str):
@@ -67,7 +69,13 @@ def wiki_media_paste(wiki: Wiki, user: Author):
     new_image = Media(wiki=wiki, file_path=filename,)
     new_image.save()
 
-    return f"{new_image.link}\n{new_image.edit_link}\n![]({new_image.file_path})"
+    result = {
+        "url": new_image.link,
+        "link": new_image.edit_link,
+        "filename": new_image.file_path,
+    }
+
+    return json.dumps(result)
 
 
 @route(f"{Wiki.PATH}/media/<file_name>")
