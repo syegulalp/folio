@@ -235,4 +235,3 @@ def article_display(wiki: Wiki, user: Author, article: Article):
         Wiki.article_cache[article.id] = result
 
     return result
-

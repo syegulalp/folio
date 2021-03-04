@@ -62,7 +62,6 @@ def new_wiki_save(user: Author):
     return redirect(new_wiki.link)
 
 
-
 @route("/quit")
 def quit(*a):
     yield "You may now close this browser."
@@ -71,5 +70,5 @@ def quit(*a):
     db.close()
 
     from utils import server
-    server.shutdown()
 
+    server.shutdown()

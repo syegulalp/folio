@@ -981,7 +981,7 @@ class Article(BaseModel):
             else:
                 source_link = matchobj.group(1)
 
-        source_link = source_link.replace(r'\(', '(').replace(r'\)',')')
+        source_link = source_link.replace(r"\(", "(").replace(r"\)", ")")
 
         if source_link.startswith("/tag/"):
             newlink = source_link.split("/tag/", 1)[1]
