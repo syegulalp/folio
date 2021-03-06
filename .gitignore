@@ -1,5 +1,5 @@
 wiki.db*
-venv*
+.env*
 data*
 .vscode
 **/.mypy_cache
@@ -14,3 +14,4 @@ pack.py
 pack.py
 folio.zip
 extract.py
+pyrightconfig.json

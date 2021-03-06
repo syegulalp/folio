@@ -69,3 +69,25 @@ a:hover {
 blockquote {
     background-color: rgb(0 0 0 / 0.3);
 }
+
+table.table {
+    color: aliceblue;
+}
+
+.table-hover tbody tr:hover {
+    color: aliceblue;
+    background-color: rgba(0, 0, 0, 0.325);
+}
+
+hr {
+    border-top: 1px solid #adb5bd;
+}
+
+.modal-content {
+    background-color: rgba(0.32, 0.32, 0.32);
+    border: 1px solid #495057;
+}
+
+pre {
+    color: rgb(176,192,192);
+}

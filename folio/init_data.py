@@ -555,6 +555,8 @@ Indent items four spaces to create subheadings.
     * Indented item.
 * Another main item.
 
-""",
+# Custom CSS formatting
+
+If you want to add custom CSS to your wiki, you can create one or more articles [[tagged]](Tags) with `@style`. The contents of those articles will be inserted into a `<style>` block on the wiki's pages.""",
     },
 }

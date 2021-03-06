@@ -223,9 +223,17 @@ def wiki_delete(wiki: Wiki, user: Author):
 
     return template(
         "article.tpl",
-        articles=[wiki.main_article,],
+        articles=[
+            wiki.main_article,
+        ],
         wiki=wiki,
-        messages=[Message(warning, yes=wiki.delete_confirm_link, no=wiki.link,)],
+        messages=[
+            Message(
+                warning,
+                yes=wiki.delete_confirm_link,
+                no=wiki.link,
+            )
+        ],
     )
 
 
@@ -285,6 +293,7 @@ def article_new(wiki: Wiki, user: Author):
         wiki=wiki,
         messages=messages,
         has_error="true" if messages else "false",
+        style = wiki.stylesheet()
     )
 
 

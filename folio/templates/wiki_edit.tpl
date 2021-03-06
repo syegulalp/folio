@@ -2,8 +2,6 @@
 
 <main role="main" class="container-wiki">
 
-
-
     <div id="article-row" class="row">
         <div id="article-col" class="col">
             % include('includes/messages.tpl')

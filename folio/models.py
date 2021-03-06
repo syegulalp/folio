@@ -87,7 +87,10 @@ class DocTagParser(HTMLParser):
                 # TODO: this kind of construction happens often enough that we should probably make a special constructor
                 self.query = (
                     self.article.wiki.articles_tagged_with(tag)
-                    .where(Article.draft_of.is_null(), Article.revision_of.is_null(),)
+                    .where(
+                        Article.draft_of.is_null(),
+                        Article.revision_of.is_null(),
+                    )
                     .order_by(SQL("title COLLATE NOCASE"))
                 )
             except Exception:
@@ -257,11 +260,27 @@ class Wiki(BaseModel):
 
     settings = settings
 
+    def stylesheet(self):
+        style_data = []
+
+        try:
+            style_articles = Tag.get(wiki=self, title="@style").articles
+        except Tag.DoesNotExist:
+            pass
+        else:
+            for a in style_articles:
+                style_data.append(a.article.content)
+
+        style_data = "".join(style_data)
+
+        return style_data
+
     def delete_(self):
         with db.transaction():
 
             Metadata.delete().where(
-                Metadata.item == "wiki", Metadata.id == self.id,
+                Metadata.item == "wiki",
+                Metadata.id == self.id,
             )
 
             for article in self.articles:

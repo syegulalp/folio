@@ -27,7 +27,10 @@ route("/wiki")(main_route)
 @route("/new")
 @user_env
 def new_wiki(user: Author):
-    wiki = Wiki(title="", description="",)
+    wiki = Wiki(
+        title="",
+        description="",
+    )
     return template("wiki_new.tpl", wiki=wiki, user=user, page_title=f"Create new wiki")
 
 

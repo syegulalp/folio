@@ -1,3 +1,6 @@
+% if 'style' in locals() and style:
+<style>{{!style}}</style>
+% end
 % article_text = article.formatted
 % article_title = article.new_title if article.new_title else article.title
 % if article.get_metadata('@hide-title') is None:

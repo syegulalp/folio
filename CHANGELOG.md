@@ -6,10 +6,13 @@
 
 * We're now using Python 3.8 to build the standalone version of the app.
 * Slight tweaks to dark mode color theme. The default light mode has also been softened further.
-
+* You can now modify the CSS styling of a wiki. Simply create articles tagged with `@style`, and the contents of those articles will be inserted into a `<style>` block on article template pages.
+  
 ### Bugfixes
 
 * If you have parentheses in an article link, you must escape them with backslashes. E.g., if you have an article named `My Story (So Far)`, the link `[[the story]](My Story (So Far))` will not work. But you can use `[[the story]](My Story \(So Far\))`. We've also added a note about this to the included documentation.
+* Squashed a minor bug involving a trailing slash in redirection URLs.
+* Tables, modals, preformatted text, and an umber of other controls were all but unreadable in dark mode. This has been fixed.
 
 ## [0.0.7-alpha](https://github.com/syegulalp/folio/releases/tag/0.0.7-alpha)
 
@@ -29,7 +32,7 @@
 * Some templates that were supposed to display at fixed width were not; this has been corrected.
 * Javascript and CSS now load with hints that indicate the version number, so that upgrades across versions do not cause cached resources to be loaded.
 * The drag-and-drop uploader now reports back errors on multiple file uploads.
-* * Obsolete information about the use of backticks to fence off literals has been removed from the included docs.
+* Obsolete information about the use of backticks to fence off literals has been removed from the included docs.
 
 ### Known bugs
 

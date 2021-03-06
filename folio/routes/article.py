@@ -100,6 +100,7 @@ def article_preview(wiki: Wiki, user: Author, article: Article):
         article=article,
         page_title=article.title,
         wiki=wiki,
+        style=wiki.stylesheet(),
     )
 
 
@@ -270,6 +271,7 @@ def article_edit(wiki: Wiki, user: Author, article: Article, ajax=False):
         original_article=original_article,
         messages=[error, warning],
         has_error="true" if error else "false",
+        style=wiki.stylesheet(),
     )
 
 

@@ -114,7 +114,10 @@ def home_page_render(messages=[]):
         wikis=Wiki.select().order_by(Wiki.title.asc()),
         articles=(
             Article.select()
-            .where(Article.draft_of.is_null(), Article.revision_of.is_null(),)
+            .where(
+                Article.draft_of.is_null(),
+                Article.revision_of.is_null(),
+            )
             .order_by(Article.last_edited.desc())
             .limit(25)
         ),
@@ -229,6 +232,7 @@ def article_display(wiki: Wiki, user: Author, article: Article):
         articles=[article],
         page_title=f"{article.title} ({wiki.title})",
         wiki=wiki,
+        style=wiki.stylesheet()
     )
 
     if article.id:

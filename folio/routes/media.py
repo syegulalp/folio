@@ -66,7 +66,10 @@ def wiki_media_paste(wiki: Wiki, user: Author):
 
     file_data.save(str(Path(wiki.data_path, filename)))
 
-    new_image = Media(wiki=wiki, file_path=filename,)
+    new_image = Media(
+        wiki=wiki,
+        file_path=filename,
+    )
     new_image.save()
 
     result = {
@@ -81,7 +84,10 @@ def wiki_media_paste(wiki: Wiki, user: Author):
 @route(f"{Wiki.PATH}/media/<file_name>")
 @wiki_env
 def media_file(wiki: Wiki, user: Author, file_name: str):
-    return static_file(Wiki.url_to_file(file_name), f"{config.DATA_PATH}/{wiki.id}",)
+    return static_file(
+        Wiki.url_to_file(file_name),
+        f"{config.DATA_PATH}/{wiki.id}",
+    )
 
 
 @route(f"{Wiki.PATH}/media/<media_filename>/edit")
@@ -147,7 +153,8 @@ def media_file_edit_post(wiki: Wiki, user: Author, media: Media):
 
             for ref in media.in_articles:
                 ref.article.replace_text(
-                    replacement_src, r"![\1](" + new_filename + r")",
+                    replacement_src,
+                    r"![\1](" + new_filename + r")",
                 )
 
             wiki.invalidate_cache()
@@ -181,7 +188,13 @@ def media_file_delete(wiki: Wiki, user: Author, media: Media):
         "wiki_media_edit.tpl",
         wiki=wiki,
         media=media,
-        messages=[Message(warning, yes=media.delete_confirm_link, no=media.edit_link,)],
+        messages=[
+            Message(
+                warning,
+                yes=media.delete_confirm_link,
+                no=media.edit_link,
+            )
+        ],
     )
 
 
