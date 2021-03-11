@@ -9,29 +9,39 @@
         <p>To insert an image from the clipboard, click here, then paste.</p>
       </div>
       <hr />
-      {{!paginator}}
+      <center>{{!paginator}}</center>
       <p>
-      <ul class="list-unstyled">
         % if media.count()==0:
         [<i>No media in this wiki. Drag images anywhere onto this page to upload media.</i>]
         % else:
+        % col = 0
         % for media_item in media:
-        <li class="media">
-          <a href="{{media_item.edit_link}}"><img class="img-fluid align-self-start mr-3" src="{{media_item.link}}"></a>
-          <div class="media-body">
-            <a href="{{media_item.edit_link}}">{{media_item.file_path}}</a>
-          </div>
-        </li>
+        % if col == 0:
+      <div class="row">
         % end
-        % end
-      </ul>
-      <p>
-      {{!paginator}}
+        <div class="col-3 img-gallery">
+          <a class="img-gallery-title" href="{{media_item.edit_link}}">{{media_item.file_path}}</a><br>
+          <a href="{{media_item.edit_link}}"><img class="img-fluid align-self-start"
+              src="{{media_item.link}}"></a>
+        </div>
+        % col += 1
+        % if col == 4:
+      </div>
+      % col = 0
+      % end
+      % end
+      % if col!=0:
+    </div>
+    % end
+    % end
+
+    <p>
+      <center>{{!paginator}}</center>
       <hr />
-    </div>
-    <div id="sidebar" class="sidebar-col">
-      % include('includes/sidebar.tpl')
-    </div>
+  </div>
+  <div id="sidebar" class="sidebar-col">
+    % include('includes/sidebar.tpl')
+  </div>
   </div>
 
 </main>

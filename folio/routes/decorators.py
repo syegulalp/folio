@@ -126,6 +126,7 @@ def home_page_render(messages=[]):
         wiki=blank_wiki,
     )
 
+items_on_page = 12
 
 def paginator(media: Media):
     search = request.params.get("search")
@@ -138,7 +139,7 @@ def paginator(media: Media):
 
     page = int(request.params.get("p", 1))
 
-    last = ceil(media.count() / 5)
+    last = ceil(media.count() / items_on_page)
 
     if page == -1 or page > last:
         page = last
@@ -146,7 +147,7 @@ def paginator(media: Media):
     previous_page = max(page - 1, 1)
     next_page = min(page + 1, last)
 
-    media = media.paginate(page, 5)
+    media = media.paginate(page, items_on_page)
 
     first_url = urlencode({"p": 1, "search": search})
     previous_url = urlencode({"p": previous_page, "search": search})

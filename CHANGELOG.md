@@ -7,6 +7,7 @@
 * We're now using Python 3.8 to build the standalone version of the app.
 * Slight tweaks to dark mode color theme. The default light mode has also been softened further.
 * You can now modify the CSS styling of a wiki. Simply create articles tagged with `@style`, and the contents of those articles will be inserted into a `<style>` block on article template pages.
+* The image gallery layout is now a grid, which looks far better and is easier to navigate.
   
 ### Bugfixes
 
