@@ -101,7 +101,7 @@ class DocTagParser(HTMLParser):
 
         if self.query.count() > 0 and "sort" in attrs:
             sort_key = attrs["sort"]
-            self.query = sorted(self.query, key=lambda x: x.get_metadata(sort_key))
+            self.query = sorted(self.query, key=lambda x: x.get_metadata(sort_key, ""))
 
         for __ in self.query:
             __.formatted
@@ -213,13 +213,13 @@ class BaseModel(Model):
     def metadata_not_autogen(self):
         return self.metadata.where(Metadata.autogen == False)
 
-    def get_metadata(self, key=None):
+    def get_metadata(self, key=None, default=None):
         metadata = self.metadata.select()
         if key:
             try:
                 value = metadata.where(Metadata.key == key).get().value
             except Metadata.DoesNotExist:
-                return None
+                return default
             else:
                 return value
         return metadata

@@ -15,6 +15,7 @@
 * Squashed a minor bug involving a trailing slash in redirection URLs.
 * Tables, modals, preformatted text, and a number of other controls were all but unreadable in dark mode. This has been fixed.
 * We now use a more precise way to determine if a renamed article is going to create a name collision.
+* Sorting for tags failed if the retrieved articles did not have the listed sort key. The default is now that articles with no sort key show up first.
 
 ## [0.0.7-alpha](https://github.com/syegulalp/folio/releases/tag/0.0.7-alpha)
 
