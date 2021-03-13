@@ -742,8 +742,9 @@ class Article(BaseModel):
         try:
             same_title = self.wiki.articles.where(
                 Article.title == self.new_title,
-                Article.id != self.draft_of.id,
                 Article.id != self.id,
+                Article.draft_of.is_null(True),
+                Article.revision_of.is_null(True),
             ).get()
         except Article.DoesNotExist:
             return False

@@ -14,6 +14,7 @@
 * If you have parentheses in an article link, you must escape them with backslashes. E.g., if you have an article named `My Story (So Far)`, the link `[[the story]](My Story (So Far))` will not work. But you can use `[[the story]](My Story \(So Far\))`. We've also added a note about this to the included documentation.
 * Squashed a minor bug involving a trailing slash in redirection URLs.
 * Tables, modals, preformatted text, and a number of other controls were all but unreadable in dark mode. This has been fixed.
+* We now use a more precise way to determine if a renamed article is going to create a name collision.
 
 ## [0.0.7-alpha](https://github.com/syegulalp/folio/releases/tag/0.0.7-alpha)
 
