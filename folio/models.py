@@ -87,10 +87,7 @@ class DocTagParser(HTMLParser):
                 # TODO: this kind of construction happens often enough that we should probably make a special constructor
                 self.query = (
                     self.article.wiki.articles_tagged_with(tag)
-                    .where(
-                        Article.draft_of.is_null(),
-                        Article.revision_of.is_null(),
-                    )
+                    .where(Article.draft_of.is_null(), Article.revision_of.is_null(),)
                     .order_by(SQL("title COLLATE NOCASE"))
                 )
             except Exception:
@@ -260,6 +257,15 @@ class Wiki(BaseModel):
 
     settings = settings
 
+    @property
+    def uncreated_articles(self):
+        return (
+            ArticleLinks.select(ArticleLinks.link).distinct()
+            .where(
+                ArticleLinks.article << self.articles_main_only, ArticleLinks.valid_link.is_null()
+            ).order_by(ArticleLinks.link.asc())
+        )
+
     def stylesheet(self):
         style_data = []
 
@@ -279,8 +285,7 @@ class Wiki(BaseModel):
         with db.transaction():
 
             Metadata.delete().where(
-                Metadata.item == "wiki",
-                Metadata.id == self.id,
+                Metadata.item == "wiki", Metadata.id == self.id,
             )
 
             for article in self.articles:
@@ -923,6 +928,13 @@ class Article(BaseModel):
             link_class = "wiki-link"
             link_to_render = link
             valid_title = link
+        elif link.startswith(("http://", "https://")):
+            link_class = "wiki-external-link"
+            link_title = link
+            link_test = link
+            valid_title = link
+            link_to_render = link
+            target = ' target="_blank"'            
         elif link.startswith(f"{self.wiki.article_root_link}/"):
             link_to_find = link.split(f"{self.wiki.article_root_link}/")[1]
             link_to_render = link
@@ -961,12 +973,6 @@ class Article(BaseModel):
             link_class = "wiki-missing-link"
             link_title = f"{link} (nonexistent article)"
 
-        if link.startswith(("http://", "https://")):
-            link_class = "wiki-external-link"
-            link_title = link
-            link_to_render = link
-            target = ' target="_blank"'
-
         if Wiki.export_mode:
             link_to_render = link_to_render.replace("%", "%25")
 
@@ -1003,7 +1009,9 @@ class Article(BaseModel):
 
         source_link = source_link.replace(r"\(", "(").replace(r"\)", ")")
 
-        if source_link.startswith("/tag/"):
+        if source_link.startswith("http://") or source_link.startswith("https://"):
+            newlink = source_link
+        elif source_link.startswith("/tag/"):
             newlink = source_link.split("/tag/", 1)[1]
             newlink = f"{self.wiki.tag_root_link}/{self.title_to_url(newlink)}"
         else:

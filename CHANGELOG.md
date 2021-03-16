@@ -8,6 +8,7 @@
 * Slight tweaks to dark mode color theme. The default light mode has also been softened further.
 * You can now modify the CSS styling of a wiki. Simply create articles tagged with `@style`, and the contents of those articles will be inserted into a `<style>` block on article template pages.
 * The image gallery layout is now a grid, which looks far better and is easier to navigate.
+* The sidebar now lists all articles that have a link to them, but do not yet exist (Articles/Uncreated).
   
 ### Bugfixes
 
@@ -16,6 +17,7 @@
 * Tables, modals, preformatted text, and a number of other controls were all but unreadable in dark mode. This has been fixed.
 * We now use a more precise way to determine if a renamed article is going to create a name collision.
 * Sorting for tags failed if the retrieved articles did not have the listed sort key. The default is now that articles with no sort key show up first.
+* Links to external URLs did not render correctly.
 
 ## [0.0.7-alpha](https://github.com/syegulalp/folio/releases/tag/0.0.7-alpha)
 

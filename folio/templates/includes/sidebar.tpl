@@ -56,7 +56,10 @@
                 </li>
                 <li class="nav-item">
                     <a title="Drafts" class="nav-link" id="tab-articles-drafts" data-toggle="tab" aria-controls="articles-drafts" aria-selected="false" role="tab" href="#articles-drafts">Drafts</a>
-                </li>                
+                </li>
+                <li class="nav-item">
+                    <a title="Uncreated" class="nav-link" id="tab-articles-uncreated" data-toggle="tab" aria-controls="articles-uncreated" aria-selected="false" role="tab" href="#articles-uncreated">Uncreated</a>
+                </li>                 
             </ul>
             <div class="tab-content">
                 <div class="tab-pane active" id="all-articles" role="tabpanel" aria-labelledby="all-articles">
@@ -69,6 +72,11 @@
                         % include('includes/draft_article_list.tpl')
                     </div>                    
                 </div>
+                <div class="tab-pane" id="articles-uncreated" role="tabpanel" aria-labelledby="articles-uncreated">
+                    <div class="wiki-uncreated-articles">
+                        % include('includes/uncreated_article_list.tpl')
+                    </div>                    
+                </div>                
             </div>
 
         </div>

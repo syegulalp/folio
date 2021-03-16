@@ -91,3 +91,7 @@ hr {
 pre {
     color: rgb(176,192,192);
 }
+
+.wiki-external-link {
+    color: rgb(172, 166, 94);
+}
