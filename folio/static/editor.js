@@ -145,6 +145,8 @@ function insertLink(linkText, linkAltText) {
     // todo: test for http:/https:
     // and modify brackets appropriately
 
+    linkText = linkText.replace("(","\\(").replace(")","\\)")
+
     if (hasSelection(field)) {
         wrapText(field, '[[', ']](' + linkText + ')')
     }

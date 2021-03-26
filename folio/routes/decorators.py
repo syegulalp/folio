@@ -104,6 +104,7 @@ def article_env(func):
 
 @error(404)
 def error_404(error):
+    print (request.path)
     return home_page_render([Error(f"Page or wiki not found: {Unsafe(request.path)}")])
 
 

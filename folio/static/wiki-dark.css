@@ -95,3 +95,7 @@ pre {
 .wiki-external-link {
     color: rgb(172, 166, 94);
 }
+
+.btn-dark {
+    border: 1px solid gray;
+}

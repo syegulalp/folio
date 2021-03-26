@@ -170,7 +170,7 @@ class BaseModel(Model):
             title, anchor = title.split("#", 1)
         title = title.replace(" ", "_")
         title = urllib.parse.quote(title)
-        title = title.replace("/", r"%2f")
+        title = title.replace("/", r"%252f")
         if anchor:
             title = title + "#" + anchor
         return title

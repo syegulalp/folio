@@ -5,19 +5,20 @@
 ### New features
 
 * We're now using Python 3.8 to build the standalone version of the app.
-* Slight tweaks to dark mode color theme. The default light mode has also been softened further.
+* Slight tweaks to dark mode color theme. The default light mode has also been softened further. Some buttons in dark mode are now more legible.
 * You can now modify the CSS styling of a wiki. Simply create articles tagged with `@style`, and the contents of those articles will be inserted into a `<style>` block on article template pages.
 * The image gallery layout is now a grid, which looks far better and is easier to navigate.
 * The sidebar now lists all articles that have a link to them, but do not yet exist (Articles/Uncreated).
   
 ### Bugfixes
 
-* If you have parentheses in an article link, you must escape them with backslashes. E.g., if you have an article named `My Story (So Far)`, the link `[[the story]](My Story (So Far))` will not work. But you can use `[[the story]](My Story \(So Far\))`. We've also added a note about this to the included documentation.
+* If you have parentheses in an article link, you must escape them with backslashes. E.g., if you have an article named `My Story (So Far)`, the link `[[the story]](My Story (So Far))` will not work. But you can use `[[the story]](My Story \(So Far\))`. We've also added a note about this to the included documentation. Link insertion in a document also obeys this rule; any links inserted with parentheses in the title will be auto-escaped.
 * Squashed a minor bug involving a trailing slash in redirection URLs.
 * Tables, modals, preformatted text, and a number of other controls were all but unreadable in dark mode. This has been fixed.
 * We now use a more precise way to determine if a renamed article is going to create a name collision.
 * Sorting for tags failed if the retrieved articles did not have the listed sort key. The default is now that articles with no sort key show up first.
-* Links to external URLs did not render correctly.
+* Fixed an issued where links to external URLs did not render correctly.
+* Fixed an issue where backslashes in article titles did not render correctly in links, leading to a dead page. 
 
 ## [0.0.7-alpha](https://github.com/syegulalp/folio/releases/tag/0.0.7-alpha)
 
