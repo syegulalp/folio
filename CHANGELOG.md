@@ -9,7 +9,8 @@
 * You can now modify the CSS styling of a wiki. Simply create articles tagged with `@style`, and the contents of those articles will be inserted into a `<style>` block on article template pages.
 * The image gallery layout is now a grid, which looks far better and is easier to navigate.
 * The sidebar now lists all articles that have a link to them, but do not yet exist (Articles/Uncreated).
-  
+* The sidebar now has a live search box, which will search article, tag, and media object titles as you type, with a limit of five of each kind of object. Article fulltext search is not (yet) supported in this view, but might be at some point. The core of this will eventually be used to rework how the general search view operates, which has not been very useful.
+
 ### Bugfixes
 
 * If you have parentheses in an article link, you must escape them with backslashes. E.g., if you have an article named `My Story (So Far)`, the link `[[the story]](My Story (So Far))` will not work. But you can use `[[the story]](My Story \(So Far\))`. We've also added a note about this to the included documentation. Link insertion in a document also obeys this rule; any links inserted with parentheses in the title will be auto-escaped.

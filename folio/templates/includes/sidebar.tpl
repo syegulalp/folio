@@ -17,13 +17,26 @@
     {{wiki.description}}
 </div>
 <div class="wiki-icons">
-<a href="{{wiki.new_page_link}}" title="Create new wiki entry"><span class="oi oi-file"></span></a>
-<a id="wiki_search_link" href="{{wiki.search_link}}"><span title="Search this wiki" class="oi oi-magnifying-glass"></span></a>
-<a href="{{wiki.media_link}}"><span title="See wiki media" class="oi oi-image"></span></a>
-<a href="{{wiki.edit_link}}" title="Edit wiki settings"><span class="oi oi-cog"></span></a>
-<a href="{{wiki.server_homepage_link}}"><span title="Wiki server homepage" class="oi oi-home"></span></a>
+    <a href="{{wiki.new_page_link}}" title="Create new wiki entry"><span class="oi oi-file"></span></a>
+    <a id="wiki_search_link" href="{{wiki.search_link}}"><span title="Search this wiki"
+            class="oi oi-magnifying-glass"></span></a>
+    <a href="{{wiki.media_link}}"><span title="See wiki media" class="oi oi-image"></span></a>
+    <a href="{{wiki.edit_link}}" title="Edit wiki settings"><span class="oi oi-cog"></span></a>
+    <a href="{{wiki.server_homepage_link}}"><span title="Wiki server homepage" class="oi oi-home"></span></a>
 
-</div>  
+</div>
+
+<div class="wiki-search-box">
+    <form id="sidebar-search">
+        <div class="input-group">
+            <input class="form-control form-control-sm" type="input" id="wiki-search-input">
+            <div class="input-group-append">
+                <span title="Clear search" class="input-group-text"><a href="#" onclick="$('#wiki-search-input').val('');$('#wiki-search-results').html('');">❌</a></span>
+            </div>
+        </div>
+    </form>
+    <div id="wiki-search-results" class="wiki-sidebar-controls"></div>
+</div>
 
 <div class="wiki-sidebar-controls">
 
@@ -49,17 +62,22 @@
             </div>
         </div>
         <div class="tab-pane" id="articles" role="tabpanel" aria-labelledby="tab_articles">
-            
+
             <ul class="nav nav-tabs" id="article_tabs">
                 <li class="nav-item">
-                    <a title="All articles" class="nav-link active" id="tab-articles-all" data-toggle="tab" aria-controls="all-articles" aria-selected="false" role="tab" href="#all-articles">Live</a>
+                    <a title="All articles" class="nav-link active" id="tab-articles-all" data-toggle="tab"
+                        aria-controls="all-articles" aria-selected="false" role="tab" href="#all-articles">Live</a>
                 </li>
                 <li class="nav-item">
-                    <a title="Drafts" class="nav-link" id="tab-articles-drafts" data-toggle="tab" aria-controls="articles-drafts" aria-selected="false" role="tab" href="#articles-drafts">Drafts</a>
+                    <a title="Drafts" class="nav-link" id="tab-articles-drafts" data-toggle="tab"
+                        aria-controls="articles-drafts" aria-selected="false" role="tab"
+                        href="#articles-drafts">Drafts</a>
                 </li>
                 <li class="nav-item">
-                    <a title="Uncreated" class="nav-link" id="tab-articles-uncreated" data-toggle="tab" aria-controls="articles-uncreated" aria-selected="false" role="tab" href="#articles-uncreated">Uncreated</a>
-                </li>                 
+                    <a title="Uncreated" class="nav-link" id="tab-articles-uncreated" data-toggle="tab"
+                        aria-controls="articles-uncreated" aria-selected="false" role="tab"
+                        href="#articles-uncreated">Uncreated</a>
+                </li>
             </ul>
             <div class="tab-content">
                 <div class="tab-pane active" id="all-articles" role="tabpanel" aria-labelledby="all-articles">
@@ -70,13 +88,13 @@
                 <div class="tab-pane" id="articles-drafts" role="tabpanel" aria-labelledby="articles-drafts">
                     <div class="wiki-draft-articles">
                         % include('includes/draft_article_list.tpl')
-                    </div>                    
+                    </div>
                 </div>
                 <div class="tab-pane" id="articles-uncreated" role="tabpanel" aria-labelledby="articles-uncreated">
                     <div class="wiki-uncreated-articles">
                         % include('includes/uncreated_article_list.tpl')
-                    </div>                    
-                </div>                
+                    </div>
+                </div>
             </div>
 
         </div>

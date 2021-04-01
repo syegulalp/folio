@@ -374,6 +374,46 @@ def wiki_replace(wiki: Wiki, user: Author):
         result_query=result_query,
     )
 
+@route(f"{Wiki.PATH}/search2", method=("POST",))
+@wiki_env
+def wiki_search2(wiki: Wiki, user: Author):
+
+    search_query = request.forms.search
+    if search_query == "":
+        return ""
+
+    article_title_results = (
+        wiki.articles.select()
+        .where(
+            Article.revision_of.is_null(),
+            Article.title.contains(search_query),
+        )
+        .order_by(SQL("title COLLATE NOCASE"))
+    ).limit(5)
+
+    media_results = (
+        wiki.media.select()
+        .where(Media.file_path.contains(search_query))
+        .order_by(SQL("file_path COLLATE NOCASE"))
+    ).limit(5)
+
+    tag_results = (
+        wiki.tags.select()
+        .where(Tag.title.contains(search_query))
+        .order_by(SQL("title COLLATE NOCASE"))
+    ).limit(5)
+
+       
+    results = []
+    for article in article_title_results:
+        results.append(f'<p>📝<a class="jsnavlink" href="{article.link}">{article.title}</a></p>')
+    for media in media_results:
+        results.append(f'<p>🖼<a class="jsnavlink" href="{media.edit_link}">{media.file_path}</a></p>')
+    for tag in tag_results:
+        results.append(f'<p>🏷<a class="jsnavlink" href="{tag.link}">{tag.title}</a></p>')
+
+    return ''.join(results)
+
 
 @route(f"{Wiki.PATH}/search", method=("GET", "POST"))
 @wiki_env

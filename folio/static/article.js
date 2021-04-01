@@ -20,18 +20,21 @@ function setArticle(data){
     document.title = $(data).filter("title").text();
 }
 
-$('.jsnavlink').on('click', function(e) {
-    e.preventDefault();
-    href = this.href
-    $.ajax({
-        type: "GET",
-        url: href,
-        success: function(data){
-            window.history.pushState({url: window.href}, null, href);
-            setArticle(data);    
-        }
-    });   
-});
+function activateSidebarLinks(){
+    $('.jsnavlink').unbind("click");
+    $('.jsnavlink').on('click', function(e) {
+        e.preventDefault();
+        href = this.href
+        $.ajax({
+            type: "GET",
+            url: href,
+            success: function(data){
+                window.history.pushState({url: window.href}, null, href);
+                setArticle(data);    
+            }
+        });   
+    });
+}
 
 window.addEventListener("popstate", function(e) {
     console.log(e.state);
@@ -50,3 +53,5 @@ window.addEventListener("popstate", function(e) {
         window.location.href = window.location.href;
     }
 });
+
+activateSidebarLinks();

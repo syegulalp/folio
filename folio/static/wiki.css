@@ -100,7 +100,7 @@ blockquote {
     line-height: 1.2em;
 }
 
-.wiki-icons {
+.wiki-icons, .wiki-search-box {
     margin-bottom: 1em;
 }
 

@@ -169,3 +169,14 @@ $("#drop-target").on('drop', function (e) {
 
     }
 });
+
+
+$('#wiki-search-input').on("keyup", function (e) {
+    $.post(
+        search_endpoint,
+        { "search": this.value }
+    ).done(function (data) {
+        $("#wiki-search-results").html(data)
+        activateSidebarLinks();
+    });
+});

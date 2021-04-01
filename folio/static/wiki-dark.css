@@ -99,3 +99,8 @@ pre {
 .btn-dark {
     border: 1px solid gray;
 }
+
+.input-group-append .input-group-text {
+    padding: 0;
+    background-color: unset;
+}

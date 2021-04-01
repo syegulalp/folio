@@ -451,6 +451,10 @@ class Wiki(BaseModel):
         )
 
     @property
+    def search_endpoint(self):
+        return f"{self.link}/search2"
+    
+    @property
     def new_page_link(self):
         return f"{self.link}/new"
 
