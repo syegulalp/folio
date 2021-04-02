@@ -223,17 +223,9 @@ def wiki_delete(wiki: Wiki, user: Author):
 
     return template(
         "article.tpl",
-        articles=[
-            wiki.main_article,
-        ],
+        articles=[wiki.main_article,],
         wiki=wiki,
-        messages=[
-            Message(
-                warning,
-                yes=wiki.delete_confirm_link,
-                no=wiki.link,
-            )
-        ],
+        messages=[Message(warning, yes=wiki.delete_confirm_link, no=wiki.link,)],
     )
 
 
@@ -293,7 +285,7 @@ def article_new(wiki: Wiki, user: Author):
         wiki=wiki,
         messages=messages,
         has_error="true" if messages else "false",
-        style = wiki.stylesheet()
+        style=wiki.stylesheet(),
     )
 
 
@@ -374,6 +366,7 @@ def wiki_replace(wiki: Wiki, user: Author):
         result_query=result_query,
     )
 
+
 @route(f"{Wiki.PATH}/search2", method=("POST",))
 @wiki_env
 def wiki_search2(wiki: Wiki, user: Author):
@@ -382,37 +375,25 @@ def wiki_search2(wiki: Wiki, user: Author):
     if search_query == "":
         return ""
 
-    article_title_results = (
-        wiki.articles.select()
-        .where(
-            Article.revision_of.is_null(),
-            Article.title.contains(search_query),
-        )
-        .order_by(SQL("title COLLATE NOCASE"))
-    ).limit(5)
+    article_title_results = Article.search(wiki.articles, search_query).limit(5)
+    media_results = Media.search(wiki.media, search_query).limit(5)
+    tag_results = Tag.search(wiki.tags, search_query).limit(5)
 
-    media_results = (
-        wiki.media.select()
-        .where(Media.file_path.contains(search_query))
-        .order_by(SQL("file_path COLLATE NOCASE"))
-    ).limit(5)
-
-    tag_results = (
-        wiki.tags.select()
-        .where(Tag.title.contains(search_query))
-        .order_by(SQL("title COLLATE NOCASE"))
-    ).limit(5)
-
-       
     results = []
     for article in article_title_results:
-        results.append(f'<p>📝<a class="jsnavlink" href="{article.link}">{article.title}</a></p>')
+        results.append(
+            f'<p>📝<a class="jsnavlink" href="{article.link}">{article.title}</a></p>'
+        )
     for media in media_results:
-        results.append(f'<p>🖼<a class="jsnavlink" href="{media.edit_link}">{media.file_path}</a></p>')
+        results.append(
+            f'<p>🖼<a class="jsnavlink" href="{media.edit_link}">{media.file_path}</a></p>'
+        )
     for tag in tag_results:
-        results.append(f'<p>🏷<a class="jsnavlink" href="{tag.link}">{tag.title}</a></p>')
+        results.append(
+            f'<p>🏷<a class="jsnavlink" href="{tag.link}">{tag.title}</a></p>'
+        )
 
-    return ''.join(results)
+    return "".join(results)
 
 
 @route(f"{Wiki.PATH}/search", method=("GET", "POST"))

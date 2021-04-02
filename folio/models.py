@@ -260,10 +260,13 @@ class Wiki(BaseModel):
     @property
     def uncreated_articles(self):
         return (
-            ArticleLinks.select(ArticleLinks.link).distinct()
+            ArticleLinks.select(ArticleLinks.link)
+            .distinct()
             .where(
-                ArticleLinks.article << self.articles_main_only, ArticleLinks.valid_link.is_null()
-            ).order_by(ArticleLinks.link.asc())
+                ArticleLinks.article << self.articles_main_only,
+                ArticleLinks.valid_link.is_null(),
+            )
+            .order_by(ArticleLinks.link.asc())
         )
 
     def stylesheet(self):
@@ -453,7 +456,7 @@ class Wiki(BaseModel):
     @property
     def search_endpoint(self):
         return f"{self.link}/search2"
-    
+
     @property
     def new_page_link(self):
         return f"{self.link}/new"
@@ -628,6 +631,14 @@ class Article(BaseModel):
         revision.copy_tags_from(self)
 
         return revision
+
+    @classmethod
+    def search(cls, search_set, search_query):
+        return (
+            search_set.select()
+            .where(Article.revision_of.is_null(), Article.title.contains(search_query),)
+            .order_by(SQL("title COLLATE NOCASE"))
+        )
 
     def replace_text(self, re_to_find, new_text):
         if self.opened_by:
@@ -938,7 +949,7 @@ class Article(BaseModel):
             link_test = link
             valid_title = link
             link_to_render = link
-            target = ' target="_blank"'            
+            target = ' target="_blank"'
         elif link.startswith(f"{self.wiki.article_root_link}/"):
             link_to_find = link.split(f"{self.wiki.article_root_link}/")[1]
             link_to_render = link
@@ -1185,6 +1196,14 @@ class Tag(BaseModel):
     title = TextField()
     wiki = ForeignKeyField(Wiki, backref="tags")
 
+    @classmethod
+    def search(cls, search_set, search_query):
+        return (
+            search_set.select()
+            .where(Tag.title.contains(search_query))
+            .order_by(SQL("title COLLATE NOCASE"))
+        )
+
     @property
     def link(self):
         return f"{self.wiki.tag_root_link}/{self.title}"
@@ -1229,6 +1248,14 @@ class Media(BaseModel):
     file_path = TextField()
     description = TextField(null=True)
     date_uploaded = DateTimeField(default=datetime.datetime.now)
+
+    @classmethod
+    def search(cls, search_set, search_query):
+        return (
+            search_set.select()
+            .where(Media.file_path.contains(search_query))
+            .order_by(SQL("file_path COLLATE NOCASE"))
+        )
 
     @property
     def uploaded_on(self):
