@@ -633,6 +633,22 @@ class Article(BaseModel):
         return revision
 
     @classmethod
+    def fulltext_search(cls, search_set, search_query):
+        _article_contents_result = ArticleIndex.select(ArticleIndex.rowid).where(
+            ArticleIndex.match(search_query + "*")
+        )
+
+        return (
+            search_set.select()
+            .where(
+                Article.revision_of.is_null(),
+                Article.id << _article_contents_result,
+            )
+            .order_by(SQL("title COLLATE NOCASE"))
+        )
+
+
+    @classmethod
     def search(cls, search_set, search_query):
         return (
             search_set.select()

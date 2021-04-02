@@ -407,41 +407,11 @@ def wiki_search(wiki: Wiki, user: Author):
 
         search_query = request.forms.search_query
         if search_query != "":
-            search_query_wildcard = search_query
 
-            article_title_result = (
-                wiki.articles.select()
-                .where(
-                    Article.revision_of.is_null(),
-                    Article.title.contains(search_query_wildcard),
-                )
-                .order_by(SQL("title COLLATE NOCASE"))
-            )
-
-            _article_contents_result = ArticleIndex.select(ArticleIndex.rowid).where(
-                ArticleIndex.match(search_query_wildcard + "*")
-            )
-
-            article_contents_result = (
-                wiki.articles.select()
-                .where(
-                    Article.revision_of.is_null(),
-                    Article.id << _article_contents_result,
-                )
-                .order_by(SQL("title COLLATE NOCASE"))
-            )
-
-            tag_result = (
-                wiki.tags.select()
-                .where(Tag.title.contains(search_query_wildcard))
-                .order_by(SQL("title COLLATE NOCASE"))
-            )
-
-            media_result = (
-                wiki.media.select()
-                .where(Media.file_path.contains(search_query_wildcard))
-                .order_by(SQL("file_path COLLATE NOCASE"))
-            )
+            article_title_result = Article.search(wiki.articles, search_query)
+            article_contents_result = Article.fulltext_search(wiki.articles, search_query)
+            tag_result = Tag.search(wiki.tags, search_query)
+            media_result = Media.search(wiki.media, search_query)
 
             search_results.append(
                 [
