@@ -19,7 +19,8 @@
 * We now use a more precise way to determine if a renamed article is going to create a name collision.
 * Sorting for tags failed if the retrieved articles did not have the listed sort key. The default is now that articles with no sort key show up first.
 * Fixed an issued where links to external URLs did not render correctly.
-* Fixed an issue where backslashes in article titles did not render correctly in links, leading to a dead page. 
+* Fixed an issue where backslashes in article titles did not render correctly in links, leading to a dead page.
+* Fixed an issue where articles whose titles consisted of a single underscore created issues.
 
 ## [0.0.7-alpha](https://github.com/syegulalp/folio/releases/tag/0.0.7-alpha)
 
