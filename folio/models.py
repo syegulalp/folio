@@ -168,6 +168,7 @@ class BaseModel(Model):
         anchor = None
         if "#" in title:
             title, anchor = title.split("#", 1)
+        title = title.replace("_",r"%5f")
         title = title.replace(" ", "_")
         title = urllib.parse.quote(title)
         title = title.replace("/", r"%252f")
@@ -180,7 +181,9 @@ class BaseModel(Model):
         anchor = None
         if "#" in url:
             url, anchor = url.split("#", 1)
-        title = url.replace(r"_", " ")
+        title = url
+        if not all(_=="_" for _ in title):
+            title = url.replace(r"_", " ")
         title = urllib.parse.unquote(title)
         if anchor:
             title = title + "#" + anchor
