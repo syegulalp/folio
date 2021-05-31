@@ -188,7 +188,6 @@ class BaseModel(Model):
         title = title.replace("%2f", "/")
         if anchor:
             title = title + "#" + anchor
-        print(title)
         return title
 
     @classmethod
