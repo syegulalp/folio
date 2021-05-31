@@ -21,6 +21,7 @@
 * Fixed an issued where links to external URLs did not render correctly.
 * Fixed an issue where backslashes in article titles did not render correctly in links, leading to a dead page.
 * Fixed an issue where articles whose titles consisted of a single underscore created issues.
+* Fixed an issue where articles with a backslash in the name were not correctly located as an existing article.
 
 ## [0.0.7-alpha](https://github.com/syegulalp/folio/releases/tag/0.0.7-alpha)
 

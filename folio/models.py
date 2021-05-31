@@ -185,8 +185,10 @@ class BaseModel(Model):
         if not all(_=="_" for _ in title):
             title = url.replace(r"_", " ")
         title = urllib.parse.unquote(title)
+        title = title.replace("%2f","/")
         if anchor:
             title = title + "#" + anchor
+        print (title)
         return title
 
     @classmethod
