@@ -409,7 +409,9 @@ def wiki_search(wiki: Wiki, user: Author):
         if search_query != "":
 
             article_title_result = Article.search(wiki.articles, search_query)
-            article_contents_result = Article.fulltext_search(wiki.articles, search_query)
+            article_contents_result = Article.fulltext_search(
+                wiki.articles, search_query
+            )
             tag_result = Tag.search(wiki.tags, search_query)
             media_result = Media.search(wiki.media, search_query)
 

@@ -104,7 +104,7 @@ def article_env(func):
 
 @error(404)
 def error_404(error):
-    print (request.path)
+    print(request.path)
     return home_page_render([Error(f"Page or wiki not found: {Unsafe(request.path)}")])
 
 
@@ -115,10 +115,7 @@ def home_page_render(messages=[]):
         wikis=Wiki.select().order_by(Wiki.title.asc()),
         articles=(
             Article.select()
-            .where(
-                Article.draft_of.is_null(),
-                Article.revision_of.is_null(),
-            )
+            .where(Article.draft_of.is_null(), Article.revision_of.is_null(),)
             .order_by(Article.last_edited.desc())
             .limit(25)
         ),
@@ -127,7 +124,9 @@ def home_page_render(messages=[]):
         wiki=blank_wiki,
     )
 
+
 items_on_page = 12
+
 
 def paginator(media: Media):
     search = request.params.get("search")
@@ -234,7 +233,7 @@ def article_display(wiki: Wiki, user: Author, article: Article):
         articles=[article],
         page_title=f"{article.title} ({wiki.title})",
         wiki=wiki,
-        style=wiki.stylesheet()
+        style=wiki.stylesheet(),
     )
 
     if article.id:

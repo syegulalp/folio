@@ -168,7 +168,7 @@ class BaseModel(Model):
         anchor = None
         if "#" in title:
             title, anchor = title.split("#", 1)
-        title = title.replace("_",r"%5f")
+        title = title.replace("_", r"%5f")
         title = title.replace(" ", "_")
         title = urllib.parse.quote(title)
         title = title.replace("/", r"%252f")
@@ -182,13 +182,13 @@ class BaseModel(Model):
         if "#" in url:
             url, anchor = url.split("#", 1)
         title = url
-        if not all(_=="_" for _ in title):
+        if not all(_ == "_" for _ in title):
             title = url.replace(r"_", " ")
         title = urllib.parse.unquote(title)
-        title = title.replace("%2f","/")
+        title = title.replace("%2f", "/")
         if anchor:
             title = title + "#" + anchor
-        print (title)
+        print(title)
         return title
 
     @classmethod
@@ -646,12 +646,10 @@ class Article(BaseModel):
         return (
             search_set.select()
             .where(
-                Article.revision_of.is_null(),
-                Article.id << _article_contents_result,
+                Article.revision_of.is_null(), Article.id << _article_contents_result,
             )
             .order_by(SQL("title COLLATE NOCASE"))
         )
-
 
     @classmethod
     def search(cls, search_set, search_query):
