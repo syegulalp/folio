@@ -23,12 +23,13 @@
 <div id="modal-metadata-listing">
     % if article.metadata_not_autogen.count()>0:
     <table class="table table-striped table-bordered table-hover">
+        <tr><td colspan=2>Key</td><td>Value</td></td>
         % for m in article.metadata_not_autogen:
         <tr>
-            <td>{{m.key}}</td>
-            <td>{{m.value}}</td>
-            <td><button title="Delete this metadata" data-id="{{m.id}}" type="button" class="btn btn-danger"
+            <td style="width:1%"><button title="Delete this metadata" data-id="{{m.id}}" type="button" class="btn btn-sm btn-danger"
                     onclick="deleteMetadata(this);">&times;</button></td>
+            <td> {{m.key}}</td>
+            <td>{{m.value}}</td>
         </tr>
         % end
     </table>
