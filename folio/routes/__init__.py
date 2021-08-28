@@ -6,3 +6,4 @@ from .main import *
 from .wiki import *
 from .article import *
 from .media import *
+from .beta import *
