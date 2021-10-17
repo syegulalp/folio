@@ -12,17 +12,15 @@ function show_msg(text, css_class, timeout = 3000, html = false) {
     d = $("#drop-message");
     if (html) {
         d.html(text);
-    }
-    else {
+    } else {
         d.text(text)
     }
     d.prop("class", "drop-message alert alert-" + css_class)
     d.show();
     clearTimeout(drop_timeout);
     if (timeout > 0) {
-        drop_timeout = setTimeout(function () { d.fadeOut(); }, timeout);
-    }
-    else {
+        drop_timeout = setTimeout(function() { d.fadeOut(); }, timeout);
+    } else {
         d.html(d.html() + "<p><a href='#' onclick='d=$(\"#drop-message\");d.hide();d.html(\"\");' class='small'>Close this message</a></p>")
     }
 }
@@ -55,7 +53,7 @@ function handleImagePaste(e) {
             data: formData,
             contentType: false,
             processData: false,
-            success: function (data) {
+            success: function(data) {
                 var img_data = JSON.parse(data);
                 show_msg(
                     `<div class='media'><a target='_blank' href='${img_data.link}'><img src='${img_data.url}'></a><div class='media-body'><p>Pasted image of ${blob.size} bytes.<br/><a target='_blank' href='${img_data.link}'>Click here</a> to see the uploaded image.</p></div></div>`,
@@ -64,31 +62,30 @@ function handleImagePaste(e) {
                     documentInsert(txt[2]);
                 }
             }
-        }
-        );
+        });
     }
 }
 
-$(document).on('dragover', function (e) {
+$(document).on('dragover', function(e) {
     if (is_file(e)) {
         e.preventDefault();
     }
 });
 
-$(document).on('drop', function (e) {
+$(document).on('drop', function(e) {
     if (is_file(e)) {
         e.preventDefault();
     }
 });
 
-$(document).on('dragenter', function (e) {
+$(document).on('dragenter', function(e) {
     if (is_file(e)) {
         $("#drop-target").show();
         e.preventDefault();
     }
 });
 
-$("#drop-target").on('dragenter', function (e) {
+$("#drop-target").on('dragenter', function(e) {
     if (is_file(e)) {
         e.preventDefault();
         reset_msg();
@@ -99,7 +96,7 @@ $("#drop-target").on('dragenter', function (e) {
     }
 });
 
-$("#drop-target").on('dragleave', function (e) {
+$("#drop-target").on('dragleave', function(e) {
     if (is_file(e)) {
         e.preventDefault();
         reset_msg();
@@ -107,11 +104,11 @@ $("#drop-target").on('dragleave', function (e) {
     }
 });
 
-$("#drop-target").on('dragover', function (e) {
+$("#drop-target").on('dragover', function(e) {
     if (is_file(e)) { e.preventDefault(); }
 });
 
-$("#drop-target").on('drop', function (e) {
+$("#drop-target").on('drop', function(e) {
     if (is_file(e)) {
         e.preventDefault();
         $("#drop-target").hide();
@@ -143,20 +140,20 @@ $("#drop-target").on('drop', function (e) {
                 d = $("#drop-message");
 
                 $.ajax({
-                    type: 'POST',
-                    url: upload_path,
-                    data: fd,
-                    processData: false,
-                    contentType: false
-                })
-                    .done(function (data) {
+                        type: 'POST',
+                        url: upload_path,
+                        data: fd,
+                        processData: false,
+                        contentType: false
+                    })
+                    .done(function(data) {
                         var img_data = JSON.parse(data);
                         $(media_ref).html(`<a target='_blank' href='${img_data.link}'><img class='mr-3' src='${img_data.url}'></a><div class='media-body'>${img_data.filename}</div>`)
                     })
-                    .fail(function () {
+                    .fail(function() {
                         $(media_ref).html(`File ${file.name} did not upload; may be too big or wrong type.`);
                     })
-                    .always(function () {
+                    .always(function() {
                         total_progress = (i / files.length) * 100;
                         progress_bar.prop("aria-valuenow", total_progress);
                         progress_bar.css("width", total_progress + '%');
@@ -171,12 +168,20 @@ $("#drop-target").on('drop', function (e) {
 });
 
 
-$('#wiki-search-input').on("keyup", function (e) {
+$('#wiki-search-input').on("keydown", function(e) {
+    if (e.code == "Enter" & $("#wiki-search-results").children().length > 0) {
+        e.preventDefault();
+        window.location = $("#wiki-search-results").children().find("a")[0].href;
+    }
+})
+
+$('#wiki-search-input').on("keyup", function(e) {
     $.post(
-        search_endpoint,
-        { "search": this.value }
-    ).done(function (data) {
+        search_endpoint, { "search": this.value }
+    ).done(function(data) {
         $("#wiki-search-results").html(data)
         activateSidebarLinks();
     });
 });
+
+$('#wiki-search-input').focus();
