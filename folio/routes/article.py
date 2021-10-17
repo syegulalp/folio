@@ -7,6 +7,7 @@ from bottle import (
 
 from models import (
     Article,
+    ArticleLinks,
     Wiki,
     Author,
     Tag,
@@ -305,6 +306,10 @@ def article_delete_confirm(
         return redirect(article.link)
 
     # TODO: this stuff should be in the delete_instance method
+
+    ArticleLinks.update(link=article.title, valid_link=None).where(
+        ArticleLinks.valid_link == article
+    ).execute()
 
     if article.drafts.count():
         draft = article.drafts.get()

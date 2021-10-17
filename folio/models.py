@@ -1257,8 +1257,11 @@ class TagAssociation(BaseModel):
 
 class ArticleLinks(BaseModel):
     article = ForeignKeyField(Article, backref="ext_links")
+    # Article that has a link in it to something else
     valid_link = ForeignKeyField(Article, backref="linked_from", null=True)
+    # The other linked article, if it exists
     link = TextField(null=True)
+    # Textual link, if the target article does not exist
 
 
 class Media(BaseModel):

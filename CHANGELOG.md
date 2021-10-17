@@ -10,6 +10,7 @@
 ### Bugfixes
 
 * The presentation of the key/value data editor in articles has been neatened up a little.
+* Articles created and then deleted did not have invalid link references tracked correctly.
 
 ## [0.0.8-alpha](https://github.com/syegulalp/folio/releases/tag/0.0.8-alpha)
 

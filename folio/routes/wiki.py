@@ -8,6 +8,7 @@ from bottle import (
 from models import (
     Article,
     ArticleIndex,
+    ArticleLinks,
     Wiki,
     Author,
     Tag,
@@ -251,6 +252,7 @@ def article_new(wiki: Wiki, user: Author):
         new_article = Article(
             title=article_title, content=article_content, author=user, wiki=wiki
         )
+
         if new_article.has_name_collision():
             messages.append(
                 Error(
@@ -259,6 +261,9 @@ def article_new(wiki: Wiki, user: Author):
             )
         else:
             new_article.save()
+            ArticleLinks.update(link=None, valid_link=new_article).where(
+                ArticleLinks.link == article_title
+            ).execute()
             return redirect(new_article.edit_link)
 
     else:
