@@ -5,8 +5,8 @@
   <div id="article-row" class="row">
     <div id="article-col" class="col">
       <h2>Media for {{wiki.title}}</h2>
-      <div id="paste-area">
-        <p>To insert an image from the clipboard, click here, then paste.</p>
+      <div >
+        <p style="background-color:blue" id="paste-area">To insert an image from the clipboard, click here, then paste (Ctrl-V).</p>
       </div>
       <hr />
       <center>{{!paginator}}</center>
