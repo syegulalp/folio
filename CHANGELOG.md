@@ -3,8 +3,8 @@
 ## HEAD
 
 ### New features
+* The main wiki page now has a type-to-search function. If you press `Enter` after typing, the topmost selected wiki is opened automatically.
 
-...
 
 ### Bugfixes
 

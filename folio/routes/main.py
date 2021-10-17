@@ -24,6 +24,15 @@ def main_route():
 route("/wiki")(main_route)
 
 
+@route("/wikititles/<title>")
+@route("/wikititles/")
+def get_titles(title=None):
+    wikis = Wiki.select().order_by(Wiki.title.asc())
+    if title:
+        wikis = wikis.where(Wiki.title.contains(title))
+    return template("includes/wiki_listing.tpl", wikis=wikis)
+
+
 @route("/new")
 @user_env
 def new_wiki(user: Author):
