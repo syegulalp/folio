@@ -29,7 +29,7 @@
 <div class="wiki-search-box">
     <form id="sidebar-search">
         <div class="input-group">
-            <input class="form-control form-control-sm" type="input" id="wiki-search-input">
+            <input class="form-control form-control-sm" type="input" id="wiki-search-input" placeholder="Search wiki for...">
             <div class="input-group-append">
                 <span title="Clear search" class="input-group-text"><a href="#" onclick="$('#wiki-search-input').val('');$('#wiki-search-results').html('');">❌</a></span>
             </div>
