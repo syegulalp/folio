@@ -6,6 +6,7 @@
 * The main wiki page now has a type-to-search function. If you press `Enter` after typing, the topmost selected wiki is opened automatically.
 * The search box on the sidebar will now also take you to the first listed item when you press `Enter` after typing.
 * The "paste image to upload" section in the media manager is a little more clearly delineated.
+* The main wiki page now has sort options: by title, or by last update. (Using search disrupts the sorting, however. This will eventually be fixed.)
 
 ### Bugfixes
 

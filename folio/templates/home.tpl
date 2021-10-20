@@ -18,6 +18,7 @@
       <div class="mb-3" id="wiki-search-div">
       <input class="form-control" id="wiki-search" placeholder="Type to search by name">
       </div>
+      <p>Sort by <a href="?" class="badge badge-primary">title</a> <a href="?s" class="badge badge-success">last updated</a></p><hr/>
       
       % include('includes/wiki_listing.tpl')    
       

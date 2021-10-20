@@ -8,6 +8,7 @@ from bottle import (
 from models import (
     Wiki,
     Author,
+    Article,
     db,
 )
 
@@ -18,7 +19,13 @@ from .decorators import user_env, home_page_render
 
 @route("/")
 def main_route():
-    return home_page_render()
+    if "s" in request.params:
+        a = Article.select(Article.wiki).distinct().order_by(Article.last_edited.desc())
+        wikis = [_.wiki for _ in a]
+    else:
+        wikis = Wiki.select().order_by(Wiki.title.asc())
+        
+    return home_page_render(wikis)
 
 
 route("/wiki")(main_route)

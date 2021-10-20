@@ -107,11 +107,12 @@ def error_404(error):
     return home_page_render([Error(f"Page or wiki not found: {Unsafe(request.path)}")])
 
 
-def home_page_render(messages=[]):
+def home_page_render(wikis=None, messages=[]):
 
     return template(
         "home.tpl",
-        wikis=Wiki.select().order_by(Wiki.title.asc()),
+        wikis=wikis,
+        #Wiki.select().order_by(Wiki.title.asc()),
         articles=(
             Article.select()
             .where(Article.draft_of.is_null(), Article.revision_of.is_null(),)
