@@ -25,7 +25,12 @@ from pathlib import Path
 
 db = SqliteExtDatabase(
     Path(config.DATA_PATH, "wiki.db"),
-    pragmas=(("cache_size", -1024 * 64), ("journal_mode", "wal"), ("synchronous", 0)),
+    pragmas=(
+        ("cache_size", -1024 * 64),
+        ("journal_mode", "wal"),
+        ("synchronous", 0),
+        ("temp_store", "MEMORY"),
+    ),
 )
 
 db.connect()
