@@ -100,7 +100,8 @@ blockquote {
     line-height: 1.2em;
 }
 
-.wiki-icons, .wiki-search-box {
+.wiki-icons,
+.wiki-search-box {
     margin-bottom: 1em;
 }
 
@@ -210,6 +211,7 @@ inline-error {
     margin-bottom: 16px;
 }
 
+
 /*
 
 Everything after this will eventually become a shadow article
@@ -258,7 +260,9 @@ img-banner p {
 img-banner {
     display: block;
     margin-bottom: 8px;
+    text-align: center;
 }
+
 
 /* Softer colors */
 
@@ -283,7 +287,7 @@ hr {
     overflow-y: scroll;
 }
 
-.img-gallery{
+.img-gallery {
     text-align: center;
 }
 
