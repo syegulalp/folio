@@ -1,5 +1,9 @@
 import html
 
+from hashlib import blake2b
+import os
+
+
 class Message:
     def __init__(self, message, color=None, **ka):
         self.message = message
@@ -32,3 +36,9 @@ class Unsafe:
 
     def __str__(self):
         return html.escape(self.data, True)
+
+
+def quit_key():
+    h = blake2b(key=b"key1", digest_size=16)
+    h.update(bytes(str(os.getpid()), "utf8"))
+    return h.hexdigest()

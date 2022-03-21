@@ -9,6 +9,8 @@
     <h1>Your Wikis</h1>
     <hr />
 
+    <a href="/quit"><button type="button" class="btn btn-sm btn-danger float-right">Shut down</button></a>
+
     <a href="/new"><button type="button" class="btn btn-sm btn-success">Create a new wiki</button></a>
 
     <hr />

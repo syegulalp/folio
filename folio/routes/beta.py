@@ -44,8 +44,6 @@ def export(wiki: Wiki) -> dict:
     # into zip file with media in subdir labeled media
     # zip file can be saved into subdir
 
-    
-
 
 @route(f"{Wiki.PATH}/export")
 @wiki_env

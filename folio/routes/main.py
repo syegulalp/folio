@@ -9,10 +9,11 @@ from models import (
     Wiki,
     Author,
     Article,
+    System,
     db,
 )
 
-from utils import Error
+from utils import Error, Message, quit_key
 
 from .decorators import user_env, home_page_render
 
@@ -24,7 +25,7 @@ def main_route():
         wikis = [_.wiki for _ in a]
     else:
         wikis = Wiki.select().order_by(Wiki.title.asc())
-        
+
     return home_page_render(wikis)
 
 
@@ -80,6 +81,19 @@ def new_wiki_save(user: Author):
 
 @route("/quit")
 def quit(*a):
+
+    warning = Message(
+        "You are about to shut the wiki down.", yes=f"/quit/{quit_key()}", no="/"
+    )
+    return template("blank.tpl", wiki=System, messages=[warning],)
+
+
+@route("/quit/<delete_key>")
+def quit_confirm(delete_key: str):
+
+    if delete_key != quit_key():
+        return quit()
+
     yield "You may now close this browser."
     from models import db
 

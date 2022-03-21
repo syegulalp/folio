@@ -28,7 +28,7 @@ For other OSes:
 3. Install the requirements.
 4. Run `python folio` to start the program. The system web browser will automatically launch to the newly configured home page for the wiki.
 5. The subdirectory `data` will contain the data for the wiki, which can be backed up or restored as needed.
-6. To shut the wiki down, either terminate the running Python session or navigate to the URL `/quit` in the wiki.
+6. To shut the wiki down, either terminate the running Python session, click the "Shut down" button on the main wiki page, or navigate to the URL `/quit` in the wiki. You'll have to confirm this action.
 
 # Updating from previous releases
 

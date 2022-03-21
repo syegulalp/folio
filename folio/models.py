@@ -1353,6 +1353,7 @@ class ArticleIndex(FTSModel):
 
 System = Wiki()
 System.id = 0
+System.title = ""
 
 
 def create_db():

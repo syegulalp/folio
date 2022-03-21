@@ -112,7 +112,7 @@ def home_page_render(wikis=None, messages=[]):
     return template(
         "home.tpl",
         wikis=wikis,
-        #Wiki.select().order_by(Wiki.title.asc()),
+        # Wiki.select().order_by(Wiki.title.asc()),
         articles=(
             Article.select()
             .where(Article.draft_of.is_null(), Article.revision_of.is_null(),)
