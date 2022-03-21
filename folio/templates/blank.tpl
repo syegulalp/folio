@@ -8,9 +8,11 @@
     <div class="col">
 
     </div>
+    % if get("sidebar", True):
     <div id="sidebar" class="sidebar-col">
       % include includes/sidebar.tpl
     </div>
+    % end
   </div>
 
 </main>

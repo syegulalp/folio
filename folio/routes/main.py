@@ -85,7 +85,7 @@ def quit(*a):
     warning = Message(
         "You are about to shut the wiki down.", yes=f"/quit/{quit_key()}", no="/"
     )
-    return template("blank.tpl", wiki=System, messages=[warning],)
+    return template("blank.tpl", wiki=System, messages=[warning], sidebar=False)
 
 
 @route("/quit/<delete_key>")
