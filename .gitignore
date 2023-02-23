@@ -15,3 +15,5 @@ pack.py
 folio.zip
 extract.py
 pyrightconfig.json
+.sync
+*.7z

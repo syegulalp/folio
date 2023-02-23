@@ -1,4 +1,4 @@
 commonmark==0.9.1
-peewee==3.14.2
-regex==2020.11.13
-bottle==0.12.21
+peewee==3.15.4
+regex==2022.10.31
+bottle==0.12.24
