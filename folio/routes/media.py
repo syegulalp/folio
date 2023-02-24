@@ -16,7 +16,8 @@ from models import (
 
 from .decorators import *
 
-from __main__ import config
+# from __main__ import config
+from data import config
 from utils import Message, Error, Unsafe
 
 from peewee import SQL
@@ -35,7 +36,6 @@ def static_content(filename: str):
 @route(f"{Wiki.PATH}/media")
 @wiki_env
 def wiki_media(wiki: Wiki, user: Author):
-
     media, pagination = paginator(wiki.media_alpha)
 
     return template(
@@ -50,7 +50,6 @@ def wiki_media(wiki: Wiki, user: Author):
 @route(f"{Wiki.PATH}/media-paste", method="POST")
 @wiki_env
 def wiki_media_paste(wiki: Wiki, user: Author):
-
     file_data = request.files["file"]
 
     if not file_data:
@@ -66,7 +65,10 @@ def wiki_media_paste(wiki: Wiki, user: Author):
 
     file_data.save(str(Path(wiki.data_path, filename)))
 
-    new_image = Media(wiki=wiki, file_path=filename,)
+    new_image = Media(
+        wiki=wiki,
+        file_path=filename,
+    )
     new_image.save()
 
     result = {
@@ -81,13 +83,15 @@ def wiki_media_paste(wiki: Wiki, user: Author):
 @route(f"{Wiki.PATH}/media/<file_name>")
 @wiki_env
 def media_file(wiki: Wiki, user: Author, file_name: str):
-    return static_file(Wiki.url_to_file(file_name), f"{config.DATA_PATH}/{wiki.id}",)
+    return static_file(
+        Wiki.url_to_file(file_name),
+        f"{config.DATA_PATH}/{wiki.id}",
+    )
 
 
 @route(f"{Wiki.PATH}/media/<media_filename>/edit")
 @media_env
 def media_file_edit(wiki: Wiki, user: Author, media: Media):
-
     return template(
         "wiki_media_edit.tpl",
         wiki=wiki,
@@ -99,7 +103,6 @@ def media_file_edit(wiki: Wiki, user: Author, media: Media):
 @route(f"{Wiki.PATH}/media/<media_filename>/edit", method="POST")
 @media_env
 def media_file_edit_post(wiki: Wiki, user: Author, media: Media):
-
     note: Union[Error, Message, None] = None
 
     filename_body, filename_ext = media.file_path.rsplit(".", 1)
@@ -110,11 +113,9 @@ def media_file_edit_post(wiki: Wiki, user: Author, media: Media):
         wiki.invalidate_cache()
 
     elif request.forms.get("save", None) and new_filename_body != filename_body:
-
         new_filename = new_filename_body + "." + filename_ext
 
         try:
-
             if Media.exists(new_filename, wiki):
                 note = Error(
                     f'Filename "{Unsafe(new_filename)}" already exists. Use another filename.'
@@ -147,7 +148,8 @@ def media_file_edit_post(wiki: Wiki, user: Author, media: Media):
 
             for ref in media.in_articles:
                 ref.article.replace_text(
-                    replacement_src, r"![\1](" + new_filename + r")",
+                    replacement_src,
+                    r"![\1](" + new_filename + r")",
                 )
 
             wiki.invalidate_cache()
@@ -165,13 +167,11 @@ def media_file_edit_post(wiki: Wiki, user: Author, media: Media):
 @route(f"{Wiki.PATH}/media/<media_filename>/delete")
 @media_env
 def media_file_delete(wiki: Wiki, user: Author, media: Media):
-
     warning = f'Media "{Unsafe(media.file_path)}" is going to be deleted! Deleted media are GONE FOREVER.'
 
     cover_media_id = wiki.get_metadata("cover_img")
 
     if cover_media_id and int(cover_media_id) == media.id:
-
         warning += f"<hr>Also note: This media is in use as the cover image for this wiki. Deleting it will cause the cover image to revert to the default."
 
     if media.in_articles.count():
@@ -181,14 +181,19 @@ def media_file_delete(wiki: Wiki, user: Author, media: Media):
         "wiki_media_edit.tpl",
         wiki=wiki,
         media=media,
-        messages=[Message(warning, yes=media.delete_confirm_link, no=media.edit_link,)],
+        messages=[
+            Message(
+                warning,
+                yes=media.delete_confirm_link,
+                no=media.edit_link,
+            )
+        ],
     )
 
 
 @route(f"{Wiki.PATH}/media/<media_filename>/delete/<delete_key>")
 @media_env
 def media_file_delete_confirm(wiki: Wiki, user: Author, media: Media, delete_key: str):
-
     cover_media_id = wiki.get_metadata("cover_img")
     if cover_media_id and int(cover_media_id) == media.id:
         wiki.delete_metadata("cover_img")

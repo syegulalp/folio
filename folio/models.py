@@ -12,7 +12,7 @@ try:
 except ImportError:
     import re  # type: ignore
 import datetime
-import config  # type: ignore
+from data import config
 import os
 from hashlib import blake2b
 
@@ -92,7 +92,10 @@ class DocTagParser(HTMLParser):
                 # TODO: this kind of construction happens often enough that we should probably make a special constructor
                 self.query = (
                     self.article.wiki.articles_tagged_with(tag)
-                    .where(Article.draft_of.is_null(), Article.revision_of.is_null(),)
+                    .where(
+                        Article.draft_of.is_null(),
+                        Article.revision_of.is_null(),
+                    )
                     .order_by(SQL("title COLLATE NOCASE"))
                 )
             except Exception:
@@ -173,12 +176,20 @@ class BaseModel(Model):
         anchor = None
         if "#" in title:
             title, anchor = title.split("#", 1)
-        title = title.replace("_", r"%5f")
-        title = title.replace(" ", "_")
-        title = urllib.parse.quote(title)
-        title = title.replace("/", r"%252f")
+
+        title_elements = title.split("_")
+
+        for idx, element in enumerate(title_elements):
+            element = element.replace(" ", "_")
+            element = urllib.parse.quote(element)
+            element = element.replace("/", r"%2f")
+            title_elements[idx] = element
+
+        title = r"%5f".join(title_elements)
+
         if anchor:
             title = title + "#" + anchor
+
         return title
 
     @classmethod
@@ -187,10 +198,8 @@ class BaseModel(Model):
         if "#" in url:
             url, anchor = url.split("#", 1)
         title = url
-        if not all(_ == "_" for _ in title):
-            title = url.replace(r"_", " ")
+        title = title.replace("_", r"%20")
         title = urllib.parse.unquote(title)
-        title = title.replace("%2f", "/")
         if anchor:
             title = title + "#" + anchor
         return title
@@ -295,9 +304,9 @@ class Wiki(BaseModel):
 
     def delete_(self):
         with db.transaction():
-
             Metadata.delete().where(
-                Metadata.item == "wiki", Metadata.id == self.id,
+                Metadata.item == "wiki",
+                Metadata.id == self.id,
             )
 
             for article in self.articles:
@@ -364,6 +373,7 @@ class Wiki(BaseModel):
                 new_article.save()
 
                 new_article.add_tag("@template")
+                new_article.add_tag("@start")
                 new_article.update_index()
                 new_article.update_links()
                 new_article.update_autogen_metadata()
@@ -420,13 +430,13 @@ class Wiki(BaseModel):
     @property
     def homepage_link(self):
         if Wiki.export_mode:
-            return f"{self.article_root_link}/Contents.html"
+            return f"{self.article_root_link}/{self.main_article.file_to_url}.html"
         return self.link
 
     @property
     def server_homepage_link(self):
         if Wiki.export_mode:
-            return f"{self.article_root_link}/Contents.html"
+            return f"{self.article_root_link}/{self.main_article.file_to_url}.html"
         return "/"
 
     @property
@@ -497,8 +507,11 @@ class Wiki(BaseModel):
         )
 
     @property
-    def main_article(self):
-        return self.articles.where(Article.title == "Contents").get()
+    def main_article(self) -> "Article":
+        start_article = self.articles_tagged_with("@start")
+        if len(start_article) < 1:
+            return self.articles_main_only.order_by(Article.last_edited.desc())[0]
+        return start_article[0]
 
     @property
     def data_path(self):
@@ -573,7 +586,6 @@ class Author(BaseModel):
 
 
 class Article(BaseModel):
-
     wiki = ForeignKeyField(Wiki, backref="articles")
     title = TextField(index=True)
     content = TextField(null=True)
@@ -650,7 +662,8 @@ class Article(BaseModel):
         return (
             search_set.select()
             .where(
-                Article.revision_of.is_null(), Article.id << _article_contents_result,
+                Article.revision_of.is_null(),
+                Article.id << _article_contents_result,
             )
             .order_by(SQL("title COLLATE NOCASE"))
         )
@@ -659,7 +672,10 @@ class Article(BaseModel):
     def search(cls, search_set, search_query):
         return (
             search_set.select()
-            .where(Article.revision_of.is_null(), Article.title.contains(search_query),)
+            .where(
+                Article.revision_of.is_null(),
+                Article.title.contains(search_query),
+            )
             .order_by(SQL("title COLLATE NOCASE"))
         )
 
@@ -1079,7 +1095,7 @@ class Article(BaseModel):
         is_table = False
         header_row = None
         md_mini = None
-        dummy = None
+        dummy: Optional[Article] = None
 
         for _ in content.splitlines(True):
             if _.startswith("|"):
@@ -1186,7 +1202,6 @@ class Article(BaseModel):
         return inline
 
     def _formatted(self, raw_content):
-
         self.autogen_metadata = []
 
         raw_content = self._content_regions(raw_content, self._inline_format)

@@ -3,6 +3,10 @@
 ## HEAD
 
 ### New features
+
+* The bundled version of the app now uses Python 3.11 as its base version of Python.
+* Launching the wiki app with no data directory causes one to be auto-created with sane defaults.
+* Newly-created wikis have their main page tagged with `@start` to indicate this is the starting page. You can reassign this tag to a new page to use that as the starting page. (Note that if you have multiple pages tagged as `@start`, the one with the earliest lexographical ordering for its title will display first. This feature will eventually become more refined.) Wikis without `@start` defined will just default to the last edited page as the start page.
 * The main wiki page now has a type-to-search function. If you press `Enter` after typing, the topmost selected wiki is opened automatically.
 * The search box on the sidebar will now also take you to the first listed item when you press `Enter` after typing.
 * The "paste image to upload" section in the media manager is a little more clearly delineated.
@@ -10,6 +14,9 @@
 
 ### Bugfixes
 
+* Many subtle URL conversion bugs have been removed thanks to a new URL conversion system.
+* The template directory for the app is now computed from the locations of the files rather than being hardcoded.
+* Running Folio with no data directory used to crash the program outright. It now automatically creates one if it doesn't exist, and populates it with the needed files.
 * The presentation of the key/value data editor in articles has been neatened up a little.
 * Articles created and then deleted did not have invalid link references tracked correctly.
 

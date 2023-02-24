@@ -17,7 +17,8 @@ from models import (
 
 from .decorators import wiki_env, article_display, home_page_render
 
-from __main__ import config
+# from __main__ import config
+from data import config
 from utils import Message, Error, Unsafe
 
 from peewee import SQL
@@ -38,7 +39,6 @@ def wiki_home(wiki: Wiki, user: Author):
 @route(f"{Wiki.PATH}/export")
 @wiki_env
 def wiki_export(wiki: Wiki, user: Author):
-
     import os, glob, shutil
 
     export_path = Path(config.DATA_PATH, "export", wiki.title_to_url(wiki.title))
@@ -85,6 +85,7 @@ def wiki_export(wiki: Wiki, user: Author):
 
     with open(Path(article_path, ".htaccess"), "w", encoding="utf8") as htf:
         htf.write("DirectoryIndex Contents.html")
+        # TODO: make sure wikis that don't use Contents get updated correctly
 
     redirect_txt = """
 <!DOCTYPE html>
@@ -111,7 +112,6 @@ def wiki_settings_edit(wiki: Wiki, user: Author):
     original_wiki = wiki
 
     if request.method == "POST":
-
         wiki_new_title = request.forms.wiki_title
         wiki_new_description = request.forms.wiki_description
 
@@ -153,7 +153,6 @@ def wiki_settings_edit(wiki: Wiki, user: Author):
 @route(f"{Wiki.PATH}/clone")
 @wiki_env
 def clone_wiki(wiki: Wiki, user: Author):
-
     return template(
         "wiki_clone.tpl",
         wiki=wiki,
@@ -165,7 +164,6 @@ def clone_wiki(wiki: Wiki, user: Author):
 @route(f"{Wiki.PATH}/clone", method="POST")
 @wiki_env
 def clone_wiki_confirm(wiki: Wiki, user: Author):
-
     new_wiki = Wiki.new_wiki(
         f"New wiki created from {wiki.title}", "", user, empty=True
     )
@@ -219,14 +217,21 @@ def clone_wiki_confirm(wiki: Wiki, user: Author):
 @route(f"{Wiki.PATH}/delete")
 @wiki_env
 def wiki_delete(wiki: Wiki, user: Author):
-
     warning = f'Wiki "{Unsafe(wiki.title)}" is going to be deleted! Deleted wikis are GONE FOREVER.'
 
     return template(
         "article.tpl",
-        articles=[wiki.main_article,],
+        articles=[
+            wiki.main_article,
+        ],
         wiki=wiki,
-        messages=[Message(warning, yes=wiki.delete_confirm_link, no=wiki.link,)],
+        messages=[
+            Message(
+                warning,
+                yes=wiki.delete_confirm_link,
+                no=wiki.link,
+            )
+        ],
     )
 
 
@@ -242,7 +247,6 @@ def wiki_delete_confirm(wiki: Wiki, user: Author, delete_key: str):
 @route(f"{Wiki.PATH}/new", method=("GET", "POST"))
 @wiki_env
 def article_new(wiki: Wiki, user: Author):
-
     messages = []
     wiki.invalidate_cache()
 
@@ -276,7 +280,6 @@ def article_new(wiki: Wiki, user: Author):
         new_article = Article(title=article_title, content="", author=user, wiki=wiki)
 
         while True:
-
             if new_article.has_name_collision():
                 counter += 1
                 new_article.title = f"Untitled ({counter})"
@@ -297,7 +300,6 @@ def article_new(wiki: Wiki, user: Author):
 @route(f"{Wiki.PATH}/replace", method=("GET", "POST"))
 @wiki_env
 def wiki_replace(wiki: Wiki, user: Author):
-
     search_query = ""
     replace_query = ""
     result_query = ""
@@ -307,12 +309,10 @@ def wiki_replace(wiki: Wiki, user: Author):
     article_count: int = 0
 
     if request.method == "POST":
-
         search_query = request.forms.search_query
         replace_query = request.forms.replace_query
 
         if search_query:
-
             search_results = (
                 wiki.articles.select()
                 .where(
@@ -326,7 +326,6 @@ def wiki_replace(wiki: Wiki, user: Author):
             article_count = search_results.count()
 
         if replace_query:
-
             messages = [
                 Message(
                     f"Press [Replace all] to update {article_count} articles.<br>Note that there is no undo for this operation, but every changed article will have a revision saved."
@@ -334,7 +333,6 @@ def wiki_replace(wiki: Wiki, user: Author):
             ]
 
         if replace_query and request.forms.get("replace", ""):
-
             for result in search_results:
                 result.make_revision()
                 result.content = result.content.replace(search_query, replace_query)
@@ -375,7 +373,6 @@ def wiki_replace(wiki: Wiki, user: Author):
 @route(f"{Wiki.PATH}/search2", method=("POST",))
 @wiki_env
 def wiki_search2(wiki: Wiki, user: Author):
-
     search_query = request.forms.search
     if search_query == "":
         return ""
@@ -404,15 +401,12 @@ def wiki_search2(wiki: Wiki, user: Author):
 @route(f"{Wiki.PATH}/search", method=("GET", "POST"))
 @wiki_env
 def wiki_search(wiki: Wiki, user: Author):
-
     search_results = []
     search_query = ""
 
     if request.method == "POST":
-
         search_query = request.forms.search_query
         if search_query != "":
-
             article_title_result = Article.search(wiki.articles, search_query)
             article_contents_result = Article.fulltext_search(
                 wiki.articles, search_query
@@ -465,14 +459,12 @@ def wiki_search(wiki: Wiki, user: Author):
 @route(f"{Wiki.PATH}/tags")
 @wiki_env
 def tags_all(wiki: Wiki, user: Author):
-
     return template("wiki_tags.tpl", tags=wiki.tags_alpha, wiki=wiki)
 
 
 @route(f"{Wiki.PATH}/upload", method="POST")
 @wiki_env
 def upload_to_wiki(wiki: Wiki, user: Author):
-
     f = request.files["file"]
 
     rename = 1

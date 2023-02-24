@@ -6,7 +6,6 @@ from pathlib import Path
 
 class TestRendering(unittest.TestCase):
     def setUp(self):
-
         self.models = models
         self.author = self.models.Author.select().get()
 
@@ -18,11 +17,14 @@ class TestRendering(unittest.TestCase):
         self.wiki.save()
 
         self.article = self.models.Article(
-            wiki=self.wiki, title="Test data article", content="", author=self.author,
+            wiki=self.wiki,
+            title="Test data article",
+            content="",
+            author=self.author,
         )
         self.article.save()
 
-        with open(Path("test", "testdata", "source.md")) as f:
+        with open(Path("test", "data", "source.md")) as f:
             self.article.content = f.read()
         self.article.save()
 
@@ -38,25 +40,51 @@ class TestRendering(unittest.TestCase):
         self.include_article.add_tag("@test")
         self.include_article.update_autogen_metadata()
 
+        # TODO: add some media for testing, too
+
     def test_article_all_inclusive(self):
         self.maxDiff = None
         content = self.article.formatted
-        with open(Path("test", "testdata", "output.html")) as f:
+        # with open(Path("test", "data", "output.html"), "w", encoding="utf8") as f:
+        #     f.write(content)
+        with open(Path("test", "data", "output.html"), encoding="utf8") as f:
             output = f.read()
         self.assertEqual(
-            content, output,
+            content,
+            output,
         )
 
     def _make_article(self, article_title):
         article = self.models.Article(
-            wiki=self.wiki, title=article_title, content="", author=self.author,
+            wiki=self.wiki,
+            title=article_title,
+            content="",
+            author=self.author,
         )
         article.save()
         return article
 
     def test_article_delete(self):
         article_title = "Test article for deletion"
+        tag_title = "Frumblebrumble"
+
         test_article = self._make_article(article_title)
+        self.assertEqual(self.wiki.article_exists(article_title), True)
+
+        test_article.add_tag(tag_title)
+        self.assertEqual(self.wiki.tag_exists(tag_title), True)
+
+        test_article.set_metadata("Foo", "Bar")
+        self.assertEqual(test_article.get_metadata("Foo"), "Bar")
+
+        # TODO: have a master delete override that handles all this
+
+        test_article.clear_tags()
+        self.assertEqual(self.wiki.tag_exists(tag_title), False)
+
+        test_article.clear_metadata()
+        self.assertEqual(test_article.get_metadata("Foo"), None)
+
         test_article.delete_instance(recursive=True)
         self.assertEqual(
             self.wiki.articles.where(
@@ -69,19 +97,41 @@ class TestRendering(unittest.TestCase):
         base = self.models.BaseModel
 
         self.assertEqual(
+            base.title_to_url("Title_with_underscores"),
+            "Title%5fwith%5funderscores",
+        )
+
+        self.assertEqual(
+            base.url_to_title("Title%5fwith%5funderscores"),
+            "Title_with_underscores",
+        )
+
+        self.assertEqual(
+            base.title_to_url("Title_with_underscores and spaces"),
+            "Title%5fwith%5funderscores_and_spaces",
+        )
+
+        self.assertEqual(
+            base.url_to_title("Title%5fwith%5funderscores_and_spaces"),
+            "Title_with_underscores and spaces",
+        )
+
+        self.assertEqual(
+            base.title_to_url('"Title_with_quotes_and_underscores"'),
+            "%22Title%5fwith%5fquotes%5fand%5funderscores%22",
+        )
+
+        self.assertEqual(
+            base.url_to_title("%22Title%5fwith%5fquotes%5fand%5funderscores%22"),
+            '"Title_with_quotes_and_underscores"',
+        )
+
+        self.assertEqual(
             base.title_to_url('"Title with quotes"'), "%22Title_with_quotes%22"
         )
 
         self.assertEqual(
             base.url_to_title("%22Title_with_quotes%22"), '"Title with quotes"'
-        )
-
-        self.assertEqual(
-            base.title_to_url("Title_with_underscores"), "Title_with_underscores"
-        )
-
-        self.assertEqual(
-            base.url_to_title("Title_with_underscores"), "Title with underscores"
         )
 
         self.assertEqual(
@@ -137,11 +187,11 @@ class TestRendering(unittest.TestCase):
 
 
 if __name__ == "__main__":
-
     import sys, os
 
-    sys.path.insert(0, str(Path("test", "testdata")))
     sys.path.insert(0, "folio")
+    sys.path.insert(0, Path("test", "data").absolute())
+
     import models as m
 
     global models
@@ -155,5 +205,5 @@ if __name__ == "__main__":
 
     # teardown
     models.db.close()
-    os.remove(Path("test", "testdata", "wiki.db"))
-    os.rmdir(Path("test", "testdata", "1"))
+    os.remove(Path("test", "data", "wiki.db"))
+    os.rmdir(Path("test", "data", "1"))

@@ -4,18 +4,37 @@ import sys, os
 
 sys.path.insert(0, "folio")
 
+import pathlib
+
+config_path = pathlib.Path("data")
+if not config_path.exists():
+    config_path.mkdir()
+    with open(config_path / "config.py", "w") as f:
+        f.write(
+            """
+DEBUG = False
+DATA_PATH = "data"
+CSS = ["wiki-dark.css"]
+PORT = 7007
+        """
+        )
+    import models
+
+    models.create_db()
+
+
 import regex as re
 
 import bottle
 
-bottle.TEMPLATE_PATH.insert(0, "folio/templates")
+bottle.TEMPLATE_PATH.insert(0, pathlib.Path(__file__).parent / "templates")
 bottle.re = re
 
 import peewee
 
 peewee.re = re
 
-config_path = "data"
+# config_path = "data"
 
 INIT = False
 
@@ -67,7 +86,7 @@ if not os.path.exists(config_path):
 
 sys.path.insert(0, config_path)
 
-import config  # type: ignore
+from data import config
 
 debug = getattr(config, "DEBUG", False) or args.debug
 launch_browser = getattr(config, "LAUNCH_BROWSER", None) or args.browser
@@ -79,7 +98,6 @@ bottle.DEBUG = debug
 
 
 if __name__ == "__main__":
-
     if INIT:
         import models
 
@@ -89,7 +107,6 @@ if __name__ == "__main__":
 
     img_paths = getattr(config, "IMG_PATHS", None)
     if img_paths:
-
         from bottle import static_file, route
 
         # for alias, img_path in img_paths:

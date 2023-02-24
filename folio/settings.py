@@ -1,5 +1,5 @@
 defaults = {
-    "Wiki homepage": "Contents",
+    #"Wiki homepage": "Contents",
     "Default tab on page load": ("History", "Articles", "Tabs"),
     "Save pasted images as": ("JPEG", "PNG"),
 }

@@ -108,14 +108,15 @@ def error_404(error):
 
 
 def home_page_render(wikis=None, messages=[]):
-
     return template(
         "home.tpl",
         wikis=wikis,
-        # Wiki.select().order_by(Wiki.title.asc()),
         articles=(
             Article.select()
-            .where(Article.draft_of.is_null(), Article.revision_of.is_null(),)
+            .where(
+                Article.draft_of.is_null(),
+                Article.revision_of.is_null(),
+            )
             .order_by(Article.last_edited.desc())
             .limit(25)
         ),
@@ -189,17 +190,7 @@ def article_display(wiki: Wiki, user: Author, article: Article):
 
     if article.id is None:
         try:
-            # TODO: replace with common search object
-            # articles_tagged_with
-            # article searches need to be composable entities
-            # something for a later revision
-
-            form_tag = Tag.select(Tag.id).where(Tag.wiki == wiki, Tag.title == "@form")
-
-            tagged_as_form = TagAssociation.select(TagAssociation.article).where(
-                TagAssociation.tag << form_tag
-            )
-
+            tagged_as_form = wiki.articles_tagged_with("@form")
             forms = wiki.articles_alpha.select().where(
                 Article.id << tagged_as_form,
                 Article.draft_of.is_null(),
